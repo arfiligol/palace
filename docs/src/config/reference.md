@@ -888,7 +888,7 @@ Array of numeric wave port boundary conditions. Wave ports can only be specified
   <dd>
     <p>Turns on or off the damping boundary condition for this port for driven simulations.</p>
   </dd>
-  <dt id="config-boundaries-waveport-maxits"><a href="#config-boundaries-waveport-maxits"><code>"MaxIts"</code></a> <span class="config-type">integer</span> <span class="config-default">default: <code>30</code></span> <span class="config-constraint"><code>&gt; 0</code></span> <span class="config-advanced">advanced</span></dt>
+  <dt id="config-boundaries-waveport-maxits"><a href="#config-boundaries-waveport-maxits"><code>"MaxIts"</code></a> <span class="config-type">integer</span> <span class="config-default">default: <code>45</code></span> <span class="config-constraint"><code>&gt; 0</code></span> <span class="config-advanced">advanced</span></dt>
   <dd>
     <p>Maximum number of iterations for the GMRES solver used in the wave port boundary mode analysis.</p>
   </dd>
@@ -1973,7 +1973,7 @@ Configuration for the linear solver used by all simulation types.
   <dd>
     <p>Precision bits for STRUMPACK ZFP lossy compression.</p>
   </dd>
-  <dt id="config-solver-linear-strumpackbutterflylevels"><a href="#config-solver-linear-strumpackbutterflylevels"><code>"STRUMPACKButterflyLevels"</code></a> <span class="config-type">integer</span> <span class="config-default">default: <code>0</code></span> <span class="config-constraint"><code>≥ 0</code></span> <span class="config-advanced">advanced</span></dt>
+  <dt id="config-solver-linear-strumpackbutterflylevels"><a href="#config-solver-linear-strumpackbutterflylevels"><code>"STRUMPACKButterflyLevels"</code></a> <span class="config-type">integer</span> <span class="config-default">default: <code>1</code></span> <span class="config-constraint"><code>≥ 0</code></span> <span class="config-advanced">advanced</span></dt>
   <dd>
     <p>Number of butterfly levels for STRUMPACK HODLR compression.</p>
   </dd>
