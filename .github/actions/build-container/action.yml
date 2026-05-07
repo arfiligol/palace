@@ -10,7 +10,7 @@ runs:
         # Spack develop because we want to have access to the most recent
         # version of spack-packages
         spack-version: 'develop'
-        julia-version: 'release'
+        julia-version: 'dont-install'
         llvm-version: 'dont-install'
         setup-intel: 'false'
 
