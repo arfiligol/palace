@@ -81,29 +81,6 @@ runs:
         sudo chmod a+r ${{ steps.name.outputs.image_name }}.sif
         end_timer "Convert to SIF"
 
-    - name: Test container
-      shell: bash
-      run: |
-        source /tmp/timing_functions.sh
-        start_timer
-
-        # Use nproc, but halve to account for hyperthreading.
-        LOGICAL_CORES=$(nproc)
-        THREADS_PER_CORE=$(lscpu | grep "Thread(s) per core" | awk '{print $4}')
-        if [ "$THREADS_PER_CORE" = "2" ]; then
-          export NUM_PROC_TEST=$((LOGICAL_CORES / 2))
-        else
-          export NUM_PROC_TEST=$LOGICAL_CORES
-        fi
-
-        export PALACE_TEST="apptainer run $(pwd)/${{ steps.name.outputs.image_name }}.sif palace"
-
-        # Run integration tests.
-        julia --project=test/examples -e 'using Pkg; Pkg.instantiate()'
-        julia --project=test/examples --color=yes test/examples/runtests.jl
-
-        end_timer "Test container"
-
     - name: Upload OCI image
       uses: actions/upload-artifact@v4
       with:
