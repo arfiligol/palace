@@ -279,7 +279,7 @@
         "EigenTol": { "type": "number", "exclusiveMinimum": 0.0 },
         "MaxSize": { "type": "integer", "exclusiveMinimum": 0 },
         "Verbose": { "type": "integer", "minimum": 0.0 },
-        "VoltagePath": { "type": "array", "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 3 } },
+        "VoltagePath": { "$ref": "#/$defs/CoordinatePath" },
         "NSamples": { "type": "integer", "minimum": 1 }
       }
     },
@@ -412,8 +412,8 @@
         "Index": { "type": "integer" },
         "VoltageAttributes": { "$ref": "#/$defs/Attributes" },
         "CurrentAttributes": { "$ref": "#/$defs/Attributes" },
-        "VoltagePath": { "type": "array", "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 3 } },
-        "CurrentPath": { "type": "array", "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 3 } },
+        "VoltagePath": { "$ref": "#/$defs/CoordinatePath" },
+        "CurrentPath": { "$ref": "#/$defs/CoordinatePath" },
         "NSamples": { "type": "integer", "minimum": 1 }
       }
     },
@@ -426,7 +426,7 @@
       {
         "Index": { "type": "integer" },
         "VoltageAttributes": { "$ref": "#/$defs/Attributes" },
-        "VoltagePath": { "type": "array", "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 3 } },
+        "VoltagePath": { "$ref": "#/$defs/CoordinatePath" },
         "NSamples": { "type": "integer", "minimum": 1 }
       }
     },
@@ -524,6 +524,17 @@
       "items": { "type": "number" },
       "minItems": 2,
       "maxItems": 2
+    },
+    "CoordinatePath":
+    {
+      "type": "array",
+      "items":
+      {
+        "type": "array",
+        "items": { "type": "number" },
+        "minItems": 2,
+        "maxItems": 3
+      }
     },
     "PortDirection":
     {
