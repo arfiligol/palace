@@ -12,7 +12,7 @@
       "type": "string",
       "description": "Controls the simulation type.",
       "oneOf": [
-        { "const": "Eigenmode",     "description": "Perform an undamped or damped eigenfrequency analysis." },
+        { "const": "Eigenmode",     "description": "Perform an eigenmode analysis." },
         { "const": "Driven",        "description": "Perform a frequency-domain driven simulation." },
         { "const": "Transient",     "description": "Perform a time-domain excitation response simulation." },
         { "const": "Electrostatic", "description": "Perform an electrostatic analysis to compute the capacitance matrix for a set of voltage terminals." },

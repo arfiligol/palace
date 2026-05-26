@@ -41,7 +41,7 @@ Top-level configuration for the simulation type and output.
     <p>Controls the simulation type.</p>
     <dl class="config-enum">
       <dt><code>"Eigenmode"</code></dt>
-      <dd>Perform an undamped or damped eigenfrequency analysis.</dd>
+      <dd>Perform an eigenmode analysis.</dd>
       <dt><code>"Driven"</code></dt>
       <dd>Perform a frequency-domain driven simulation.</dd>
       <dt><code>"Transient"</code></dt>

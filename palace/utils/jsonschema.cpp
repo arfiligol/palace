@@ -274,7 +274,7 @@ json FindEnumInSchema(const json &schema, const std::string &ptr)
   if (current.contains("oneOf"))
   {
     const auto &branches = current["oneOf"];
-    // Check if oneOf + const enum: all items in oneOf have "cosnt" and no "properties"
+    // Check if oneOf + const enum: all items in oneOf have "const" and no "properties"
     if (!branches.empty() &&
         std::all_of(branches.begin(), branches.end(), [](const json &b)
                     { return b.contains("const") && !b.contains("properties"); }))
