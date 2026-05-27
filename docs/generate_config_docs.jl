@@ -408,27 +408,27 @@ function render_field_entry!(buf::IOBuffer, f::FieldDoc)
         print(buf, "<code>\"$(html_escape(f.name))\"</code>")
     end
     # All fields get the full badge row
-    print(buf, " <span class=\"config-type\">$(html_escape(f.type_str))</span>")
+    print(buf, " <span class=\"tag config-type\">type: <code>$(html_escape(f.type_str))</code></span>")
     if f.required
-        print(buf, " <span class=\"config-required\">required</span>")
+        print(buf, " <span class=\"tag config-required\">required</span>")
     else
         default_val = something(f.default, "—")
         print(
             buf,
-            " <span class=\"config-default\">default: <code>$(html_escape(default_val))</code></span>"
+            " <span class=\"tag config-default\">default: <code>$(html_escape(default_val))</code></span>"
         )
     end
     if !isempty(f.constraints)
         print(
             buf,
-            " <span class=\"config-constraint\"><code>$(html_escape(f.constraints))</code></span>"
+            " <span class=\"tag config-constraint\">constraint: <code>$(html_escape(f.constraints))</code></span>"
         )
     end
     if f.advanced
-        print(buf, " <span class=\"config-advanced\">advanced</span>")
+        print(buf, " <span class=\"tag config-advanced\">advanced</span>")
     end
     if f.deprecated
-        print(buf, " <span class=\"config-deprecated\">deprecated</span>")
+        print(buf, " <span class=\"tag config-deprecated\">deprecated</span>")
     end
     println(buf, "</dt>")
 
@@ -544,27 +544,27 @@ function render_field_badges(f::FieldDoc)::String
     buf = IOBuffer()
     println(buf, "```@raw html")
     print(buf, "<span class=\"config-section-badges\">")
-    print(buf, "<span class=\"config-type\">$(html_escape(f.type_str))</span>")
+    print(buf, "<span class=\"tag config-type\">type: <code>$(html_escape(f.type_str))</code></span>")
     if f.required
-        print(buf, " <span class=\"config-required\">required</span>")
+        print(buf, " <span class=\"tag config-required\">required</span>")
     else
         default_val = something(f.default, "—")
         print(
             buf,
-            " <span class=\"config-default\">default: <code>$(html_escape(default_val))</code></span>"
+            " <span class=\"tag config-default\">default: <code>$(html_escape(default_val))</code></span>"
         )
     end
     if !isempty(f.constraints)
         print(
             buf,
-            " <span class=\"config-constraint\"><code>$(html_escape(f.constraints))</code></span>"
+            " <span class=\"tag config-constraint\">constraint: <code>$(html_escape(f.constraints))</code></span>"
         )
     end
     if f.advanced
-        print(buf, " <span class=\"config-advanced\">advanced</span>")
+        print(buf, " <span class=\"tag config-advanced\">advanced</span>")
     end
     if f.deprecated
-        print(buf, " <span class=\"config-deprecated\">deprecated</span>")
+        print(buf, " <span class=\"tag config-deprecated\">deprecated</span>")
     end
     println(buf, "</span>")
     println(buf, "```")
