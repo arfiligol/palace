@@ -26,6 +26,7 @@ The format of this changelog is based on
   - Adaptive mesh refinement is now supported for `BoundaryMode` simulations on a
     2D submesh extracted from a 3D input mesh.
     [PR 727](https://github.com/awslabs/palace/pull/727).
+  - Enable S-parameters calculations when both lumped and wave ports are present [PR XXX](https://github.com/awslabs/palace/pull/XXX).
 
 #### Interface Changes
 
@@ -54,6 +55,8 @@ The format of this changelog is based on
     collapsing the normal and the reference length `Lc` to zero. Pre-existing
     from [PR 657](https://github.com/awslabs/palace/pull/657).
     [PR 727](https://github.com/awslabs/palace/pull/727).
+  - Fixed a bug causing incorrect S-parameters when lumped port pairs have different R values
+    [PR XXX](https://github.com/awslabs/palace/pull/XXX).
 
 ## [0.16.1] - 2026-04-24
 
