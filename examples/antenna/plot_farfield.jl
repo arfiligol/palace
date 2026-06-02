@@ -198,7 +198,7 @@ function polar_plots(
             rticks=-25:5:2,
             radius_at_origin=-25,
             rlimits=(-25, 2),
-            theta_0=-π / 2,
+            theta_0=(-π / 2),
             direction=-1,
             rgridcolor=:lightgray,
             thetagridcolor=:lightgray
@@ -226,7 +226,7 @@ function polar_plots(
             rticks=-25:5:2,
             radius_at_origin=-25,
             rlimits=(-25, 2),
-            theta_0=-π / 2,
+            theta_0=(-π / 2),
             direction=-1,
             rgridcolor=:lightgray,
             thetagridcolor=:lightgray
