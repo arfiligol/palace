@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2026-06-01 23:29:48</td>
+            <td class="headerValue">2026-06-02 20:34:55</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntryHi">-</td>
@@ -182,12 +182,12 @@
 <span id="L112"><span class="lineNum">     112</span>              :   std::unique_ptr&lt;mfem::ParTransferMap&gt; port_nd_transfer_reverse;</span>
 <span id="L113"><span class="lineNum">     113</span>              :   std::unique_ptr&lt;GridFunction&gt; parent_E0t;</span>
 <span id="L114"><span class="lineNum">     114</span>              : </span>
-<span id="L115"><span class="lineNum">     115</span>              :   // Optional polarity attributes (parent-mesh boundary attrs [low, high]). When set</span>
-<span id="L116"><span class="lineNum">     116</span>              :   // and no VoltagePath is configured, the mode is flipped so that E points from low to</span>
-<span id="L117"><span class="lineNum">     117</span>              :   // high. Computed without GSLIB by evaluating the mode at port-submesh boundary</span>
-<span id="L118"><span class="lineNum">     118</span>              :   // element centroids adjacent to each attribute.</span>
-<span id="L119"><span class="lineNum">     119</span>              :   std::array&lt;int, 2&gt; polarity_attributes = {0, 0};</span>
-<span id="L120"><span class="lineNum">     120</span>              :   bool has_polarity_attributes = false;</span>
+<span id="L115"><span class="lineNum">     115</span>              :   // Optional polarity attributes (parent-mesh boundary attrs [high, low], signal</span>
+<span id="L116"><span class="lineNum">     116</span>              :   // first, ground second). When non-zero (i.e. set by the user) the mode is flipped</span>
+<span id="L117"><span class="lineNum">     117</span>              :   // so that E points from high to low, matching the lumped-port `+R Direction`</span>
+<span id="L118"><span class="lineNum">     118</span>              :   // convention. Computed without GSLIB by evaluating the mode at port-submesh</span>
+<span id="L119"><span class="lineNum">     119</span>              :   // boundary element centroids adjacent to each attribute.</span>
+<span id="L120"><span class="lineNum">     120</span>              :   std::array&lt;int, 2&gt; polarity_attributes = {0, 0};</span>
 <span id="L121"><span class="lineNum">     121</span>              : </span>
 <span id="L122"><span class="lineNum">     122</span>              : public:</span>
 <span id="L123"><span class="lineNum">     123</span>              :   // 3D submesh constructor: extracts submesh from parent mesh.</span>
@@ -206,103 +206,104 @@
 <span id="L136"><span class="lineNum">     136</span>              : </span>
 <span id="L137"><span class="lineNum">     137</span>              :   void Initialize(double omega);</span>
 <span id="L138"><span class="lineNum">     138</span>              : </span>
-<span id="L139"><span class="lineNum">     139</span>              :   // Compute the sign of the modal E-field projected on the (low → high) direction</span>
-<span id="L140"><span class="lineNum">     140</span>              :   // implied by the given pair of parent-mesh boundary attributes. Returns +1, -1,</span>
-<span id="L141"><span class="lineNum">     141</span>              :   // or 0 if attributes were not resolvable on this mesh partition. Used by</span>
-<span id="L142"><span class="lineNum">     142</span>              :   // Initialize() to flip the mode polarity without requiring GSLIB.</span>
-<span id="L143"><span class="lineNum">     143</span>              :   [[nodiscard]] int GetModePolaritySign(int low_attr, int high_attr) const;</span>
-<span id="L144"><span class="lineNum">     144</span>              : </span>
-<span id="L145"><span class="lineNum">     145</span>              :   HYPRE_BigInt GlobalTrueNDSize() const { return port_nd_fespace-&gt;GlobalTrueVSize(); }</span>
-<span id="L146"><span class="lineNum">     146</span>              :   HYPRE_BigInt GlobalTrueH1Size() const { return port_h1_fespace-&gt;GlobalTrueVSize(); }</span>
-<span id="L147"><span class="lineNum">     147</span>              : </span>
-<span id="L148"><span class="lineNum">     148</span>              :   std::unique_ptr&lt;mfem::VectorCoefficient&gt; GetModeExcitationCoefficientReal() const;</span>
-<span id="L149"><span class="lineNum">     149</span>              :   std::unique_ptr&lt;mfem::VectorCoefficient&gt; GetModeExcitationCoefficientImag() const;</span>
-<span id="L150"><span class="lineNum">     150</span>              : </span>
-<span id="L151"><span class="lineNum">     151</span>              :   std::unique_ptr&lt;mfem::VectorCoefficient&gt;</span>
-<span id="L152"><span class="lineNum">     152</span>              :   GetModeFieldCoefficientReal(double scaling = 1.0) const;</span>
-<span id="L153"><span class="lineNum">     153</span>              :   std::unique_ptr&lt;mfem::VectorCoefficient&gt;</span>
-<span id="L154"><span class="lineNum">     154</span>              :   GetModeFieldCoefficientImag(double scaling = 1.0) const;</span>
-<span id="L155"><span class="lineNum">     155</span>              : </span>
-<span id="L156"><span class="lineNum">     156</span>              :   // Characteristic impedance Z = |V|^2 / (2P) from the port mode voltage and unit power.</span>
-<span id="L157"><span class="lineNum">     157</span>              :   // Requires voltage coordinates to be configured.</span>
-<span id="L158"><span class="lineNum">     158</span>              :   std::complex&lt;double&gt; GetCharacteristicImpedance() const;</span>
-<span id="L159"><span class="lineNum">     159</span>              : </span>
-<span id="L160"><span class="lineNum">     160</span>              :   double GetExcitationPower() const;</span>
-<span id="L161"><span class="lineNum">     161</span>              : </span>
-<span id="L162"><span class="lineNum">     162</span>              :   // Excitation voltage from the normalized port mode field.</span>
-<span id="L163"><span class="lineNum">     163</span>              :   std::complex&lt;double&gt; GetExcitationVoltage() const;</span>
-<span id="L164"><span class="lineNum">     164</span>              : </span>
-<span id="L165"><span class="lineNum">     165</span>              :   std::complex&lt;double&gt; GetPower(GridFunction &amp;E, GridFunction &amp;B) const;</span>
-<span id="L166"><span class="lineNum">     166</span>              :   std::complex&lt;double&gt; GetSParameter(GridFunction &amp;E) const;</span>
-<span id="L167"><span class="lineNum">     167</span>              : </span>
-<span id="L168"><span class="lineNum">     168</span>              :   // Voltage line integral V = integral of E . dl on the port, using the 3D E field.</span>
-<span id="L169"><span class="lineNum">     169</span>              :   // Requires voltage coordinates to be configured.</span>
-<span id="L170"><span class="lineNum">     170</span>              :   std::complex&lt;double&gt; GetVoltage(GridFunction &amp;E) const;</span>
-<span id="L171"><span class="lineNum">     171</span>              : };</span>
-<span id="L172"><span class="lineNum">     172</span>              : </span>
-<span id="L173"><span class="lineNum">     173</span>              : //</span>
-<span id="L174"><span class="lineNum">     174</span>              : // A class handling wave port boundaries and their postprocessing.</span>
-<span id="L175"><span class="lineNum">     175</span>              : //</span>
-<span id="L176"><span class="lineNum">     176</span> <span class="tlaUNC">           0 : class WavePortOperator</span></span>
-<span id="L177"><span class="lineNum">     177</span>              : {</span>
-<span id="L178"><span class="lineNum">     178</span>              : private:</span>
-<span id="L179"><span class="lineNum">     179</span>              :   // Mapping from port index to data structure containing port information.</span>
-<span id="L180"><span class="lineNum">     180</span>              :   std::map&lt;int, WavePortData&gt; ports;</span>
-<span id="L181"><span class="lineNum">     181</span>              : </span>
-<span id="L182"><span class="lineNum">     182</span>              :   // Flag which forces no printing during WavePortData::Print().</span>
-<span id="L183"><span class="lineNum">     183</span>              :   bool suppress_output;</span>
-<span id="L184"><span class="lineNum">     184</span>              :   double fc, kc;</span>
-<span id="L185"><span class="lineNum">     185</span>              : </span>
-<span id="L186"><span class="lineNum">     186</span>              :   void SetUpBoundaryProperties(const config::BoundaryData &amp;boundaries,</span>
-<span id="L187"><span class="lineNum">     187</span>              :                                const config::DomainData &amp;domains,</span>
-<span id="L188"><span class="lineNum">     188</span>              :                                const config::SolverData &amp;solver, ProblemType problem_type,</span>
-<span id="L189"><span class="lineNum">     189</span>              :                                const Units &amp;units, const MaterialOperator &amp;mat_op,</span>
-<span id="L190"><span class="lineNum">     190</span>              :                                mfem::ParFiniteElementSpace &amp;nd_fespace,</span>
-<span id="L191"><span class="lineNum">     191</span>              :                                mfem::ParFiniteElementSpace &amp;h1_fespace);</span>
-<span id="L192"><span class="lineNum">     192</span>              :   void PrintBoundaryInfo(const Units &amp;units, const mfem::ParMesh &amp;mesh);</span>
-<span id="L193"><span class="lineNum">     193</span>              : </span>
-<span id="L194"><span class="lineNum">     194</span>              : protected:</span>
-<span id="L195"><span class="lineNum">     195</span>              :   // Compute boundary modes for all wave port boundaries at the specified frequency.</span>
-<span id="L196"><span class="lineNum">     196</span>              :   // Protected so test fixtures can drive this directly via a thin subclass.</span>
-<span id="L197"><span class="lineNum">     197</span>              :   void Initialize(double omega);</span>
-<span id="L198"><span class="lineNum">     198</span>              : </span>
-<span id="L199"><span class="lineNum">     199</span>              : public:</span>
-<span id="L200"><span class="lineNum">     200</span>              :   WavePortOperator(const config::BoundaryData &amp;boundaries,</span>
-<span id="L201"><span class="lineNum">     201</span>              :                    const config::DomainData &amp;domains, const config::SolverData &amp;solver,</span>
-<span id="L202"><span class="lineNum">     202</span>              :                    ProblemType problem_type, const Units &amp;units,</span>
-<span id="L203"><span class="lineNum">     203</span>              :                    const MaterialOperator &amp;mat_op, mfem::ParFiniteElementSpace &amp;nd_fespace,</span>
-<span id="L204"><span class="lineNum">     204</span>              :                    mfem::ParFiniteElementSpace &amp;h1_fespace);</span>
-<span id="L205"><span class="lineNum">     205</span>              :   WavePortOperator(const IoData &amp;iodata, const MaterialOperator &amp;mat_op,</span>
-<span id="L206"><span class="lineNum">     206</span>              :                    mfem::ParFiniteElementSpace &amp;nd_fespace,</span>
-<span id="L207"><span class="lineNum">     207</span>              :                    mfem::ParFiniteElementSpace &amp;h1_fespace);</span>
-<span id="L208"><span class="lineNum">     208</span>              : </span>
-<span id="L209"><span class="lineNum">     209</span>              :   // Access data structures for the wave port with the given index.</span>
-<span id="L210"><span class="lineNum">     210</span>              :   const WavePortData &amp;GetPort(int idx) const;</span>
-<span id="L211"><span class="lineNum">     211</span>              :   auto begin() const { return ports.begin(); }</span>
-<span id="L212"><span class="lineNum">     212</span>              :   auto end() const { return ports.end(); }</span>
-<span id="L213"><span class="lineNum">     213</span>              :   auto rbegin() const { return ports.rbegin(); }</span>
-<span id="L214"><span class="lineNum">     214</span>              :   auto rend() const { return ports.rend(); }</span>
-<span id="L215"><span class="lineNum">     215</span>              :   auto Size() const { return ports.size(); }</span>
-<span id="L216"><span class="lineNum">     216</span>              : </span>
-<span id="L217"><span class="lineNum">     217</span>              :   // Enable or suppress all outputs (log printing and fields to disk).</span>
-<span id="L218"><span class="lineNum">     218</span> <span class="tlaGNC tlaBgGNC">           2 :   void SetSuppressOutput(bool suppress) { suppress_output = suppress; }</span></span>
-<span id="L219"><span class="lineNum">     219</span>              : </span>
-<span id="L220"><span class="lineNum">     220</span>              :   // Returns array of wave port attributes.</span>
-<span id="L221"><span class="lineNum">     221</span>              :   mfem::Array&lt;int&gt; GetAttrList() const;</span>
-<span id="L222"><span class="lineNum">     222</span>              : </span>
-<span id="L223"><span class="lineNum">     223</span>              :   // Add contributions to system matrix from wave ports.</span>
-<span id="L224"><span class="lineNum">     224</span>              :   void AddExtraSystemBdrCoefficients(double omega, MaterialPropertyCoefficient &amp;fbr,</span>
-<span id="L225"><span class="lineNum">     225</span>              :                                      MaterialPropertyCoefficient &amp;fbi);</span>
-<span id="L226"><span class="lineNum">     226</span>              : </span>
-<span id="L227"><span class="lineNum">     227</span>              :   // Add contributions to the right-hand side source term vector for an incident field at</span>
-<span id="L228"><span class="lineNum">     228</span>              :   // excited port boundaries.</span>
-<span id="L229"><span class="lineNum">     229</span>              :   void AddExcitationBdrCoefficients(int excitation_idx, double omega,</span>
-<span id="L230"><span class="lineNum">     230</span>              :                                     SumVectorCoefficient &amp;fbr, SumVectorCoefficient &amp;fbi);</span>
-<span id="L231"><span class="lineNum">     231</span>              : };</span>
-<span id="L232"><span class="lineNum">     232</span>              : </span>
-<span id="L233"><span class="lineNum">     233</span>              : }  // namespace palace</span>
-<span id="L234"><span class="lineNum">     234</span>              : </span>
-<span id="L235"><span class="lineNum">     235</span>              : #endif  // PALACE_MODELS_WAVE_PORT_OPERATOR_HPP</span>
+<span id="L139"><span class="lineNum">     139</span>              :   // Compute the sign of the modal E-field projected on the (high → low) direction</span>
+<span id="L140"><span class="lineNum">     140</span>              :   // implied by the given pair of parent-mesh boundary attributes (signal terminal</span>
+<span id="L141"><span class="lineNum">     141</span>              :   // first, ground terminal second). Returns +1, -1, or 0 if attributes were not</span>
+<span id="L142"><span class="lineNum">     142</span>              :   // resolvable on this mesh partition. Used by Initialize() to flip the mode polarity</span>
+<span id="L143"><span class="lineNum">     143</span>              :   // without requiring GSLIB.</span>
+<span id="L144"><span class="lineNum">     144</span>              :   [[nodiscard]] int GetModePolaritySign(int high_attr, int low_attr) const;</span>
+<span id="L145"><span class="lineNum">     145</span>              : </span>
+<span id="L146"><span class="lineNum">     146</span>              :   HYPRE_BigInt GlobalTrueNDSize() const { return port_nd_fespace-&gt;GlobalTrueVSize(); }</span>
+<span id="L147"><span class="lineNum">     147</span>              :   HYPRE_BigInt GlobalTrueH1Size() const { return port_h1_fespace-&gt;GlobalTrueVSize(); }</span>
+<span id="L148"><span class="lineNum">     148</span>              : </span>
+<span id="L149"><span class="lineNum">     149</span>              :   std::unique_ptr&lt;mfem::VectorCoefficient&gt; GetModeExcitationCoefficientReal() const;</span>
+<span id="L150"><span class="lineNum">     150</span>              :   std::unique_ptr&lt;mfem::VectorCoefficient&gt; GetModeExcitationCoefficientImag() const;</span>
+<span id="L151"><span class="lineNum">     151</span>              : </span>
+<span id="L152"><span class="lineNum">     152</span>              :   std::unique_ptr&lt;mfem::VectorCoefficient&gt;</span>
+<span id="L153"><span class="lineNum">     153</span>              :   GetModeFieldCoefficientReal(double scaling = 1.0) const;</span>
+<span id="L154"><span class="lineNum">     154</span>              :   std::unique_ptr&lt;mfem::VectorCoefficient&gt;</span>
+<span id="L155"><span class="lineNum">     155</span>              :   GetModeFieldCoefficientImag(double scaling = 1.0) const;</span>
+<span id="L156"><span class="lineNum">     156</span>              : </span>
+<span id="L157"><span class="lineNum">     157</span>              :   // Characteristic impedance Z = |V|^2 / (2P) from the port mode voltage and unit power.</span>
+<span id="L158"><span class="lineNum">     158</span>              :   // Requires voltage coordinates to be configured.</span>
+<span id="L159"><span class="lineNum">     159</span>              :   std::complex&lt;double&gt; GetCharacteristicImpedance() const;</span>
+<span id="L160"><span class="lineNum">     160</span>              : </span>
+<span id="L161"><span class="lineNum">     161</span>              :   double GetExcitationPower() const;</span>
+<span id="L162"><span class="lineNum">     162</span>              : </span>
+<span id="L163"><span class="lineNum">     163</span>              :   // Excitation voltage from the normalized port mode field.</span>
+<span id="L164"><span class="lineNum">     164</span>              :   std::complex&lt;double&gt; GetExcitationVoltage() const;</span>
+<span id="L165"><span class="lineNum">     165</span>              : </span>
+<span id="L166"><span class="lineNum">     166</span>              :   std::complex&lt;double&gt; GetPower(GridFunction &amp;E, GridFunction &amp;B) const;</span>
+<span id="L167"><span class="lineNum">     167</span>              :   std::complex&lt;double&gt; GetSParameter(GridFunction &amp;E) const;</span>
+<span id="L168"><span class="lineNum">     168</span>              : </span>
+<span id="L169"><span class="lineNum">     169</span>              :   // Voltage line integral V = integral of E . dl on the port, using the 3D E field.</span>
+<span id="L170"><span class="lineNum">     170</span>              :   // Requires voltage coordinates to be configured.</span>
+<span id="L171"><span class="lineNum">     171</span>              :   std::complex&lt;double&gt; GetVoltage(GridFunction &amp;E) const;</span>
+<span id="L172"><span class="lineNum">     172</span>              : };</span>
+<span id="L173"><span class="lineNum">     173</span>              : </span>
+<span id="L174"><span class="lineNum">     174</span>              : //</span>
+<span id="L175"><span class="lineNum">     175</span>              : // A class handling wave port boundaries and their postprocessing.</span>
+<span id="L176"><span class="lineNum">     176</span>              : //</span>
+<span id="L177"><span class="lineNum">     177</span> <span class="tlaUNC">           0 : class WavePortOperator</span></span>
+<span id="L178"><span class="lineNum">     178</span>              : {</span>
+<span id="L179"><span class="lineNum">     179</span>              : private:</span>
+<span id="L180"><span class="lineNum">     180</span>              :   // Mapping from port index to data structure containing port information.</span>
+<span id="L181"><span class="lineNum">     181</span>              :   std::map&lt;int, WavePortData&gt; ports;</span>
+<span id="L182"><span class="lineNum">     182</span>              : </span>
+<span id="L183"><span class="lineNum">     183</span>              :   // Flag which forces no printing during WavePortData::Print().</span>
+<span id="L184"><span class="lineNum">     184</span>              :   bool suppress_output;</span>
+<span id="L185"><span class="lineNum">     185</span>              :   double fc, kc;</span>
+<span id="L186"><span class="lineNum">     186</span>              : </span>
+<span id="L187"><span class="lineNum">     187</span>              :   void SetUpBoundaryProperties(const config::BoundaryData &amp;boundaries,</span>
+<span id="L188"><span class="lineNum">     188</span>              :                                const config::DomainData &amp;domains,</span>
+<span id="L189"><span class="lineNum">     189</span>              :                                const config::SolverData &amp;solver, ProblemType problem_type,</span>
+<span id="L190"><span class="lineNum">     190</span>              :                                const Units &amp;units, const MaterialOperator &amp;mat_op,</span>
+<span id="L191"><span class="lineNum">     191</span>              :                                mfem::ParFiniteElementSpace &amp;nd_fespace,</span>
+<span id="L192"><span class="lineNum">     192</span>              :                                mfem::ParFiniteElementSpace &amp;h1_fespace);</span>
+<span id="L193"><span class="lineNum">     193</span>              :   void PrintBoundaryInfo(const Units &amp;units, const mfem::ParMesh &amp;mesh);</span>
+<span id="L194"><span class="lineNum">     194</span>              : </span>
+<span id="L195"><span class="lineNum">     195</span>              : protected:</span>
+<span id="L196"><span class="lineNum">     196</span>              :   // Compute boundary modes for all wave port boundaries at the specified frequency.</span>
+<span id="L197"><span class="lineNum">     197</span>              :   // Protected so test fixtures can drive this directly via a thin subclass.</span>
+<span id="L198"><span class="lineNum">     198</span>              :   void Initialize(double omega);</span>
+<span id="L199"><span class="lineNum">     199</span>              : </span>
+<span id="L200"><span class="lineNum">     200</span>              : public:</span>
+<span id="L201"><span class="lineNum">     201</span>              :   WavePortOperator(const config::BoundaryData &amp;boundaries,</span>
+<span id="L202"><span class="lineNum">     202</span>              :                    const config::DomainData &amp;domains, const config::SolverData &amp;solver,</span>
+<span id="L203"><span class="lineNum">     203</span>              :                    ProblemType problem_type, const Units &amp;units,</span>
+<span id="L204"><span class="lineNum">     204</span>              :                    const MaterialOperator &amp;mat_op, mfem::ParFiniteElementSpace &amp;nd_fespace,</span>
+<span id="L205"><span class="lineNum">     205</span>              :                    mfem::ParFiniteElementSpace &amp;h1_fespace);</span>
+<span id="L206"><span class="lineNum">     206</span>              :   WavePortOperator(const IoData &amp;iodata, const MaterialOperator &amp;mat_op,</span>
+<span id="L207"><span class="lineNum">     207</span>              :                    mfem::ParFiniteElementSpace &amp;nd_fespace,</span>
+<span id="L208"><span class="lineNum">     208</span>              :                    mfem::ParFiniteElementSpace &amp;h1_fespace);</span>
+<span id="L209"><span class="lineNum">     209</span>              : </span>
+<span id="L210"><span class="lineNum">     210</span>              :   // Access data structures for the wave port with the given index.</span>
+<span id="L211"><span class="lineNum">     211</span>              :   const WavePortData &amp;GetPort(int idx) const;</span>
+<span id="L212"><span class="lineNum">     212</span>              :   auto begin() const { return ports.begin(); }</span>
+<span id="L213"><span class="lineNum">     213</span>              :   auto end() const { return ports.end(); }</span>
+<span id="L214"><span class="lineNum">     214</span>              :   auto rbegin() const { return ports.rbegin(); }</span>
+<span id="L215"><span class="lineNum">     215</span>              :   auto rend() const { return ports.rend(); }</span>
+<span id="L216"><span class="lineNum">     216</span>              :   auto Size() const { return ports.size(); }</span>
+<span id="L217"><span class="lineNum">     217</span>              : </span>
+<span id="L218"><span class="lineNum">     218</span>              :   // Enable or suppress all outputs (log printing and fields to disk).</span>
+<span id="L219"><span class="lineNum">     219</span> <span class="tlaGNC tlaBgGNC">           2 :   void SetSuppressOutput(bool suppress) { suppress_output = suppress; }</span></span>
+<span id="L220"><span class="lineNum">     220</span>              : </span>
+<span id="L221"><span class="lineNum">     221</span>              :   // Returns array of wave port attributes.</span>
+<span id="L222"><span class="lineNum">     222</span>              :   mfem::Array&lt;int&gt; GetAttrList() const;</span>
+<span id="L223"><span class="lineNum">     223</span>              : </span>
+<span id="L224"><span class="lineNum">     224</span>              :   // Add contributions to system matrix from wave ports.</span>
+<span id="L225"><span class="lineNum">     225</span>              :   void AddExtraSystemBdrCoefficients(double omega, MaterialPropertyCoefficient &amp;fbr,</span>
+<span id="L226"><span class="lineNum">     226</span>              :                                      MaterialPropertyCoefficient &amp;fbi);</span>
+<span id="L227"><span class="lineNum">     227</span>              : </span>
+<span id="L228"><span class="lineNum">     228</span>              :   // Add contributions to the right-hand side source term vector for an incident field at</span>
+<span id="L229"><span class="lineNum">     229</span>              :   // excited port boundaries.</span>
+<span id="L230"><span class="lineNum">     230</span>              :   void AddExcitationBdrCoefficients(int excitation_idx, double omega,</span>
+<span id="L231"><span class="lineNum">     231</span>              :                                     SumVectorCoefficient &amp;fbr, SumVectorCoefficient &amp;fbi);</span>
+<span id="L232"><span class="lineNum">     232</span>              : };</span>
+<span id="L233"><span class="lineNum">     233</span>              : </span>
+<span id="L234"><span class="lineNum">     234</span>              : }  // namespace palace</span>
+<span id="L235"><span class="lineNum">     235</span>              : </span>
+<span id="L236"><span class="lineNum">     236</span>              : #endif  // PALACE_MODELS_WAVE_PORT_OPERATOR_HPP</span>
         </pre>
               </td>
             </tr>
