@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2026-06-02 23:26:02</td>
+            <td class="headerValue">2026-06-02 23:51:41</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntryLo">43.3&nbsp;%</td>
@@ -362,21 +362,21 @@
 <span id="L292"><span class="lineNum">     292</span> <span class="tlaGNC">        6727 :   if (ai == 0.0)</span></span>
 <span id="L293"><span class="lineNum">     293</span>              :   {</span>
 <span id="L294"><span class="lineNum">     294</span>              :     mfem::forall_switch(use_dev, N,</span>
-<span id="L295"><span class="lineNum">     295</span> <span class="tlaGNC">         202 :                         [=] MFEM_HOST_DEVICE(int i)</span></span>
+<span id="L295"><span class="lineNum">     295</span> <span class="tlaGNC">         201 :                         [=] MFEM_HOST_DEVICE(int i)</span></span>
 <span id="L296"><span class="lineNum">     296</span>              :                         {</span>
-<span id="L297"><span class="lineNum">     297</span> <span class="tlaGNC">      147008 :                           YR[i] += ar * XR[i];</span></span>
-<span id="L298"><span class="lineNum">     298</span> <span class="tlaGNC">      147008 :                           YI[i] += ar * XI[i];</span></span>
-<span id="L299"><span class="lineNum">     299</span> <span class="tlaGNC">      147008 :                         });</span></span>
+<span id="L297"><span class="lineNum">     297</span> <span class="tlaGNC">      147005 :                           YR[i] += ar * XR[i];</span></span>
+<span id="L298"><span class="lineNum">     298</span> <span class="tlaGNC">      147005 :                           YI[i] += ar * XI[i];</span></span>
+<span id="L299"><span class="lineNum">     299</span> <span class="tlaGNC">      147005 :                         });</span></span>
 <span id="L300"><span class="lineNum">     300</span>              :   }</span>
 <span id="L301"><span class="lineNum">     301</span>              :   else</span>
 <span id="L302"><span class="lineNum">     302</span>              :   {</span>
 <span id="L303"><span class="lineNum">     303</span>              :     mfem::forall_switch(use_dev, N,</span>
-<span id="L304"><span class="lineNum">     304</span> <span class="tlaGNC">        6525 :                         [=] MFEM_HOST_DEVICE(int i)</span></span>
+<span id="L304"><span class="lineNum">     304</span> <span class="tlaGNC">        6526 :                         [=] MFEM_HOST_DEVICE(int i)</span></span>
 <span id="L305"><span class="lineNum">     305</span>              :                         {</span>
-<span id="L306"><span class="lineNum">     306</span> <span class="tlaGNC">     4930998 :                           const auto t = ai * XR[i] + ar * XI[i];</span></span>
-<span id="L307"><span class="lineNum">     307</span> <span class="tlaGNC">     4930998 :                           YR[i] += ar * XR[i] - ai * XI[i];</span></span>
-<span id="L308"><span class="lineNum">     308</span> <span class="tlaGNC">     4930998 :                           YI[i] += t;</span></span>
-<span id="L309"><span class="lineNum">     309</span> <span class="tlaGNC">     4930998 :                         });</span></span>
+<span id="L306"><span class="lineNum">     306</span> <span class="tlaGNC">     4931001 :                           const auto t = ai * XR[i] + ar * XI[i];</span></span>
+<span id="L307"><span class="lineNum">     307</span> <span class="tlaGNC">     4931001 :                           YR[i] += ar * XR[i] - ai * XI[i];</span></span>
+<span id="L308"><span class="lineNum">     308</span> <span class="tlaGNC">     4931001 :                           YI[i] += t;</span></span>
+<span id="L309"><span class="lineNum">     309</span> <span class="tlaGNC">     4931001 :                         });</span></span>
 <span id="L310"><span class="lineNum">     310</span>              :   }</span>
 <span id="L311"><span class="lineNum">     311</span> <span class="tlaGNC">        6727 : }</span></span>
 <span id="L312"><span class="lineNum">     312</span>              : </span>
