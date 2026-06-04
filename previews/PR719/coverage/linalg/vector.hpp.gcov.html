@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2026-05-15 18:39:30</td>
+            <td class="headerValue">2026-06-04 21:57:07</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntryLo">53.3&nbsp;%</td>
@@ -130,7 +130,7 @@
 <span id="L60"><span class="lineNum">      60</span>              : </span>
 <span id="L61"><span class="lineNum">      61</span>              :   // Get access to the real and imaginary vector parts.</span>
 <span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">        8275 :   const Vector &amp;Real() const { return xr; }</span></span>
-<span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC">      106283 :   Vector &amp;Real() { return xr; }</span></span>
+<span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC">      119822 :   Vector &amp;Real() { return xr; }</span></span>
 <span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC">        8267 :   const Vector &amp;Imag() const { return xi; }</span></span>
 <span id="L65"><span class="lineNum">      65</span> <span class="tlaGNC">       13977 :   Vector &amp;Imag() { return xi; }</span></span>
 <span id="L66"><span class="lineNum">      66</span>              : </span>
@@ -315,11 +315,11 @@
 <span id="L245"><span class="lineNum">     245</span>              : </span>
 <span id="L246"><span class="lineNum">     246</span>              : // Calculate the parallel inner product yᴴ x or yᵀ x.</span>
 <span id="L247"><span class="lineNum">     247</span>              : template &lt;typename VecType&gt;</span>
-<span id="L248"><span class="lineNum">     248</span> <span class="tlaGNC tlaBgGNC">        1568 : inline auto Dot(MPI_Comm comm, const VecType &amp;x, const VecType &amp;y)</span></span>
+<span id="L248"><span class="lineNum">     248</span> <span class="tlaGNC tlaBgGNC">       10902 : inline auto Dot(MPI_Comm comm, const VecType &amp;x, const VecType &amp;y)</span></span>
 <span id="L249"><span class="lineNum">     249</span>              : {</span>
-<span id="L250"><span class="lineNum">     250</span> <span class="tlaGNC">        1568 :   auto dot = LocalDot(x, y);</span></span>
+<span id="L250"><span class="lineNum">     250</span> <span class="tlaGNC">       10902 :   auto dot = LocalDot(x, y);</span></span>
 <span id="L251"><span class="lineNum">     251</span>              :   Mpi::GlobalSum(1, &amp;dot, comm);</span>
-<span id="L252"><span class="lineNum">     252</span> <span class="tlaGNC">        1568 :   return dot;</span></span>
+<span id="L252"><span class="lineNum">     252</span> <span class="tlaGNC">       10902 :   return dot;</span></span>
 <span id="L253"><span class="lineNum">     253</span>              : }</span>
 <span id="L254"><span class="lineNum">     254</span>              : </span>
 <span id="L255"><span class="lineNum">     255</span>              : // Calculate the vector 2-norm.</span>

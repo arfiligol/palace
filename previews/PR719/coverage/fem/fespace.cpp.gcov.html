@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2026-05-15 18:39:30</td>
+            <td class="headerValue">2026-06-04 21:57:07</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
@@ -82,33 +82,33 @@
 <span id="L12"><span class="lineNum">      12</span>              : namespace palace</span>
 <span id="L13"><span class="lineNum">      13</span>              : {</span>
 <span id="L14"><span class="lineNum">      14</span>              : </span>
-<span id="L15"><span class="lineNum">      15</span> <span class="tlaGNC tlaBgGNC">       32052 : CeedBasis FiniteElementSpace::GetCeedBasis(Ceed ceed, mfem::Geometry::Type geom) const</span></span>
+<span id="L15"><span class="lineNum">      15</span> <span class="tlaGNC tlaBgGNC">       33092 : CeedBasis FiniteElementSpace::GetCeedBasis(Ceed ceed, mfem::Geometry::Type geom) const</span></span>
 <span id="L16"><span class="lineNum">      16</span>              : {</span>
 <span id="L17"><span class="lineNum">      17</span>              :   auto it = basis.find(ceed);</span>
 <span id="L18"><span class="lineNum">      18</span>              :   MFEM_ASSERT(it != basis.end(), &quot;Unknown Ceed context in GetCeedBasis!&quot;);</span>
 <span id="L19"><span class="lineNum">      19</span>              :   auto &amp;basis_map = it-&gt;second;</span>
 <span id="L20"><span class="lineNum">      20</span>              :   auto basis_it = basis_map.find(geom);</span>
-<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC">       32052 :   if (basis_it != basis_map.end())</span></span>
+<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC">       33092 :   if (basis_it != basis_map.end())</span></span>
 <span id="L22"><span class="lineNum">      22</span>              :   {</span>
-<span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC">       10108 :     return basis_it-&gt;second;</span></span>
+<span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC">       10968 :     return basis_it-&gt;second;</span></span>
 <span id="L24"><span class="lineNum">      24</span>              :   }</span>
-<span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC">       21944 :   return basis_map.emplace(geom, BuildCeedBasis(*this, ceed, geom)).first-&gt;second;</span></span>
+<span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC">       22124 :   return basis_map.emplace(geom, BuildCeedBasis(*this, ceed, geom)).first-&gt;second;</span></span>
 <span id="L26"><span class="lineNum">      26</span>              : }</span>
 <span id="L27"><span class="lineNum">      27</span>              : </span>
 <span id="L28"><span class="lineNum">      28</span>              : CeedElemRestriction</span>
-<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">       34137 : FiniteElementSpace::GetCeedElemRestriction(Ceed ceed, mfem::Geometry::Type geom,</span></span>
+<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">       35177 : FiniteElementSpace::GetCeedElemRestriction(Ceed ceed, mfem::Geometry::Type geom,</span></span>
 <span id="L30"><span class="lineNum">      30</span>              :                                            const std::vector&lt;int&gt; &amp;indices) const</span>
 <span id="L31"><span class="lineNum">      31</span>              : {</span>
 <span id="L32"><span class="lineNum">      32</span>              :   auto it = restr.find(ceed);</span>
 <span id="L33"><span class="lineNum">      33</span>              :   MFEM_ASSERT(it != restr.end(), &quot;Unknown Ceed context in GetCeedElemRestriction!&quot;);</span>
 <span id="L34"><span class="lineNum">      34</span>              :   auto &amp;restr_map = it-&gt;second;</span>
 <span id="L35"><span class="lineNum">      35</span>              :   auto restr_it = restr_map.find(geom);</span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">       34137 :   if (restr_it != restr_map.end())</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">       35177 :   if (restr_it != restr_map.end())</span></span>
 <span id="L37"><span class="lineNum">      37</span>              :   {</span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">       10172 :     return restr_it-&gt;second;</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">       11032 :     return restr_it-&gt;second;</span></span>
 <span id="L39"><span class="lineNum">      39</span>              :   }</span>
-<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">       23965 :   return restr_map.emplace(geom, BuildCeedElemRestriction(*this, ceed, geom, indices))</span></span>
-<span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC">       23965 :       .first-&gt;second;</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">       24145 :   return restr_map.emplace(geom, BuildCeedElemRestriction(*this, ceed, geom, indices))</span></span>
+<span id="L41"><span class="lineNum">      41</span> <span class="tlaGNC">       24145 :       .first-&gt;second;</span></span>
 <span id="L42"><span class="lineNum">      42</span>              : }</span>
 <span id="L43"><span class="lineNum">      43</span>              : </span>
 <span id="L44"><span class="lineNum">      44</span>              : CeedElemRestriction</span>
@@ -161,16 +161,16 @@
 <span id="L91"><span class="lineNum">      91</span>              : {</span>
 <span id="L92"><span class="lineNum">      92</span> <span class="tlaGNC">       89628 :   for (auto &amp;[ceed, basis_map] : basis)</span></span>
 <span id="L93"><span class="lineNum">      93</span>              :   {</span>
-<span id="L94"><span class="lineNum">      94</span> <span class="tlaGNC">       66758 :     for (auto &amp;[key, val] : basis_map)</span></span>
+<span id="L94"><span class="lineNum">      94</span> <span class="tlaGNC">       66938 :     for (auto &amp;[key, val] : basis_map)</span></span>
 <span id="L95"><span class="lineNum">      95</span>              :     {</span>
-<span id="L96"><span class="lineNum">      96</span> <span class="tlaGNC">       21944 :       PalaceCeedCall(ceed, CeedBasisDestroy(&amp;val));</span></span>
+<span id="L96"><span class="lineNum">      96</span> <span class="tlaGNC">       22124 :       PalaceCeedCall(ceed, CeedBasisDestroy(&amp;val));</span></span>
 <span id="L97"><span class="lineNum">      97</span>              :     }</span>
 <span id="L98"><span class="lineNum">      98</span>              :   }</span>
 <span id="L99"><span class="lineNum">      99</span> <span class="tlaGNC">       89628 :   for (auto &amp;[ceed, restr_map] : restr)</span></span>
 <span id="L100"><span class="lineNum">     100</span>              :   {</span>
-<span id="L101"><span class="lineNum">     101</span> <span class="tlaGNC">       68779 :     for (auto &amp;[key, val] : restr_map)</span></span>
+<span id="L101"><span class="lineNum">     101</span> <span class="tlaGNC">       68959 :     for (auto &amp;[key, val] : restr_map)</span></span>
 <span id="L102"><span class="lineNum">     102</span>              :     {</span>
-<span id="L103"><span class="lineNum">     103</span> <span class="tlaGNC">       23965 :       PalaceCeedCall(ceed, CeedElemRestrictionDestroy(&amp;val));</span></span>
+<span id="L103"><span class="lineNum">     103</span> <span class="tlaGNC">       24145 :       PalaceCeedCall(ceed, CeedElemRestrictionDestroy(&amp;val));</span></span>
 <span id="L104"><span class="lineNum">     104</span>              :     }</span>
 <span id="L105"><span class="lineNum">     105</span>              :   }</span>
 <span id="L106"><span class="lineNum">     106</span> <span class="tlaGNC">       89628 :   for (auto &amp;[ceed, restr_map] : interp_restr)</span></span>
@@ -201,43 +201,43 @@
 <span id="L131"><span class="lineNum">     131</span>              :   }</span>
 <span id="L132"><span class="lineNum">     132</span> <span class="tlaGNC">       44814 : }</span></span>
 <span id="L133"><span class="lineNum">     133</span>              : </span>
-<span id="L134"><span class="lineNum">     134</span> <span class="tlaGNC">       79033 : CeedBasis FiniteElementSpace::BuildCeedBasis(const mfem::FiniteElementSpace &amp;fespace,</span></span>
+<span id="L134"><span class="lineNum">     134</span> <span class="tlaGNC">       79645 : CeedBasis FiniteElementSpace::BuildCeedBasis(const mfem::FiniteElementSpace &amp;fespace,</span></span>
 <span id="L135"><span class="lineNum">     135</span>              :                                              Ceed ceed, mfem::Geometry::Type geom)</span>
 <span id="L136"><span class="lineNum">     136</span>              : {</span>
 <span id="L137"><span class="lineNum">     137</span>              :   // Find the appropriate integration rule for the element.</span>
-<span id="L138"><span class="lineNum">     138</span> <span class="tlaGNC">       79033 :   mfem::IsoparametricTransformation T;</span></span>
+<span id="L138"><span class="lineNum">     138</span> <span class="tlaGNC">       79645 :   mfem::IsoparametricTransformation T;</span></span>
 <span id="L139"><span class="lineNum">     139</span>              :   const mfem::FiniteElement *fe_nodal =</span>
-<span id="L140"><span class="lineNum">     140</span> <span class="tlaGNC">       79033 :       fespace.GetMesh()-&gt;GetNodalFESpace()-&gt;FEColl()-&gt;FiniteElementForGeometry(geom);</span></span>
-<span id="L141"><span class="lineNum">     141</span> <span class="tlaGNC">       79033 :   if (!fe_nodal)</span></span>
+<span id="L140"><span class="lineNum">     140</span> <span class="tlaGNC">       79645 :       fespace.GetMesh()-&gt;GetNodalFESpace()-&gt;FEColl()-&gt;FiniteElementForGeometry(geom);</span></span>
+<span id="L141"><span class="lineNum">     141</span> <span class="tlaGNC">       79645 :   if (!fe_nodal)</span></span>
 <span id="L142"><span class="lineNum">     142</span>              :   {</span>
 <span id="L143"><span class="lineNum">     143</span>              :     fe_nodal =</span>
 <span id="L144"><span class="lineNum">     144</span> <span class="tlaUNC tlaBgUNC">           0 :         fespace.GetMesh()-&gt;GetNodalFESpace()-&gt;FEColl()-&gt;TraceFiniteElementForGeometry(geom);</span></span>
 <span id="L145"><span class="lineNum">     145</span>              :   }</span>
 <span id="L146"><span class="lineNum">     146</span>              :   T.SetFE(fe_nodal);</span>
-<span id="L147"><span class="lineNum">     147</span> <span class="tlaGNC tlaBgGNC">       79033 :   const int q_order = fem::DefaultIntegrationOrder::Get(T);</span></span>
-<span id="L148"><span class="lineNum">     148</span> <span class="tlaGNC">       79033 :   const mfem::IntegrationRule &amp;ir = mfem::IntRules.Get(geom, q_order);</span></span>
+<span id="L147"><span class="lineNum">     147</span> <span class="tlaGNC tlaBgGNC">       79645 :   const int q_order = fem::DefaultIntegrationOrder::Get(T);</span></span>
+<span id="L148"><span class="lineNum">     148</span> <span class="tlaGNC">       79645 :   const mfem::IntegrationRule &amp;ir = mfem::IntRules.Get(geom, q_order);</span></span>
 <span id="L149"><span class="lineNum">     149</span>              : </span>
 <span id="L150"><span class="lineNum">     150</span>              :   // Build the libCEED basis.</span>
 <span id="L151"><span class="lineNum">     151</span>              :   CeedBasis val;</span>
-<span id="L152"><span class="lineNum">     152</span> <span class="tlaGNC">       79033 :   const mfem::FiniteElement *fe = fespace.FEColl()-&gt;FiniteElementForGeometry(geom);</span></span>
-<span id="L153"><span class="lineNum">     153</span> <span class="tlaGNC">       79033 :   if (!fe)</span></span>
+<span id="L152"><span class="lineNum">     152</span> <span class="tlaGNC">       79645 :   const mfem::FiniteElement *fe = fespace.FEColl()-&gt;FiniteElementForGeometry(geom);</span></span>
+<span id="L153"><span class="lineNum">     153</span> <span class="tlaGNC">       79645 :   if (!fe)</span></span>
 <span id="L154"><span class="lineNum">     154</span>              :   {</span>
 <span id="L155"><span class="lineNum">     155</span> <span class="tlaUNC tlaBgUNC">           0 :     fe = fespace.FEColl()-&gt;TraceFiniteElementForGeometry(geom);</span></span>
 <span id="L156"><span class="lineNum">     156</span>              :   }</span>
 <span id="L157"><span class="lineNum">     157</span>              :   const int vdim = fespace.GetVDim();</span>
-<span id="L158"><span class="lineNum">     158</span> <span class="tlaGNC tlaBgGNC">       79033 :   ceed::InitBasis(*fe, ir, vdim, ceed, &amp;val);</span></span>
-<span id="L159"><span class="lineNum">     159</span> <span class="tlaGNC">       79033 :   return val;</span></span>
-<span id="L160"><span class="lineNum">     160</span> <span class="tlaGNC">       79033 : }</span></span>
+<span id="L158"><span class="lineNum">     158</span> <span class="tlaGNC tlaBgGNC">       79645 :   ceed::InitBasis(*fe, ir, vdim, ceed, &amp;val);</span></span>
+<span id="L159"><span class="lineNum">     159</span> <span class="tlaGNC">       79645 :   return val;</span></span>
+<span id="L160"><span class="lineNum">     160</span> <span class="tlaGNC">       79645 : }</span></span>
 <span id="L161"><span class="lineNum">     161</span>              : </span>
-<span id="L162"><span class="lineNum">     162</span> <span class="tlaGNC">       81619 : CeedElemRestriction FiniteElementSpace::BuildCeedElemRestriction(</span></span>
+<span id="L162"><span class="lineNum">     162</span> <span class="tlaGNC">       82231 : CeedElemRestriction FiniteElementSpace::BuildCeedElemRestriction(</span></span>
 <span id="L163"><span class="lineNum">     163</span>              :     const mfem::FiniteElementSpace &amp;fespace, Ceed ceed, mfem::Geometry::Type geom,</span>
 <span id="L164"><span class="lineNum">     164</span>              :     const std::vector&lt;int&gt; &amp;indices, bool is_interp, bool is_interp_range)</span>
 <span id="L165"><span class="lineNum">     165</span>              : {</span>
 <span id="L166"><span class="lineNum">     166</span>              :   // Construct the libCEED element restriction for this element type.</span>
 <span id="L167"><span class="lineNum">     167</span>              :   CeedElemRestriction val;</span>
-<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC">       81619 :   const bool use_bdr = (mfem::Geometry::Dimension[geom] != fespace.GetMesh()-&gt;Dimension());</span></span>
-<span id="L169"><span class="lineNum">     169</span> <span class="tlaGNC">       81619 :   ceed::InitRestriction(fespace, indices, use_bdr, is_interp, is_interp_range, ceed, &amp;val);</span></span>
-<span id="L170"><span class="lineNum">     170</span> <span class="tlaGNC">       81619 :   return val;</span></span>
+<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC">       82231 :   const bool use_bdr = (mfem::Geometry::Dimension[geom] != fespace.GetMesh()-&gt;Dimension());</span></span>
+<span id="L169"><span class="lineNum">     169</span> <span class="tlaGNC">       82231 :   ceed::InitRestriction(fespace, indices, use_bdr, is_interp, is_interp_range, ceed, &amp;val);</span></span>
+<span id="L170"><span class="lineNum">     170</span> <span class="tlaGNC">       82231 :   return val;</span></span>
 <span id="L171"><span class="lineNum">     171</span>              : }</span>
 <span id="L172"><span class="lineNum">     172</span>              : </span>
 <span id="L173"><span class="lineNum">     173</span> <span class="tlaGNC">          32 : const Operator &amp;FiniteElementSpace::BuildDiscreteInterpolator() const</span></span>

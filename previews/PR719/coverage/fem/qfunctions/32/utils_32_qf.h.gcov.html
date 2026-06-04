@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2026-05-15 18:39:30</td>
+            <td class="headerValue">2026-06-04 21:57:07</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntryHi">-</td>
@@ -96,28 +96,28 @@
 <span id="L26"><span class="lineNum">      26</span>              :   // J: 0 3</span>
 <span id="L27"><span class="lineNum">      27</span>              :   //    1 4</span>
 <span id="L28"><span class="lineNum">      28</span>              :   //    2 5</span>
-<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC tlaBgGNC">     4899856 :   const CeedScalar E = J[0] * J[0] + J[1] * J[1] + J[2] * J[2];</span></span>
-<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">     4899856 :   const CeedScalar G = J[3] * J[3] + J[4] * J[4] + J[5] * J[5];</span></span>
-<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">     4899856 :   const CeedScalar F = J[0] * J[3] + J[1] * J[4] + J[2] * J[5];</span></span>
-<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">     4899856 :   const CeedScalar d = sqrt(E * G - F * F);</span></span>
-<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">     4899856 :   adjJt[0] = (G * J[0] - F * J[3]) / d;</span></span>
-<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">     4899856 :   adjJt[1] = (G * J[1] - F * J[4]) / d;</span></span>
-<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">     4899856 :   adjJt[2] = (G * J[2] - F * J[5]) / d;</span></span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">     4899856 :   adjJt[3] = (E * J[3] - F * J[0]) / d;</span></span>
-<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">     4899856 :   adjJt[4] = (E * J[4] - F * J[1]) / d;</span></span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">     4899856 :   adjJt[5] = (E * J[5] - F * J[2]) / d;</span></span>
+<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC tlaBgGNC">     4927120 :   const CeedScalar E = J[0] * J[0] + J[1] * J[1] + J[2] * J[2];</span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">     4927120 :   const CeedScalar G = J[3] * J[3] + J[4] * J[4] + J[5] * J[5];</span></span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">     4927120 :   const CeedScalar F = J[0] * J[3] + J[1] * J[4] + J[2] * J[5];</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">     4927120 :   const CeedScalar d = sqrt(E * G - F * F);</span></span>
+<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">     4927120 :   adjJt[0] = (G * J[0] - F * J[3]) / d;</span></span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">     4927120 :   adjJt[1] = (G * J[1] - F * J[4]) / d;</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">     4927120 :   adjJt[2] = (G * J[2] - F * J[5]) / d;</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">     4927120 :   adjJt[3] = (E * J[3] - F * J[0]) / d;</span></span>
+<span id="L37"><span class="lineNum">      37</span> <span class="tlaGNC">     4927120 :   adjJt[4] = (E * J[4] - F * J[1]) / d;</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">     4927120 :   adjJt[5] = (E * J[5] - F * J[2]) / d;</span></span>
 <span id="L39"><span class="lineNum">      39</span>              :   return ComputeDet ? d : 0.0;</span>
 <span id="L40"><span class="lineNum">      40</span>              : }</span>
 <span id="L41"><span class="lineNum">      41</span>              : </span>
 <span id="L42"><span class="lineNum">      42</span>              : CEED_QFUNCTION_HELPER void MatUnpack32(const CeedScalar *A, const CeedInt A_stride,</span>
 <span id="L43"><span class="lineNum">      43</span>              :                                        CeedScalar A_loc[6])</span>
 <span id="L44"><span class="lineNum">      44</span>              : {</span>
-<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">    11095344 :   A_loc[0] = A[A_stride * 0];</span></span>
-<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC">    11095344 :   A_loc[1] = A[A_stride * 1];</span></span>
-<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">    11095344 :   A_loc[2] = A[A_stride * 2];</span></span>
-<span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC">    11095344 :   A_loc[3] = A[A_stride * 3];</span></span>
-<span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC">    11095344 :   A_loc[4] = A[A_stride * 4];</span></span>
-<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">    11095344 :   A_loc[5] = A[A_stride * 5];</span></span>
+<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">    12903696 :   A_loc[0] = A[A_stride * 0];</span></span>
+<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC">    12903696 :   A_loc[1] = A[A_stride * 1];</span></span>
+<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">    12903696 :   A_loc[2] = A[A_stride * 2];</span></span>
+<span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC">    12903696 :   A_loc[3] = A[A_stride * 3];</span></span>
+<span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC">    12903696 :   A_loc[4] = A[A_stride * 4];</span></span>
+<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">    12903696 :   A_loc[5] = A[A_stride * 5];</span></span>
 <span id="L51"><span class="lineNum">      51</span>              : }</span>
 <span id="L52"><span class="lineNum">      52</span>              : </span>
 <span id="L53"><span class="lineNum">      53</span>              : CEED_QFUNCTION_HELPER void MultAtBCx32(const CeedScalar A[6], const CeedScalar B[9],</span>
@@ -129,16 +129,16 @@
 <span id="L59"><span class="lineNum">      59</span>              :   //       2 5      2 5 8</span>
 <span id="L60"><span class="lineNum">      60</span>              :   CeedScalar z[3], t;</span>
 <span id="L61"><span class="lineNum">      61</span>              : </span>
-<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">     6195488 :   y[0] = C[0] * x[0] + C[3] * x[1];</span></span>
-<span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC">     6195488 :   y[1] = C[1] * x[0] + C[4] * x[1];</span></span>
-<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC">     6195488 :   t = C[2] * x[0] + C[5] * x[1];</span></span>
+<span id="L62"><span class="lineNum">      62</span> <span class="tlaGNC">     7976576 :   y[0] = C[0] * x[0] + C[3] * x[1];</span></span>
+<span id="L63"><span class="lineNum">      63</span> <span class="tlaGNC">     7976576 :   y[1] = C[1] * x[0] + C[4] * x[1];</span></span>
+<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC">     7976576 :   t = C[2] * x[0] + C[5] * x[1];</span></span>
 <span id="L65"><span class="lineNum">      65</span>              : </span>
-<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">     6195488 :   z[0] = B[0] * y[0] + B[3] * y[1] + B[6] * t;</span></span>
-<span id="L67"><span class="lineNum">      67</span> <span class="tlaGNC">     6195488 :   z[1] = B[1] * y[0] + B[4] * y[1] + B[7] * t;</span></span>
-<span id="L68"><span class="lineNum">      68</span> <span class="tlaGNC">     6195488 :   z[2] = B[2] * y[0] + B[5] * y[1] + B[8] * t;</span></span>
+<span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">     7976576 :   z[0] = B[0] * y[0] + B[3] * y[1] + B[6] * t;</span></span>
+<span id="L67"><span class="lineNum">      67</span> <span class="tlaGNC">     7976576 :   z[1] = B[1] * y[0] + B[4] * y[1] + B[7] * t;</span></span>
+<span id="L68"><span class="lineNum">      68</span> <span class="tlaGNC">     7976576 :   z[2] = B[2] * y[0] + B[5] * y[1] + B[8] * t;</span></span>
 <span id="L69"><span class="lineNum">      69</span>              : </span>
-<span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC">     6195488 :   y[0] = A[0] * z[0] + A[1] * z[1] + A[2] * z[2];</span></span>
-<span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC">     6195488 :   y[1] = A[3] * z[0] + A[4] * z[1] + A[5] * z[2];</span></span>
+<span id="L70"><span class="lineNum">      70</span> <span class="tlaGNC">     7976576 :   y[0] = A[0] * z[0] + A[1] * z[1] + A[2] * z[2];</span></span>
+<span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC">     7976576 :   y[1] = A[3] * z[0] + A[4] * z[1] + A[5] * z[2];</span></span>
 <span id="L72"><span class="lineNum">      72</span>              : }</span>
 <span id="L73"><span class="lineNum">      73</span>              : </span>
 <span id="L74"><span class="lineNum">      74</span>              : CEED_QFUNCTION_HELPER void MultBAx32(const CeedScalar A[6], const CeedScalar B[9],</span>

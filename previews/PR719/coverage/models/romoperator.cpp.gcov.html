@@ -31,13 +31,13 @@
             <td class="headerValue">Palace Coverage Report</td>
             <td></td>
             <td class="headerItem">Lines:</td>
-            <td class="headerCovTableEntryLo">60.1&nbsp;%</td>
-            <td class="headerCovTableEntry">303</td>
-            <td class="headerCovTableEntry">182</td>
+            <td class="headerCovTableEntryLo">60.3&nbsp;%</td>
+            <td class="headerCovTableEntry">305</td>
+            <td class="headerCovTableEntry">184</td>
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2026-05-15 18:39:30</td>
+            <td class="headerValue">2026-06-04 21:57:07</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntryLo">58.3&nbsp;%</td>
@@ -522,447 +522,449 @@
 <span id="L452"><span class="lineNum">     452</span>              :   // be done during an HDM solve at a given parameter point). The preconditioner for the</span>
 <span id="L453"><span class="lineNum">     453</span>              :   // complex linear system is constructed from a real approximation to the complex system</span>
 <span id="L454"><span class="lineNum">     454</span>              :   // matrix.</span>
-<span id="L455"><span class="lineNum">     455</span> <span class="tlaGNC">          62 :   ksp = std::make_unique&lt;ComplexKspSolver&gt;(iodata.solver.linear, iodata.problem.verbose,</span></span>
-<span id="L456"><span class="lineNum">     456</span> <span class="tlaGNC">          31 :                                            space_op.GetNDSpaces(), &amp;space_op.GetH1Spaces());</span></span>
-<span id="L457"><span class="lineNum">     457</span>              : </span>
-<span id="L458"><span class="lineNum">     458</span> <span class="tlaGNC">          31 :   MFEM_VERIFY(max_size_per_excitation &gt; 0, &quot;Reduced order basis must have &gt; 0 size!&quot;);</span></span>
+<span id="L455"><span class="lineNum">     455</span> <span class="tlaGNC">          31 :   ksp = std::make_unique&lt;ComplexKspSolver&gt;(iodata.solver.linear,</span></span>
+<span id="L456"><span class="lineNum">     456</span> <span class="tlaGNC">          31 :                                            GetPreconditionerMatrixSymmetry(iodata),</span></span>
+<span id="L457"><span class="lineNum">     457</span> <span class="tlaGNC">          31 :                                            iodata.problem.verbose, space_op.GetNDSpaces(),</span></span>
+<span id="L458"><span class="lineNum">     458</span> <span class="tlaGNC">          31 :                                            &amp;space_op.GetH1Spaces());</span></span>
 <span id="L459"><span class="lineNum">     459</span>              : </span>
-<span id="L460"><span class="lineNum">     460</span> <span class="tlaGNC">          31 :   auto max_prom_size = 2 * max_size_per_excitation * space_op.GetPortExcitations().Size();</span></span>
-<span id="L461"><span class="lineNum">     461</span> <span class="tlaGNC">          31 :   if (iodata.solver.driven.adaptive_circuit_synthesis)</span></span>
-<span id="L462"><span class="lineNum">     462</span>              :   {</span>
-<span id="L463"><span class="lineNum">     463</span> <span class="tlaGNC">          31 :     max_prom_size += space_op.GetLumpedPortOp().Size();  // Lumped ports are real fields</span></span>
-<span id="L464"><span class="lineNum">     464</span>              : </span>
-<span id="L465"><span class="lineNum">     465</span>              :     // Build inner-product weight matrix.</span>
-<span id="L466"><span class="lineNum">     466</span> <span class="tlaGNC">          31 :     weight_op_W = HybridBulkBoundaryOperator{</span></span>
-<span id="L467"><span class="lineNum">     467</span> <span class="tlaGNC">          31 :         space_op, iodata.solver.driven.adaptive_circuit_synthesis_domain_orthog};</span></span>
-<span id="L468"><span class="lineNum">     468</span>              :   }</span>
-<span id="L469"><span class="lineNum">     469</span>              : </span>
-<span id="L470"><span class="lineNum">     470</span>              :   // Reserve empty vectors.</span>
-<span id="L471"><span class="lineNum">     471</span> <span class="tlaGNC">          31 :   V.reserve(max_prom_size);</span></span>
-<span id="L472"><span class="lineNum">     472</span> <span class="tlaGNC">          31 :   v_node_label.reserve(max_prom_size);</span></span>
-<span id="L473"><span class="lineNum">     473</span>              : </span>
-<span id="L474"><span class="lineNum">     474</span>              :   // Set up MinimalRationalInterpolation.</span>
-<span id="L475"><span class="lineNum">     475</span> <span class="tlaGNC">          62 :   for (const auto &amp;[excitation_idx, data] : space_op.GetPortExcitations())</span></span>
-<span id="L476"><span class="lineNum">     476</span>              :   {</span>
-<span id="L477"><span class="lineNum">     477</span> <span class="tlaGNC">          31 :     mri.emplace(excitation_idx, MinimalRationalInterpolation(max_size_per_excitation));</span></span>
-<span id="L478"><span class="lineNum">     478</span>              :   }</span>
-<span id="L479"><span class="lineNum">     479</span> <span class="tlaGNC">          31 : }</span></span>
-<span id="L480"><span class="lineNum">     480</span>              : </span>
-<span id="L481"><span class="lineNum">     481</span>              : // TODO: Add config-only constructor for unit testing once the new PROM</span>
-<span id="L482"><span class="lineNum">     482</span>              : // circuit synthesis parameters (adaptive_circuit_synthesis,</span>
-<span id="L483"><span class="lineNum">     483</span>              : // adaptive_circuit_synthesis_domain_orthog) are factored out of IoData.</span>
-<span id="L484"><span class="lineNum">     484</span>              : </span>
-<span id="L485"><span class="lineNum">     485</span> <span class="tlaUNC tlaBgUNC">           0 : void RomOperator::SetExcitationIndex(int excitation_idx)</span></span>
-<span id="L486"><span class="lineNum">     486</span>              : {</span>
-<span id="L487"><span class="lineNum">     487</span>              :   // Return if cached. Ctor constructs with excitation_idx_cache = 0 which is not a valid</span>
-<span id="L488"><span class="lineNum">     488</span>              :   // excitation index, so this is triggered the first time it is called in</span>
-<span id="L489"><span class="lineNum">     489</span>              :   // drivensolver.cpp.</span>
-<span id="L490"><span class="lineNum">     490</span> <span class="tlaUNC">           0 :   if (excitation_idx_cache == excitation_idx)</span></span>
-<span id="L491"><span class="lineNum">     491</span>              :   {</span>
-<span id="L492"><span class="lineNum">     492</span>              :     return;</span>
-<span id="L493"><span class="lineNum">     493</span>              :   }</span>
-<span id="L494"><span class="lineNum">     494</span>              : </span>
-<span id="L495"><span class="lineNum">     495</span>              :   // Set up RHS vector (linear in frequency part) for the incident field at port</span>
-<span id="L496"><span class="lineNum">     496</span>              :   // boundaries, and the vector for the solution, which satisfies the Dirichlet (PEC) BC.</span>
-<span id="L497"><span class="lineNum">     497</span> <span class="tlaUNC">           0 :   excitation_idx_cache = excitation_idx;</span></span>
-<span id="L498"><span class="lineNum">     498</span>              :   // Reset has_RHS2 so SolveHDM re-checks, since it may differ per excited port.</span>
-<span id="L499"><span class="lineNum">     499</span> <span class="tlaUNC">           0 :   has_RHS2 = true;</span></span>
-<span id="L500"><span class="lineNum">     500</span> <span class="tlaUNC">           0 :   has_RHS1 = space_op.GetExcitationVector1(excitation_idx_cache, RHS1);</span></span>
-<span id="L501"><span class="lineNum">     501</span> <span class="tlaUNC">           0 :   if (!has_RHS1)</span></span>
-<span id="L502"><span class="lineNum">     502</span>              :   {</span>
-<span id="L503"><span class="lineNum">     503</span> <span class="tlaUNC">           0 :     RHS1.SetSize(0);</span></span>
-<span id="L504"><span class="lineNum">     504</span>              :   }</span>
-<span id="L505"><span class="lineNum">     505</span>              :   else</span>
-<span id="L506"><span class="lineNum">     506</span>              :   {</span>
-<span id="L507"><span class="lineNum">     507</span>              :     // Project RHS1 to RHS1r with current PROM.</span>
-<span id="L508"><span class="lineNum">     508</span>              :     auto dim_V = V.size();</span>
-<span id="L509"><span class="lineNum">     509</span> <span class="tlaUNC">           0 :     if (dim_V &gt; 0)</span></span>
-<span id="L510"><span class="lineNum">     510</span>              :     {</span>
-<span id="L511"><span class="lineNum">     511</span> <span class="tlaUNC">           0 :       MPI_Comm comm = space_op.GetComm();</span></span>
-<span id="L512"><span class="lineNum">     512</span>              :       RHS1r.conservativeResize(dim_V);</span>
-<span id="L513"><span class="lineNum">     513</span> <span class="tlaUNC">           0 :       ProjectVecInternal(comm, V, RHS1, RHS1r, 0);</span></span>
-<span id="L514"><span class="lineNum">     514</span>              :     }</span>
-<span id="L515"><span class="lineNum">     515</span>              :   }</span>
-<span id="L516"><span class="lineNum">     516</span>              : }</span>
-<span id="L517"><span class="lineNum">     517</span>              : </span>
-<span id="L518"><span class="lineNum">     518</span> <span class="tlaUNC">           0 : void RomOperator::SolveHDM(int excitation_idx, double omega, ComplexVector &amp;u)</span></span>
-<span id="L519"><span class="lineNum">     519</span>              : {</span>
-<span id="L520"><span class="lineNum">     520</span> <span class="tlaUNC">           0 :   SetExcitationIndex(excitation_idx);</span></span>
-<span id="L521"><span class="lineNum">     521</span>              : </span>
-<span id="L522"><span class="lineNum">     522</span>              :   // Compute HDM solution at the given frequency. The system matrix, A = K + iω C - ω² M +</span>
-<span id="L523"><span class="lineNum">     523</span>              :   // A2(ω) is built by summing the underlying operator contributions.</span>
-<span id="L524"><span class="lineNum">     524</span> <span class="tlaUNC">           0 :   A2 = space_op.GetExtraSystemMatrix&lt;ComplexOperator&gt;(omega, Operator::DIAG_ZERO);</span></span>
-<span id="L525"><span class="lineNum">     525</span> <span class="tlaUNC">           0 :   has_A2 = (A2 != nullptr);</span></span>
-<span id="L526"><span class="lineNum">     526</span> <span class="tlaUNC">           0 :   auto A = space_op.GetSystemMatrix(std::complex&lt;double&gt;(1.0, 0.0), 1i * omega,</span></span>
-<span id="L527"><span class="lineNum">     527</span> <span class="tlaUNC">           0 :                                     std::complex&lt;double&gt;(-omega * omega, 0.0), K.get(),</span></span>
-<span id="L528"><span class="lineNum">     528</span> <span class="tlaUNC">           0 :                                     C.get(), M.get(), A2.get());</span></span>
-<span id="L529"><span class="lineNum">     529</span> <span class="tlaUNC">           0 :   auto P = space_op.GetPreconditionerMatrix&lt;ComplexOperator&gt;(1.0 + 0.0i, 1i * omega,</span></span>
-<span id="L530"><span class="lineNum">     530</span> <span class="tlaUNC">           0 :                                                              -omega * omega + 0.0i, omega);</span></span>
-<span id="L531"><span class="lineNum">     531</span> <span class="tlaUNC">           0 :   ksp-&gt;SetOperators(*A, *P);</span></span>
-<span id="L532"><span class="lineNum">     532</span>              : </span>
-<span id="L533"><span class="lineNum">     533</span>              :   // The HDM excitation vector is computed as RHS = iω RHS1 + RHS2(ω).</span>
-<span id="L534"><span class="lineNum">     534</span> <span class="tlaUNC">           0 :   Mpi::Print(&quot;\n&quot;);</span></span>
-<span id="L535"><span class="lineNum">     535</span> <span class="tlaUNC">           0 :   if (has_RHS2)</span></span>
-<span id="L536"><span class="lineNum">     536</span>              :   {</span>
-<span id="L537"><span class="lineNum">     537</span> <span class="tlaUNC">           0 :     has_RHS2 = space_op.GetExcitationVector2(excitation_idx, omega, r);</span></span>
-<span id="L538"><span class="lineNum">     538</span>              :   }</span>
-<span id="L539"><span class="lineNum">     539</span>              :   else</span>
-<span id="L540"><span class="lineNum">     540</span>              :   {</span>
-<span id="L541"><span class="lineNum">     541</span> <span class="tlaUNC">           0 :     r = 0.0;</span></span>
-<span id="L542"><span class="lineNum">     542</span>              :   }</span>
-<span id="L543"><span class="lineNum">     543</span> <span class="tlaUNC">           0 :   if (has_RHS1)</span></span>
-<span id="L544"><span class="lineNum">     544</span>              :   {</span>
-<span id="L545"><span class="lineNum">     545</span> <span class="tlaUNC">           0 :     r.Add(1i * omega, RHS1);</span></span>
-<span id="L546"><span class="lineNum">     546</span>              :   }</span>
-<span id="L547"><span class="lineNum">     547</span>              : </span>
-<span id="L548"><span class="lineNum">     548</span>              :   // Solve the linear system.</span>
-<span id="L549"><span class="lineNum">     549</span> <span class="tlaUNC">           0 :   ksp-&gt;Mult(r, u);</span></span>
-<span id="L550"><span class="lineNum">     550</span> <span class="tlaUNC">           0 : }</span></span>
-<span id="L551"><span class="lineNum">     551</span>              : </span>
-<span id="L552"><span class="lineNum">     552</span> <span class="tlaGNC tlaBgGNC">          28 : void RomOperator::AddLumpedPortModesForSynthesis()</span></span>
-<span id="L553"><span class="lineNum">     553</span>              : {</span>
-<span id="L554"><span class="lineNum">     554</span>              :   // Add modes for lumped port to use them a circuit matrices.</span>
-<span id="L555"><span class="lineNum">     555</span>              :   //</span>
-<span id="L556"><span class="lineNum">     556</span>              :   // The excitation vector that we expect to add to the PROM is just the GridFunction</span>
-<span id="L557"><span class="lineNum">     557</span>              :   // (primary vector) E_t which is the tangential electric field associated with that</span>
-<span id="L558"><span class="lineNum">     558</span>              :   // port. The field is normalized according with an effective reference impedance of</span>
-<span id="L559"><span class="lineNum">     559</span>              :   // \vert Z_R</span>
-<span id="L560"><span class="lineNum">     560</span>              :   // \vert = 1, see SpaceOp::GetLumpedPortExcitationVectorPrimaryEt &amp;</span>
-<span id="L561"><span class="lineNum">     561</span>              :   // LumpedPortData::GetExcitationFieldEtNormSqWithUnityZR().</span>
-<span id="L562"><span class="lineNum">     562</span>              :   //</span>
-<span id="L563"><span class="lineNum">     563</span>              :   // The lumped ports currently implemented (rectangular and coax) are purely real.</span>
+<span id="L460"><span class="lineNum">     460</span> <span class="tlaGNC">          31 :   MFEM_VERIFY(max_size_per_excitation &gt; 0, &quot;Reduced order basis must have &gt; 0 size!&quot;);</span></span>
+<span id="L461"><span class="lineNum">     461</span>              : </span>
+<span id="L462"><span class="lineNum">     462</span> <span class="tlaGNC">          31 :   auto max_prom_size = 2 * max_size_per_excitation * space_op.GetPortExcitations().Size();</span></span>
+<span id="L463"><span class="lineNum">     463</span> <span class="tlaGNC">          31 :   if (iodata.solver.driven.adaptive_circuit_synthesis)</span></span>
+<span id="L464"><span class="lineNum">     464</span>              :   {</span>
+<span id="L465"><span class="lineNum">     465</span> <span class="tlaGNC">          31 :     max_prom_size += space_op.GetLumpedPortOp().Size();  // Lumped ports are real fields</span></span>
+<span id="L466"><span class="lineNum">     466</span>              : </span>
+<span id="L467"><span class="lineNum">     467</span>              :     // Build inner-product weight matrix.</span>
+<span id="L468"><span class="lineNum">     468</span> <span class="tlaGNC">          31 :     weight_op_W = HybridBulkBoundaryOperator{</span></span>
+<span id="L469"><span class="lineNum">     469</span> <span class="tlaGNC">          31 :         space_op, iodata.solver.driven.adaptive_circuit_synthesis_domain_orthog};</span></span>
+<span id="L470"><span class="lineNum">     470</span>              :   }</span>
+<span id="L471"><span class="lineNum">     471</span>              : </span>
+<span id="L472"><span class="lineNum">     472</span>              :   // Reserve empty vectors.</span>
+<span id="L473"><span class="lineNum">     473</span> <span class="tlaGNC">          31 :   V.reserve(max_prom_size);</span></span>
+<span id="L474"><span class="lineNum">     474</span> <span class="tlaGNC">          31 :   v_node_label.reserve(max_prom_size);</span></span>
+<span id="L475"><span class="lineNum">     475</span>              : </span>
+<span id="L476"><span class="lineNum">     476</span>              :   // Set up MinimalRationalInterpolation.</span>
+<span id="L477"><span class="lineNum">     477</span> <span class="tlaGNC">          62 :   for (const auto &amp;[excitation_idx, data] : space_op.GetPortExcitations())</span></span>
+<span id="L478"><span class="lineNum">     478</span>              :   {</span>
+<span id="L479"><span class="lineNum">     479</span> <span class="tlaGNC">          31 :     mri.emplace(excitation_idx, MinimalRationalInterpolation(max_size_per_excitation));</span></span>
+<span id="L480"><span class="lineNum">     480</span>              :   }</span>
+<span id="L481"><span class="lineNum">     481</span> <span class="tlaGNC">          31 : }</span></span>
+<span id="L482"><span class="lineNum">     482</span>              : </span>
+<span id="L483"><span class="lineNum">     483</span>              : // TODO: Add config-only constructor for unit testing once the new PROM</span>
+<span id="L484"><span class="lineNum">     484</span>              : // circuit synthesis parameters (adaptive_circuit_synthesis,</span>
+<span id="L485"><span class="lineNum">     485</span>              : // adaptive_circuit_synthesis_domain_orthog) are factored out of IoData.</span>
+<span id="L486"><span class="lineNum">     486</span>              : </span>
+<span id="L487"><span class="lineNum">     487</span> <span class="tlaUNC tlaBgUNC">           0 : void RomOperator::SetExcitationIndex(int excitation_idx)</span></span>
+<span id="L488"><span class="lineNum">     488</span>              : {</span>
+<span id="L489"><span class="lineNum">     489</span>              :   // Return if cached. Ctor constructs with excitation_idx_cache = 0 which is not a valid</span>
+<span id="L490"><span class="lineNum">     490</span>              :   // excitation index, so this is triggered the first time it is called in</span>
+<span id="L491"><span class="lineNum">     491</span>              :   // drivensolver.cpp.</span>
+<span id="L492"><span class="lineNum">     492</span> <span class="tlaUNC">           0 :   if (excitation_idx_cache == excitation_idx)</span></span>
+<span id="L493"><span class="lineNum">     493</span>              :   {</span>
+<span id="L494"><span class="lineNum">     494</span>              :     return;</span>
+<span id="L495"><span class="lineNum">     495</span>              :   }</span>
+<span id="L496"><span class="lineNum">     496</span>              : </span>
+<span id="L497"><span class="lineNum">     497</span>              :   // Set up RHS vector (linear in frequency part) for the incident field at port</span>
+<span id="L498"><span class="lineNum">     498</span>              :   // boundaries, and the vector for the solution, which satisfies the Dirichlet (PEC) BC.</span>
+<span id="L499"><span class="lineNum">     499</span> <span class="tlaUNC">           0 :   excitation_idx_cache = excitation_idx;</span></span>
+<span id="L500"><span class="lineNum">     500</span>              :   // Reset has_RHS2 so SolveHDM re-checks, since it may differ per excited port.</span>
+<span id="L501"><span class="lineNum">     501</span> <span class="tlaUNC">           0 :   has_RHS2 = true;</span></span>
+<span id="L502"><span class="lineNum">     502</span> <span class="tlaUNC">           0 :   has_RHS1 = space_op.GetExcitationVector1(excitation_idx_cache, RHS1);</span></span>
+<span id="L503"><span class="lineNum">     503</span> <span class="tlaUNC">           0 :   if (!has_RHS1)</span></span>
+<span id="L504"><span class="lineNum">     504</span>              :   {</span>
+<span id="L505"><span class="lineNum">     505</span> <span class="tlaUNC">           0 :     RHS1.SetSize(0);</span></span>
+<span id="L506"><span class="lineNum">     506</span>              :   }</span>
+<span id="L507"><span class="lineNum">     507</span>              :   else</span>
+<span id="L508"><span class="lineNum">     508</span>              :   {</span>
+<span id="L509"><span class="lineNum">     509</span>              :     // Project RHS1 to RHS1r with current PROM.</span>
+<span id="L510"><span class="lineNum">     510</span>              :     auto dim_V = V.size();</span>
+<span id="L511"><span class="lineNum">     511</span> <span class="tlaUNC">           0 :     if (dim_V &gt; 0)</span></span>
+<span id="L512"><span class="lineNum">     512</span>              :     {</span>
+<span id="L513"><span class="lineNum">     513</span> <span class="tlaUNC">           0 :       MPI_Comm comm = space_op.GetComm();</span></span>
+<span id="L514"><span class="lineNum">     514</span>              :       RHS1r.conservativeResize(dim_V);</span>
+<span id="L515"><span class="lineNum">     515</span> <span class="tlaUNC">           0 :       ProjectVecInternal(comm, V, RHS1, RHS1r, 0);</span></span>
+<span id="L516"><span class="lineNum">     516</span>              :     }</span>
+<span id="L517"><span class="lineNum">     517</span>              :   }</span>
+<span id="L518"><span class="lineNum">     518</span>              : }</span>
+<span id="L519"><span class="lineNum">     519</span>              : </span>
+<span id="L520"><span class="lineNum">     520</span> <span class="tlaUNC">           0 : void RomOperator::SolveHDM(int excitation_idx, double omega, ComplexVector &amp;u)</span></span>
+<span id="L521"><span class="lineNum">     521</span>              : {</span>
+<span id="L522"><span class="lineNum">     522</span> <span class="tlaUNC">           0 :   SetExcitationIndex(excitation_idx);</span></span>
+<span id="L523"><span class="lineNum">     523</span>              : </span>
+<span id="L524"><span class="lineNum">     524</span>              :   // Compute HDM solution at the given frequency. The system matrix, A = K + iω C - ω² M +</span>
+<span id="L525"><span class="lineNum">     525</span>              :   // A2(ω) is built by summing the underlying operator contributions.</span>
+<span id="L526"><span class="lineNum">     526</span> <span class="tlaUNC">           0 :   A2 = space_op.GetExtraSystemMatrix&lt;ComplexOperator&gt;(omega, Operator::DIAG_ZERO);</span></span>
+<span id="L527"><span class="lineNum">     527</span> <span class="tlaUNC">           0 :   has_A2 = (A2 != nullptr);</span></span>
+<span id="L528"><span class="lineNum">     528</span> <span class="tlaUNC">           0 :   auto A = space_op.GetSystemMatrix(std::complex&lt;double&gt;(1.0, 0.0), 1i * omega,</span></span>
+<span id="L529"><span class="lineNum">     529</span> <span class="tlaUNC">           0 :                                     std::complex&lt;double&gt;(-omega * omega, 0.0), K.get(),</span></span>
+<span id="L530"><span class="lineNum">     530</span> <span class="tlaUNC">           0 :                                     C.get(), M.get(), A2.get());</span></span>
+<span id="L531"><span class="lineNum">     531</span> <span class="tlaUNC">           0 :   auto P = space_op.GetPreconditionerMatrix&lt;ComplexOperator&gt;(1.0 + 0.0i, 1i * omega,</span></span>
+<span id="L532"><span class="lineNum">     532</span> <span class="tlaUNC">           0 :                                                              -omega * omega + 0.0i, omega);</span></span>
+<span id="L533"><span class="lineNum">     533</span> <span class="tlaUNC">           0 :   ksp-&gt;SetOperators(*A, *P);</span></span>
+<span id="L534"><span class="lineNum">     534</span>              : </span>
+<span id="L535"><span class="lineNum">     535</span>              :   // The HDM excitation vector is computed as RHS = iω RHS1 + RHS2(ω).</span>
+<span id="L536"><span class="lineNum">     536</span> <span class="tlaUNC">           0 :   Mpi::Print(&quot;\n&quot;);</span></span>
+<span id="L537"><span class="lineNum">     537</span> <span class="tlaUNC">           0 :   if (has_RHS2)</span></span>
+<span id="L538"><span class="lineNum">     538</span>              :   {</span>
+<span id="L539"><span class="lineNum">     539</span> <span class="tlaUNC">           0 :     has_RHS2 = space_op.GetExcitationVector2(excitation_idx, omega, r);</span></span>
+<span id="L540"><span class="lineNum">     540</span>              :   }</span>
+<span id="L541"><span class="lineNum">     541</span>              :   else</span>
+<span id="L542"><span class="lineNum">     542</span>              :   {</span>
+<span id="L543"><span class="lineNum">     543</span> <span class="tlaUNC">           0 :     r = 0.0;</span></span>
+<span id="L544"><span class="lineNum">     544</span>              :   }</span>
+<span id="L545"><span class="lineNum">     545</span> <span class="tlaUNC">           0 :   if (has_RHS1)</span></span>
+<span id="L546"><span class="lineNum">     546</span>              :   {</span>
+<span id="L547"><span class="lineNum">     547</span> <span class="tlaUNC">           0 :     r.Add(1i * omega, RHS1);</span></span>
+<span id="L548"><span class="lineNum">     548</span>              :   }</span>
+<span id="L549"><span class="lineNum">     549</span>              : </span>
+<span id="L550"><span class="lineNum">     550</span>              :   // Solve the linear system.</span>
+<span id="L551"><span class="lineNum">     551</span> <span class="tlaUNC">           0 :   ksp-&gt;Mult(r, u);</span></span>
+<span id="L552"><span class="lineNum">     552</span> <span class="tlaUNC">           0 : }</span></span>
+<span id="L553"><span class="lineNum">     553</span>              : </span>
+<span id="L554"><span class="lineNum">     554</span> <span class="tlaGNC tlaBgGNC">          28 : void RomOperator::AddLumpedPortModesForSynthesis()</span></span>
+<span id="L555"><span class="lineNum">     555</span>              : {</span>
+<span id="L556"><span class="lineNum">     556</span>              :   // Add modes for lumped port to use them a circuit matrices.</span>
+<span id="L557"><span class="lineNum">     557</span>              :   //</span>
+<span id="L558"><span class="lineNum">     558</span>              :   // The excitation vector that we expect to add to the PROM is just the GridFunction</span>
+<span id="L559"><span class="lineNum">     559</span>              :   // (primary vector) E_t which is the tangential electric field associated with that</span>
+<span id="L560"><span class="lineNum">     560</span>              :   // port. The field is normalized according with an effective reference impedance of</span>
+<span id="L561"><span class="lineNum">     561</span>              :   // \vert Z_R</span>
+<span id="L562"><span class="lineNum">     562</span>              :   // \vert = 1, see SpaceOp::GetLumpedPortExcitationVectorPrimaryEt &amp;</span>
+<span id="L563"><span class="lineNum">     563</span>              :   // LumpedPortData::GetExcitationFieldEtNormSqWithUnityZR().</span>
 <span id="L564"><span class="lineNum">     564</span>              :   //</span>
-<span id="L565"><span class="lineNum">     565</span>              :   // The hybrid weight matrix used for normalization weight_op_W will guarantee that the</span>
-<span id="L566"><span class="lineNum">     566</span>              :   // generic vectors added to the ROM will be orthogonal with respect to the boundary</span>
-<span id="L567"><span class="lineNum">     567</span>              :   // bilinear v_rom * g_port_boundary * e_t = 0 (unless v_rom == e_t). If we used a</span>
-<span id="L568"><span class="lineNum">     568</span>              :   // conventional mass matrix of the space, this orthogonality would not be true as DoFs</span>
-<span id="L569"><span class="lineNum">     569</span>              :   // of the boundary also contribute the bulk integral ('leak into the bulk').</span>
-<span id="L570"><span class="lineNum">     570</span>              :   //</span>
-<span id="L571"><span class="lineNum">     571</span>              :   // To have a sensible scattering matrix, we ensure port modes are orthogonal. Ports that</span>
-<span id="L572"><span class="lineNum">     572</span>              :   // neighbor each other in space could fail this since they share DoFs on the finite</span>
-<span id="L573"><span class="lineNum">     573</span>              :   // element mesh, even if they would be orthogonal in continuous space.</span>
-<span id="L574"><span class="lineNum">     574</span>              : </span>
-<span id="L575"><span class="lineNum">     575</span> <span class="tlaGNC">          28 :   ComplexVector vec;  // Workspace vector:  UpdatePROM interface requires ComplexVectors</span></span>
-<span id="L576"><span class="lineNum">     576</span> <span class="tlaGNC">          28 :   vec.SetSize(space_op.GetNDSpace().GetTrueVSize());</span></span>
-<span id="L577"><span class="lineNum">     577</span> <span class="tlaGNC">          28 :   vec.UseDevice(true);</span></span>
-<span id="L578"><span class="lineNum">     578</span>              :   vec = 0.0;</span>
-<span id="L579"><span class="lineNum">     579</span>              : </span>
-<span id="L580"><span class="lineNum">     580</span> <span class="tlaGNC">          78 :   for (const auto &amp;[port_idx, port_data] : space_op.GetLumpedPortOp())</span></span>
-<span id="L581"><span class="lineNum">     581</span>              :   {</span>
-<span id="L582"><span class="lineNum">     582</span> <span class="tlaGNC">          50 :     space_op.GetLumpedPortExcitationVectorPrimaryEt(port_idx, vec, true);</span></span>
-<span id="L583"><span class="lineNum">     583</span> <span class="tlaGNC">         104 :     UpdatePROM(vec, fmt::format(&quot;port_{:d}&quot;, port_idx));</span></span>
-<span id="L584"><span class="lineNum">     584</span>              :   }</span>
-<span id="L585"><span class="lineNum">     585</span>              : </span>
-<span id="L586"><span class="lineNum">     586</span>              :   // Check that the ports don't have any overlap. These should be exactly zero, if the ports</span>
-<span id="L587"><span class="lineNum">     587</span>              :   // are distinct. But add this here for future case where lumped ports could on same attrs.</span>
-<span id="L588"><span class="lineNum">     588</span>              :   // Mix orthogonalization error and reduction error.</span>
-<span id="L589"><span class="lineNum">     589</span> <span class="tlaGNC">          28 :   auto diag_tol = std::max(ORTHOG_TOL, std::numeric_limits&lt;double&gt;::epsilon() *</span></span>
-<span id="L590"><span class="lineNum">     590</span> <span class="tlaGNC">          28 :                                            std::sqrt(Mpi::Size(space_op.GetComm())));</span></span>
-<span id="L591"><span class="lineNum">     591</span> <span class="tlaGNC">          40 :   MFEM_VERIFY(orth_R.isDiagonal(diag_tol),</span></span>
-<span id="L592"><span class="lineNum">     592</span>              :               &quot;Lumped port fields on the mesh should have exactly zero overlap. This may &quot;</span>
-<span id="L593"><span class="lineNum">     593</span>              :               &quot;be non-zero if attributes share edges.&quot;);</span>
-<span id="L594"><span class="lineNum">     594</span> <span class="tlaGNC">          24 : }</span></span>
-<span id="L595"><span class="lineNum">     595</span>              : </span>
-<span id="L596"><span class="lineNum">     596</span> <span class="tlaGNC">         236 : void RomOperator::UpdatePROM(const ComplexVector &amp;u, std::string_view node_label)</span></span>
-<span id="L597"><span class="lineNum">     597</span>              : {</span>
-<span id="L598"><span class="lineNum">     598</span>              :   // Update PROM basis V. The basis is always real (each complex solution adds two basis</span>
-<span id="L599"><span class="lineNum">     599</span>              :   // vectors, if it has a nonzero real and imaginary parts).</span>
-<span id="L600"><span class="lineNum">     600</span> <span class="tlaGNC">         236 :   BlockTimer bt(Timer::CONSTRUCT_PROM);</span></span>
-<span id="L601"><span class="lineNum">     601</span> <span class="tlaGNC">         236 :   MPI_Comm comm = space_op.GetComm();</span></span>
-<span id="L602"><span class="lineNum">     602</span>              : </span>
-<span id="L603"><span class="lineNum">     603</span> <span class="tlaGNC">         236 :   const auto norm_re = linalg::Norml2(comm, u.Real());</span></span>
-<span id="L604"><span class="lineNum">     604</span> <span class="tlaGNC">         236 :   const auto norm_im = linalg::Norml2(comm, u.Imag());</span></span>
-<span id="L605"><span class="lineNum">     605</span> <span class="tlaGNC">         236 :   const auto norm_tol = ORTHOG_TOL * std::sqrt(norm_re * norm_re + norm_im * norm_im);</span></span>
-<span id="L606"><span class="lineNum">     606</span> <span class="tlaGNC">         236 :   const bool has_real = (norm_re &gt; norm_tol);</span></span>
-<span id="L607"><span class="lineNum">     607</span> <span class="tlaGNC">         236 :   const bool has_imag = (norm_im &gt; norm_tol);</span></span>
-<span id="L608"><span class="lineNum">     608</span>              : </span>
-<span id="L609"><span class="lineNum">     609</span>              :   const std::size_t dim_V_old = V.size();</span>
-<span id="L610"><span class="lineNum">     610</span> <span class="tlaGNC">         236 :   std::size_t dim_V_new = V.size() + std::size_t{has_real} + std::size_t{has_imag};</span></span>
-<span id="L611"><span class="lineNum">     611</span>              : </span>
-<span id="L612"><span class="lineNum">     612</span> <span class="tlaGNC">         236 :   orth_R.conservativeResizeLike(Eigen::MatrixXd::Zero(dim_V_new, dim_V_new));</span></span>
+<span id="L565"><span class="lineNum">     565</span>              :   // The lumped ports currently implemented (rectangular and coax) are purely real.</span>
+<span id="L566"><span class="lineNum">     566</span>              :   //</span>
+<span id="L567"><span class="lineNum">     567</span>              :   // The hybrid weight matrix used for normalization weight_op_W will guarantee that the</span>
+<span id="L568"><span class="lineNum">     568</span>              :   // generic vectors added to the ROM will be orthogonal with respect to the boundary</span>
+<span id="L569"><span class="lineNum">     569</span>              :   // bilinear v_rom * g_port_boundary * e_t = 0 (unless v_rom == e_t). If we used a</span>
+<span id="L570"><span class="lineNum">     570</span>              :   // conventional mass matrix of the space, this orthogonality would not be true as DoFs</span>
+<span id="L571"><span class="lineNum">     571</span>              :   // of the boundary also contribute the bulk integral ('leak into the bulk').</span>
+<span id="L572"><span class="lineNum">     572</span>              :   //</span>
+<span id="L573"><span class="lineNum">     573</span>              :   // To have a sensible scattering matrix, we ensure port modes are orthogonal. Ports that</span>
+<span id="L574"><span class="lineNum">     574</span>              :   // neighbor each other in space could fail this since they share DoFs on the finite</span>
+<span id="L575"><span class="lineNum">     575</span>              :   // element mesh, even if they would be orthogonal in continuous space.</span>
+<span id="L576"><span class="lineNum">     576</span>              : </span>
+<span id="L577"><span class="lineNum">     577</span> <span class="tlaGNC">          28 :   ComplexVector vec;  // Workspace vector:  UpdatePROM interface requires ComplexVectors</span></span>
+<span id="L578"><span class="lineNum">     578</span> <span class="tlaGNC">          28 :   vec.SetSize(space_op.GetNDSpace().GetTrueVSize());</span></span>
+<span id="L579"><span class="lineNum">     579</span> <span class="tlaGNC">          28 :   vec.UseDevice(true);</span></span>
+<span id="L580"><span class="lineNum">     580</span>              :   vec = 0.0;</span>
+<span id="L581"><span class="lineNum">     581</span>              : </span>
+<span id="L582"><span class="lineNum">     582</span> <span class="tlaGNC">          78 :   for (const auto &amp;[port_idx, port_data] : space_op.GetLumpedPortOp())</span></span>
+<span id="L583"><span class="lineNum">     583</span>              :   {</span>
+<span id="L584"><span class="lineNum">     584</span> <span class="tlaGNC">          50 :     space_op.GetLumpedPortExcitationVectorPrimaryEt(port_idx, vec, true);</span></span>
+<span id="L585"><span class="lineNum">     585</span> <span class="tlaGNC">         104 :     UpdatePROM(vec, fmt::format(&quot;port_{:d}&quot;, port_idx));</span></span>
+<span id="L586"><span class="lineNum">     586</span>              :   }</span>
+<span id="L587"><span class="lineNum">     587</span>              : </span>
+<span id="L588"><span class="lineNum">     588</span>              :   // Check that the ports don't have any overlap. These should be exactly zero, if the ports</span>
+<span id="L589"><span class="lineNum">     589</span>              :   // are distinct. But add this here for future case where lumped ports could on same attrs.</span>
+<span id="L590"><span class="lineNum">     590</span>              :   // Mix orthogonalization error and reduction error.</span>
+<span id="L591"><span class="lineNum">     591</span> <span class="tlaGNC">          28 :   auto diag_tol = std::max(ORTHOG_TOL, std::numeric_limits&lt;double&gt;::epsilon() *</span></span>
+<span id="L592"><span class="lineNum">     592</span> <span class="tlaGNC">          28 :                                            std::sqrt(Mpi::Size(space_op.GetComm())));</span></span>
+<span id="L593"><span class="lineNum">     593</span> <span class="tlaGNC">          40 :   MFEM_VERIFY(orth_R.isDiagonal(diag_tol),</span></span>
+<span id="L594"><span class="lineNum">     594</span>              :               &quot;Lumped port fields on the mesh should have exactly zero overlap. This may &quot;</span>
+<span id="L595"><span class="lineNum">     595</span>              :               &quot;be non-zero if attributes share edges.&quot;);</span>
+<span id="L596"><span class="lineNum">     596</span> <span class="tlaGNC">          24 : }</span></span>
+<span id="L597"><span class="lineNum">     597</span>              : </span>
+<span id="L598"><span class="lineNum">     598</span> <span class="tlaGNC">         236 : void RomOperator::UpdatePROM(const ComplexVector &amp;u, std::string_view node_label)</span></span>
+<span id="L599"><span class="lineNum">     599</span>              : {</span>
+<span id="L600"><span class="lineNum">     600</span>              :   // Update PROM basis V. The basis is always real (each complex solution adds two basis</span>
+<span id="L601"><span class="lineNum">     601</span>              :   // vectors, if it has a nonzero real and imaginary parts).</span>
+<span id="L602"><span class="lineNum">     602</span> <span class="tlaGNC">         236 :   BlockTimer bt(Timer::CONSTRUCT_PROM);</span></span>
+<span id="L603"><span class="lineNum">     603</span> <span class="tlaGNC">         236 :   MPI_Comm comm = space_op.GetComm();</span></span>
+<span id="L604"><span class="lineNum">     604</span>              : </span>
+<span id="L605"><span class="lineNum">     605</span> <span class="tlaGNC">         236 :   const auto norm_re = linalg::Norml2(comm, u.Real());</span></span>
+<span id="L606"><span class="lineNum">     606</span> <span class="tlaGNC">         236 :   const auto norm_im = linalg::Norml2(comm, u.Imag());</span></span>
+<span id="L607"><span class="lineNum">     607</span> <span class="tlaGNC">         236 :   const auto norm_tol = ORTHOG_TOL * std::sqrt(norm_re * norm_re + norm_im * norm_im);</span></span>
+<span id="L608"><span class="lineNum">     608</span> <span class="tlaGNC">         236 :   const bool has_real = (norm_re &gt; norm_tol);</span></span>
+<span id="L609"><span class="lineNum">     609</span> <span class="tlaGNC">         236 :   const bool has_imag = (norm_im &gt; norm_tol);</span></span>
+<span id="L610"><span class="lineNum">     610</span>              : </span>
+<span id="L611"><span class="lineNum">     611</span>              :   const std::size_t dim_V_old = V.size();</span>
+<span id="L612"><span class="lineNum">     612</span> <span class="tlaGNC">         236 :   std::size_t dim_V_new = V.size() + std::size_t{has_real} + std::size_t{has_imag};</span></span>
 <span id="L613"><span class="lineNum">     613</span>              : </span>
-<span id="L614"><span class="lineNum">     614</span>              :   // Small lambda to add vector to basis. Lambda returns a bool, which is false when the new</span>
-<span id="L615"><span class="lineNum">     615</span>              :   // vector is below the linear dependence tolerance. The MFEM_VERIFY happens after the</span>
-<span id="L616"><span class="lineNum">     616</span>              :   // lambda. This is done for MPI syncronization reasons. If the MFEM_VERIFY throws / aborts</span>
-<span id="L617"><span class="lineNum">     617</span>              :   // on one rank why others are in an inconsistent state, this could lead to MPI</span>
-<span id="L618"><span class="lineNum">     618</span>              :   // communication failures in the memory unwinding and global MPI hard crash (e.g. in the</span>
-<span id="L619"><span class="lineNum">     619</span>              :   // unit tests).</span>
-<span id="L620"><span class="lineNum">     620</span> <span class="tlaGNC">         416 :   auto add_real_vector_to_basis = [this](const Vector &amp;vector,</span></span>
-<span id="L621"><span class="lineNum">     621</span>              :                                          std::string_view node_label) -&gt; bool</span>
-<span id="L622"><span class="lineNum">     622</span>              :   {</span>
-<span id="L623"><span class="lineNum">     623</span> <span class="tlaGNC">         416 :     auto dim_V = V.size();</span></span>
-<span id="L624"><span class="lineNum">     624</span> <span class="tlaGNC">         416 :     MFEM_VERIFY(dim_V &lt; V.capacity(),</span></span>
-<span id="L625"><span class="lineNum">     625</span>              :                 &quot;PROM basis storage exceeded. Please increase maximum number of prom &quot;</span>
-<span id="L626"><span class="lineNum">     626</span>              :                 &quot;vector per excitation using AdaptiveMaxSamples.&quot;);</span>
-<span id="L627"><span class="lineNum">     627</span> <span class="tlaGNC">         416 :     auto &amp;v = V.emplace_back(vector);</span></span>
-<span id="L628"><span class="lineNum">     628</span>              :     double pre_norm;</span>
-<span id="L629"><span class="lineNum">     629</span> <span class="tlaGNC">         416 :     if (weight_op_W.has_value())</span></span>
-<span id="L630"><span class="lineNum">     630</span>              :     {</span>
-<span id="L631"><span class="lineNum">     631</span> <span class="tlaGNC">         416 :       auto pre_norm_sq = weight_op_W-&gt;InnerProduct(space_op.GetComm(), v, v, r.Real());</span></span>
-<span id="L632"><span class="lineNum">     632</span> <span class="tlaGNC">         416 :       pre_norm = std::sqrt(std::abs(pre_norm_sq));</span></span>
-<span id="L633"><span class="lineNum">     633</span> <span class="tlaGNC">         416 :       OrthogonalizeColumn(</span></span>
-<span id="L634"><span class="lineNum">     634</span> <span class="tlaGNC">         416 :           orthog_type, space_op.GetComm(), V, v, orth_R.col(dim_V).data(), dim_V,</span></span>
-<span id="L635"><span class="lineNum">     635</span> <span class="tlaGNC">         416 :           [&amp;W = *(this-&gt;weight_op_W), &amp;r = this-&gt;r](const Vector &amp;x, const Vector &amp;y)</span></span>
-<span id="L636"><span class="lineNum">     636</span> <span class="tlaGNC">        8330 :           { return W.InnerProduct(x, y, r.Real()); });</span></span>
-<span id="L637"><span class="lineNum">     637</span> <span class="tlaGNC">         416 :       auto norm_sq = weight_op_W-&gt;InnerProduct(space_op.GetComm(), v, v, r.Real());</span></span>
-<span id="L638"><span class="lineNum">     638</span> <span class="tlaGNC">         416 :       orth_R(dim_V, dim_V) = std::sqrt(std::abs(norm_sq));</span></span>
-<span id="L639"><span class="lineNum">     639</span>              :     }</span>
-<span id="L640"><span class="lineNum">     640</span>              :     else</span>
-<span id="L641"><span class="lineNum">     641</span>              :     {</span>
-<span id="L642"><span class="lineNum">     642</span> <span class="tlaUNC tlaBgUNC">           0 :       pre_norm = linalg::Norml2(space_op.GetComm(), v);</span></span>
-<span id="L643"><span class="lineNum">     643</span> <span class="tlaUNC">           0 :       OrthogonalizeColumn(orthog_type, space_op.GetComm(), V, v, orth_R.col(dim_V).data(),</span></span>
-<span id="L644"><span class="lineNum">     644</span>              :                           dim_V);</span>
-<span id="L645"><span class="lineNum">     645</span> <span class="tlaUNC">           0 :       orth_R(dim_V, dim_V) = linalg::Norml2(space_op.GetComm(), v);</span></span>
-<span id="L646"><span class="lineNum">     646</span>              :     }</span>
-<span id="L647"><span class="lineNum">     647</span>              : </span>
-<span id="L648"><span class="lineNum">     648</span> <span class="tlaGNC tlaBgGNC">         416 :     if (orth_R(dim_V, dim_V) &lt;= ORTHOG_TOL * pre_norm)</span></span>
-<span id="L649"><span class="lineNum">     649</span>              :     {</span>
-<span id="L650"><span class="lineNum">     650</span>              :       return false;</span>
-<span id="L651"><span class="lineNum">     651</span>              :     }</span>
-<span id="L652"><span class="lineNum">     652</span>              : </span>
-<span id="L653"><span class="lineNum">     653</span> <span class="tlaGNC">         413 :     v *= 1.0 / orth_R(dim_V, dim_V);</span></span>
-<span id="L654"><span class="lineNum">     654</span> <span class="tlaGNC">         413 :     v_node_label.emplace_back(node_label);</span></span>
-<span id="L655"><span class="lineNum">     655</span> <span class="tlaGNC">         413 :     return true;</span></span>
-<span id="L656"><span class="lineNum">     656</span> <span class="tlaGNC">         236 :   };</span></span>
-<span id="L657"><span class="lineNum">     657</span>              : </span>
-<span id="L658"><span class="lineNum">     658</span> <span class="tlaGNC">         708 :   if (has_real &amp;&amp; !add_real_vector_to_basis(u.Real(), fmt::format(&quot;{}_re&quot;, node_label)))</span></span>
-<span id="L659"><span class="lineNum">     659</span>              :   {</span>
-<span id="L660"><span class="lineNum">     660</span> <span class="tlaGNC">          12 :     MFEM_ABORT(&quot;Linearly dependent vector added to PROM basis. This indicates a &quot;</span></span>
-<span id="L661"><span class="lineNum">     661</span>              :                &quot;convergence issue or a code error (the same vector was added multiple &quot;</span>
-<span id="L662"><span class="lineNum">     662</span>              :                &quot;times accidentally).&quot;);</span>
-<span id="L663"><span class="lineNum">     663</span>              :   }</span>
-<span id="L664"><span class="lineNum">     664</span> <span class="tlaGNC">         593 :   if (has_imag &amp;&amp; !add_real_vector_to_basis(u.Imag(), fmt::format(&quot;{}_im&quot;, node_label)))</span></span>
-<span id="L665"><span class="lineNum">     665</span>              :   {</span>
-<span id="L666"><span class="lineNum">     666</span> <span class="tlaUNC tlaBgUNC">           0 :     MFEM_ABORT(&quot;Linearly dependent vector added to PROM basis. This indicates a &quot;</span></span>
-<span id="L667"><span class="lineNum">     667</span>              :                &quot;convergence issue or a code error (the same vector was added multiple &quot;</span>
-<span id="L668"><span class="lineNum">     668</span>              :                &quot;times accidentally).&quot;);</span>
-<span id="L669"><span class="lineNum">     669</span>              :   }</span>
-<span id="L670"><span class="lineNum">     670</span>              : </span>
-<span id="L671"><span class="lineNum">     671</span> <span class="tlaGNC tlaBgGNC">         233 :   if (dim_V_new == dim_V_old)</span></span>
-<span id="L672"><span class="lineNum">     672</span>              :   {</span>
-<span id="L673"><span class="lineNum">     673</span>              :     return;</span>
-<span id="L674"><span class="lineNum">     674</span>              :   }</span>
-<span id="L675"><span class="lineNum">     675</span>              : </span>
-<span id="L676"><span class="lineNum">     676</span>              :   // Update reduced-order operators. Resize preserves the upper dim0 x dim0 block of each</span>
-<span id="L677"><span class="lineNum">     677</span>              :   // matrix and first dim0 entries of each vector and the projection uses the values</span>
-<span id="L678"><span class="lineNum">     678</span>              :   // computed for the unchanged basis vectors.</span>
-<span id="L679"><span class="lineNum">     679</span> <span class="tlaGNC">         233 :   Kr.conservativeResize(dim_V_new, dim_V_new);</span></span>
-<span id="L680"><span class="lineNum">     680</span> <span class="tlaGNC">         233 :   ProjectMatInternal(comm, V, *K, Kr, r, dim_V_old);</span></span>
-<span id="L681"><span class="lineNum">     681</span> <span class="tlaGNC">         233 :   if (C)</span></span>
-<span id="L682"><span class="lineNum">     682</span>              :   {</span>
-<span id="L683"><span class="lineNum">     683</span> <span class="tlaGNC">         233 :     Cr.conservativeResize(dim_V_new, dim_V_new);</span></span>
-<span id="L684"><span class="lineNum">     684</span> <span class="tlaGNC">         233 :     ProjectMatInternal(comm, V, *C, Cr, r, dim_V_old);</span></span>
-<span id="L685"><span class="lineNum">     685</span>              :   }</span>
-<span id="L686"><span class="lineNum">     686</span> <span class="tlaGNC">         233 :   Mr.conservativeResize(dim_V_new, dim_V_new);</span></span>
-<span id="L687"><span class="lineNum">     687</span> <span class="tlaGNC">         233 :   ProjectMatInternal(comm, V, *M, Mr, r, dim_V_old);</span></span>
-<span id="L688"><span class="lineNum">     688</span> <span class="tlaGNC">         233 :   if (RHS1.Size())</span></span>
-<span id="L689"><span class="lineNum">     689</span>              :   {</span>
-<span id="L690"><span class="lineNum">     690</span>              :     RHS1r.conservativeResize(dim_V_new);</span>
-<span id="L691"><span class="lineNum">     691</span> <span class="tlaUNC tlaBgUNC">           0 :     ProjectVecInternal(comm, V, RHS1, RHS1r, dim_V_old);</span></span>
-<span id="L692"><span class="lineNum">     692</span>              :   }</span>
-<span id="L693"><span class="lineNum">     693</span> <span class="tlaGNC tlaBgGNC">         236 : }</span></span>
-<span id="L694"><span class="lineNum">     694</span>              : </span>
-<span id="L695"><span class="lineNum">     695</span> <span class="tlaUNC tlaBgUNC">           0 : void RomOperator::UpdateMRI(int excitation_idx, double omega, const ComplexVector &amp;u)</span></span>
-<span id="L696"><span class="lineNum">     696</span>              : {</span>
-<span id="L697"><span class="lineNum">     697</span> <span class="tlaUNC">           0 :   BlockTimer bt(Timer::CONSTRUCT_PROM);</span></span>
-<span id="L698"><span class="lineNum">     698</span> <span class="tlaUNC">           0 :   mri.at(excitation_idx).AddSolutionSample(omega, u, space_op.GetComm(), orthog_type);</span></span>
-<span id="L699"><span class="lineNum">     699</span> <span class="tlaUNC">           0 : }</span></span>
-<span id="L700"><span class="lineNum">     700</span>              : </span>
-<span id="L701"><span class="lineNum">     701</span> <span class="tlaUNC">           0 : void RomOperator::SolvePROM(int excitation_idx, double omega, ComplexVector &amp;u)</span></span>
-<span id="L702"><span class="lineNum">     702</span>              : {</span>
-<span id="L703"><span class="lineNum">     703</span> <span class="tlaUNC">           0 :   SetExcitationIndex(excitation_idx);</span></span>
-<span id="L704"><span class="lineNum">     704</span>              : </span>
-<span id="L705"><span class="lineNum">     705</span>              :   // Assemble the PROM linear system at the given frequency. The PROM system is defined by</span>
-<span id="L706"><span class="lineNum">     706</span>              :   // the matrix Aᵣ(ω) = Kᵣ + iω Cᵣ - ω² Mᵣ + Vᴴ A2 V(ω) and source vector RHSᵣ(ω) =</span>
-<span id="L707"><span class="lineNum">     707</span>              :   // iω RHS1ᵣ + Vᴴ RHS2(ω). A2(ω) and RHS2(ω) are constructed only if required and are</span>
-<span id="L708"><span class="lineNum">     708</span>              :   // only nonzero on boundaries, will be empty if not needed.</span>
-<span id="L709"><span class="lineNum">     709</span>              : </span>
-<span id="L710"><span class="lineNum">     710</span>              :   // No basis states ill-defined: return zero vector to match current behaviour.</span>
-<span id="L711"><span class="lineNum">     711</span> <span class="tlaUNC">           0 :   if (V.empty())</span></span>
-<span id="L712"><span class="lineNum">     712</span>              :   {</span>
-<span id="L713"><span class="lineNum">     713</span>              :     u = 0.0;</span>
-<span id="L714"><span class="lineNum">     714</span> <span class="tlaUNC">           0 :     return;</span></span>
-<span id="L715"><span class="lineNum">     715</span>              :   }</span>
-<span id="L716"><span class="lineNum">     716</span>              : </span>
-<span id="L717"><span class="lineNum">     717</span>              :   Ar.resize(V.size(), V.size());</span>
-<span id="L718"><span class="lineNum">     718</span>              :   RHSr.resize(V.size());</span>
-<span id="L719"><span class="lineNum">     719</span>              : </span>
-<span id="L720"><span class="lineNum">     720</span> <span class="tlaUNC">           0 :   if (has_A2)</span></span>
-<span id="L721"><span class="lineNum">     721</span>              :   {</span>
-<span id="L722"><span class="lineNum">     722</span> <span class="tlaUNC">           0 :     A2 = space_op.GetExtraSystemMatrix&lt;ComplexOperator&gt;(omega, Operator::DIAG_ZERO);</span></span>
-<span id="L723"><span class="lineNum">     723</span> <span class="tlaUNC">           0 :     ProjectMatInternal(space_op.GetComm(), V, *A2, Ar, r, 0);</span></span>
-<span id="L724"><span class="lineNum">     724</span>              :   }</span>
-<span id="L725"><span class="lineNum">     725</span>              :   else</span>
-<span id="L726"><span class="lineNum">     726</span>              :   {</span>
-<span id="L727"><span class="lineNum">     727</span> <span class="tlaUNC">           0 :     Ar.setZero();</span></span>
-<span id="L728"><span class="lineNum">     728</span>              :   }</span>
-<span id="L729"><span class="lineNum">     729</span> <span class="tlaUNC">           0 :   Ar += Kr;</span></span>
-<span id="L730"><span class="lineNum">     730</span> <span class="tlaUNC">           0 :   if (C)</span></span>
-<span id="L731"><span class="lineNum">     731</span>              :   {</span>
-<span id="L732"><span class="lineNum">     732</span> <span class="tlaUNC">           0 :     Ar += (1i * omega) * Cr;</span></span>
-<span id="L733"><span class="lineNum">     733</span>              :   }</span>
-<span id="L734"><span class="lineNum">     734</span> <span class="tlaUNC">           0 :   Ar += (-omega * omega) * Mr;</span></span>
-<span id="L735"><span class="lineNum">     735</span>              : </span>
-<span id="L736"><span class="lineNum">     736</span> <span class="tlaUNC">           0 :   if (has_RHS2)</span></span>
-<span id="L737"><span class="lineNum">     737</span>              :   {</span>
-<span id="L738"><span class="lineNum">     738</span> <span class="tlaUNC">           0 :     space_op.GetExcitationVector2(excitation_idx, omega, RHS2);</span></span>
-<span id="L739"><span class="lineNum">     739</span> <span class="tlaUNC">           0 :     ProjectVecInternal(space_op.GetComm(), V, RHS2, RHSr, 0);</span></span>
-<span id="L740"><span class="lineNum">     740</span>              :   }</span>
-<span id="L741"><span class="lineNum">     741</span>              :   else</span>
-<span id="L742"><span class="lineNum">     742</span>              :   {</span>
-<span id="L743"><span class="lineNum">     743</span> <span class="tlaUNC">           0 :     RHSr.setZero();</span></span>
-<span id="L744"><span class="lineNum">     744</span>              :   }</span>
-<span id="L745"><span class="lineNum">     745</span> <span class="tlaUNC">           0 :   if (has_RHS1)</span></span>
-<span id="L746"><span class="lineNum">     746</span>              :   {</span>
-<span id="L747"><span class="lineNum">     747</span> <span class="tlaUNC">           0 :     RHSr += (1i * omega) * RHS1r;</span></span>
-<span id="L748"><span class="lineNum">     748</span>              :   }</span>
-<span id="L749"><span class="lineNum">     749</span>              : </span>
-<span id="L750"><span class="lineNum">     750</span>              :   // Compute PROM solution at the given frequency and expand into high-dimensional space.</span>
-<span id="L751"><span class="lineNum">     751</span>              :   // The PROM is solved on every process so the matrix-vector product for vector expansion</span>
-<span id="L752"><span class="lineNum">     752</span>              :   // does not require communication.</span>
-<span id="L753"><span class="lineNum">     753</span> <span class="tlaUNC">           0 :   BlockTimer bt(Timer::SOLVE_PROM);</span></span>
-<span id="L754"><span class="lineNum">     754</span>              :   if constexpr (false)</span>
-<span id="L755"><span class="lineNum">     755</span>              :   {</span>
-<span id="L756"><span class="lineNum">     756</span>              :     // LDLT solve.</span>
-<span id="L757"><span class="lineNum">     757</span>              :     RHSr = Ar.ldlt().solve(RHSr);</span>
-<span id="L758"><span class="lineNum">     758</span>              :     RHSr = Ar.selfadjointView&lt;Eigen::Lower&gt;().ldlt().solve(RHSr);</span>
-<span id="L759"><span class="lineNum">     759</span>              :   }</span>
-<span id="L760"><span class="lineNum">     760</span>              :   else</span>
-<span id="L761"><span class="lineNum">     761</span>              :   {</span>
-<span id="L762"><span class="lineNum">     762</span>              :     // QR solve, for maximal stability. The small system is cheap to compute but can be</span>
-<span id="L763"><span class="lineNum">     763</span>              :     // numerically poorly conditioned to due the splitting of HDM solutions into Re and Im</span>
-<span id="L764"><span class="lineNum">     764</span>              :     // into separate columns.</span>
-<span id="L765"><span class="lineNum">     765</span> <span class="tlaUNC">           0 :     RHSr = Ar.fullPivHouseholderQr().solve(RHSr);</span></span>
-<span id="L766"><span class="lineNum">     766</span>              :   }</span>
-<span id="L767"><span class="lineNum">     767</span> <span class="tlaUNC">           0 :   ProlongatePROMSolution(V.size(), V, RHSr, u);</span></span>
-<span id="L768"><span class="lineNum">     768</span> <span class="tlaUNC">           0 : }</span></span>
-<span id="L769"><span class="lineNum">     769</span>              : </span>
-<span id="L770"><span class="lineNum">     770</span> <span class="tlaUNC">           0 : std::vector&lt;std::complex&lt;double&gt;&gt; RomOperator::ComputeEigenvalueEstimates() const</span></span>
-<span id="L771"><span class="lineNum">     771</span>              : {</span>
-<span id="L772"><span class="lineNum">     772</span>              :   // XX TODO: Not yet implemented</span>
-<span id="L773"><span class="lineNum">     773</span> <span class="tlaUNC">           0 :   MFEM_ABORT(&quot;Eigenvalue estimates for PROM operators are not yet implemented!&quot;);</span></span>
-<span id="L774"><span class="lineNum">     774</span>              :   return {};</span>
-<span id="L775"><span class="lineNum">     775</span>              : }</span>
-<span id="L776"><span class="lineNum">     776</span>              : </span>
-<span id="L777"><span class="lineNum">     777</span>              : std::tuple&lt;std::unique_ptr&lt;Eigen::MatrixXcd&gt;, std::unique_ptr&lt;Eigen::MatrixXcd&gt;,</span>
-<span id="L778"><span class="lineNum">     778</span>              :            std::unique_ptr&lt;Eigen::MatrixXcd&gt;&gt;</span>
-<span id="L779"><span class="lineNum">     779</span> <span class="tlaGNC tlaBgGNC">          24 : RomOperator::CalculateNormalizedPROMMatrices(const Units &amp;units) const</span></span>
-<span id="L780"><span class="lineNum">     780</span>              : {</span>
-<span id="L781"><span class="lineNum">     781</span>              :   using mat_t = Eigen::MatrixXcd;</span>
-<span id="L782"><span class="lineNum">     782</span> <span class="tlaGNC">          24 :   std::unique_ptr&lt;mat_t&gt; inductance_L_inv = {};</span></span>
-<span id="L783"><span class="lineNum">     783</span> <span class="tlaGNC">          24 :   std::unique_ptr&lt;mat_t&gt; resistance_R_inv = {};</span></span>
-<span id="L784"><span class="lineNum">     784</span> <span class="tlaGNC">          24 :   std::unique_ptr&lt;mat_t&gt; capacitance_C = {};</span></span>
-<span id="L785"><span class="lineNum">     785</span>              : </span>
-<span id="L786"><span class="lineNum">     786</span> <span class="tlaUNC tlaBgUNC">           0 :   Eigen::VectorXd v_conc = Eigen::VectorXd::Ones(GetReducedDimension());</span></span>
+<span id="L614"><span class="lineNum">     614</span> <span class="tlaGNC">         236 :   orth_R.conservativeResizeLike(Eigen::MatrixXd::Zero(dim_V_new, dim_V_new));</span></span>
+<span id="L615"><span class="lineNum">     615</span>              : </span>
+<span id="L616"><span class="lineNum">     616</span>              :   // Small lambda to add vector to basis. Lambda returns a bool, which is false when the new</span>
+<span id="L617"><span class="lineNum">     617</span>              :   // vector is below the linear dependence tolerance. The MFEM_VERIFY happens after the</span>
+<span id="L618"><span class="lineNum">     618</span>              :   // lambda. This is done for MPI syncronization reasons. If the MFEM_VERIFY throws / aborts</span>
+<span id="L619"><span class="lineNum">     619</span>              :   // on one rank why others are in an inconsistent state, this could lead to MPI</span>
+<span id="L620"><span class="lineNum">     620</span>              :   // communication failures in the memory unwinding and global MPI hard crash (e.g. in the</span>
+<span id="L621"><span class="lineNum">     621</span>              :   // unit tests).</span>
+<span id="L622"><span class="lineNum">     622</span> <span class="tlaGNC">         416 :   auto add_real_vector_to_basis = [this](const Vector &amp;vector,</span></span>
+<span id="L623"><span class="lineNum">     623</span>              :                                          std::string_view node_label) -&gt; bool</span>
+<span id="L624"><span class="lineNum">     624</span>              :   {</span>
+<span id="L625"><span class="lineNum">     625</span> <span class="tlaGNC">         416 :     auto dim_V = V.size();</span></span>
+<span id="L626"><span class="lineNum">     626</span> <span class="tlaGNC">         416 :     MFEM_VERIFY(dim_V &lt; V.capacity(),</span></span>
+<span id="L627"><span class="lineNum">     627</span>              :                 &quot;PROM basis storage exceeded. Please increase maximum number of prom &quot;</span>
+<span id="L628"><span class="lineNum">     628</span>              :                 &quot;vector per excitation using AdaptiveMaxSamples.&quot;);</span>
+<span id="L629"><span class="lineNum">     629</span> <span class="tlaGNC">         416 :     auto &amp;v = V.emplace_back(vector);</span></span>
+<span id="L630"><span class="lineNum">     630</span>              :     double pre_norm;</span>
+<span id="L631"><span class="lineNum">     631</span> <span class="tlaGNC">         416 :     if (weight_op_W.has_value())</span></span>
+<span id="L632"><span class="lineNum">     632</span>              :     {</span>
+<span id="L633"><span class="lineNum">     633</span> <span class="tlaGNC">         416 :       auto pre_norm_sq = weight_op_W-&gt;InnerProduct(space_op.GetComm(), v, v, r.Real());</span></span>
+<span id="L634"><span class="lineNum">     634</span> <span class="tlaGNC">         416 :       pre_norm = std::sqrt(std::abs(pre_norm_sq));</span></span>
+<span id="L635"><span class="lineNum">     635</span> <span class="tlaGNC">         416 :       OrthogonalizeColumn(</span></span>
+<span id="L636"><span class="lineNum">     636</span> <span class="tlaGNC">         416 :           orthog_type, space_op.GetComm(), V, v, orth_R.col(dim_V).data(), dim_V,</span></span>
+<span id="L637"><span class="lineNum">     637</span> <span class="tlaGNC">         416 :           [&amp;W = *(this-&gt;weight_op_W), &amp;r = this-&gt;r](const Vector &amp;x, const Vector &amp;y)</span></span>
+<span id="L638"><span class="lineNum">     638</span> <span class="tlaGNC">        8330 :           { return W.InnerProduct(x, y, r.Real()); });</span></span>
+<span id="L639"><span class="lineNum">     639</span> <span class="tlaGNC">         416 :       auto norm_sq = weight_op_W-&gt;InnerProduct(space_op.GetComm(), v, v, r.Real());</span></span>
+<span id="L640"><span class="lineNum">     640</span> <span class="tlaGNC">         416 :       orth_R(dim_V, dim_V) = std::sqrt(std::abs(norm_sq));</span></span>
+<span id="L641"><span class="lineNum">     641</span>              :     }</span>
+<span id="L642"><span class="lineNum">     642</span>              :     else</span>
+<span id="L643"><span class="lineNum">     643</span>              :     {</span>
+<span id="L644"><span class="lineNum">     644</span> <span class="tlaUNC tlaBgUNC">           0 :       pre_norm = linalg::Norml2(space_op.GetComm(), v);</span></span>
+<span id="L645"><span class="lineNum">     645</span> <span class="tlaUNC">           0 :       OrthogonalizeColumn(orthog_type, space_op.GetComm(), V, v, orth_R.col(dim_V).data(),</span></span>
+<span id="L646"><span class="lineNum">     646</span>              :                           dim_V);</span>
+<span id="L647"><span class="lineNum">     647</span> <span class="tlaUNC">           0 :       orth_R(dim_V, dim_V) = linalg::Norml2(space_op.GetComm(), v);</span></span>
+<span id="L648"><span class="lineNum">     648</span>              :     }</span>
+<span id="L649"><span class="lineNum">     649</span>              : </span>
+<span id="L650"><span class="lineNum">     650</span> <span class="tlaGNC tlaBgGNC">         416 :     if (orth_R(dim_V, dim_V) &lt;= ORTHOG_TOL * pre_norm)</span></span>
+<span id="L651"><span class="lineNum">     651</span>              :     {</span>
+<span id="L652"><span class="lineNum">     652</span>              :       return false;</span>
+<span id="L653"><span class="lineNum">     653</span>              :     }</span>
+<span id="L654"><span class="lineNum">     654</span>              : </span>
+<span id="L655"><span class="lineNum">     655</span> <span class="tlaGNC">         413 :     v *= 1.0 / orth_R(dim_V, dim_V);</span></span>
+<span id="L656"><span class="lineNum">     656</span> <span class="tlaGNC">         413 :     v_node_label.emplace_back(node_label);</span></span>
+<span id="L657"><span class="lineNum">     657</span> <span class="tlaGNC">         413 :     return true;</span></span>
+<span id="L658"><span class="lineNum">     658</span> <span class="tlaGNC">         236 :   };</span></span>
+<span id="L659"><span class="lineNum">     659</span>              : </span>
+<span id="L660"><span class="lineNum">     660</span> <span class="tlaGNC">         708 :   if (has_real &amp;&amp; !add_real_vector_to_basis(u.Real(), fmt::format(&quot;{}_re&quot;, node_label)))</span></span>
+<span id="L661"><span class="lineNum">     661</span>              :   {</span>
+<span id="L662"><span class="lineNum">     662</span> <span class="tlaGNC">          12 :     MFEM_ABORT(&quot;Linearly dependent vector added to PROM basis. This indicates a &quot;</span></span>
+<span id="L663"><span class="lineNum">     663</span>              :                &quot;convergence issue or a code error (the same vector was added multiple &quot;</span>
+<span id="L664"><span class="lineNum">     664</span>              :                &quot;times accidentally).&quot;);</span>
+<span id="L665"><span class="lineNum">     665</span>              :   }</span>
+<span id="L666"><span class="lineNum">     666</span> <span class="tlaGNC">         593 :   if (has_imag &amp;&amp; !add_real_vector_to_basis(u.Imag(), fmt::format(&quot;{}_im&quot;, node_label)))</span></span>
+<span id="L667"><span class="lineNum">     667</span>              :   {</span>
+<span id="L668"><span class="lineNum">     668</span> <span class="tlaUNC tlaBgUNC">           0 :     MFEM_ABORT(&quot;Linearly dependent vector added to PROM basis. This indicates a &quot;</span></span>
+<span id="L669"><span class="lineNum">     669</span>              :                &quot;convergence issue or a code error (the same vector was added multiple &quot;</span>
+<span id="L670"><span class="lineNum">     670</span>              :                &quot;times accidentally).&quot;);</span>
+<span id="L671"><span class="lineNum">     671</span>              :   }</span>
+<span id="L672"><span class="lineNum">     672</span>              : </span>
+<span id="L673"><span class="lineNum">     673</span> <span class="tlaGNC tlaBgGNC">         233 :   if (dim_V_new == dim_V_old)</span></span>
+<span id="L674"><span class="lineNum">     674</span>              :   {</span>
+<span id="L675"><span class="lineNum">     675</span>              :     return;</span>
+<span id="L676"><span class="lineNum">     676</span>              :   }</span>
+<span id="L677"><span class="lineNum">     677</span>              : </span>
+<span id="L678"><span class="lineNum">     678</span>              :   // Update reduced-order operators. Resize preserves the upper dim0 x dim0 block of each</span>
+<span id="L679"><span class="lineNum">     679</span>              :   // matrix and first dim0 entries of each vector and the projection uses the values</span>
+<span id="L680"><span class="lineNum">     680</span>              :   // computed for the unchanged basis vectors.</span>
+<span id="L681"><span class="lineNum">     681</span> <span class="tlaGNC">         233 :   Kr.conservativeResize(dim_V_new, dim_V_new);</span></span>
+<span id="L682"><span class="lineNum">     682</span> <span class="tlaGNC">         233 :   ProjectMatInternal(comm, V, *K, Kr, r, dim_V_old);</span></span>
+<span id="L683"><span class="lineNum">     683</span> <span class="tlaGNC">         233 :   if (C)</span></span>
+<span id="L684"><span class="lineNum">     684</span>              :   {</span>
+<span id="L685"><span class="lineNum">     685</span> <span class="tlaGNC">         233 :     Cr.conservativeResize(dim_V_new, dim_V_new);</span></span>
+<span id="L686"><span class="lineNum">     686</span> <span class="tlaGNC">         233 :     ProjectMatInternal(comm, V, *C, Cr, r, dim_V_old);</span></span>
+<span id="L687"><span class="lineNum">     687</span>              :   }</span>
+<span id="L688"><span class="lineNum">     688</span> <span class="tlaGNC">         233 :   Mr.conservativeResize(dim_V_new, dim_V_new);</span></span>
+<span id="L689"><span class="lineNum">     689</span> <span class="tlaGNC">         233 :   ProjectMatInternal(comm, V, *M, Mr, r, dim_V_old);</span></span>
+<span id="L690"><span class="lineNum">     690</span> <span class="tlaGNC">         233 :   if (RHS1.Size())</span></span>
+<span id="L691"><span class="lineNum">     691</span>              :   {</span>
+<span id="L692"><span class="lineNum">     692</span>              :     RHS1r.conservativeResize(dim_V_new);</span>
+<span id="L693"><span class="lineNum">     693</span> <span class="tlaUNC tlaBgUNC">           0 :     ProjectVecInternal(comm, V, RHS1, RHS1r, dim_V_old);</span></span>
+<span id="L694"><span class="lineNum">     694</span>              :   }</span>
+<span id="L695"><span class="lineNum">     695</span> <span class="tlaGNC tlaBgGNC">         236 : }</span></span>
+<span id="L696"><span class="lineNum">     696</span>              : </span>
+<span id="L697"><span class="lineNum">     697</span> <span class="tlaUNC tlaBgUNC">           0 : void RomOperator::UpdateMRI(int excitation_idx, double omega, const ComplexVector &amp;u)</span></span>
+<span id="L698"><span class="lineNum">     698</span>              : {</span>
+<span id="L699"><span class="lineNum">     699</span> <span class="tlaUNC">           0 :   BlockTimer bt(Timer::CONSTRUCT_PROM);</span></span>
+<span id="L700"><span class="lineNum">     700</span> <span class="tlaUNC">           0 :   mri.at(excitation_idx).AddSolutionSample(omega, u, space_op.GetComm(), orthog_type);</span></span>
+<span id="L701"><span class="lineNum">     701</span> <span class="tlaUNC">           0 : }</span></span>
+<span id="L702"><span class="lineNum">     702</span>              : </span>
+<span id="L703"><span class="lineNum">     703</span> <span class="tlaUNC">           0 : void RomOperator::SolvePROM(int excitation_idx, double omega, ComplexVector &amp;u)</span></span>
+<span id="L704"><span class="lineNum">     704</span>              : {</span>
+<span id="L705"><span class="lineNum">     705</span> <span class="tlaUNC">           0 :   SetExcitationIndex(excitation_idx);</span></span>
+<span id="L706"><span class="lineNum">     706</span>              : </span>
+<span id="L707"><span class="lineNum">     707</span>              :   // Assemble the PROM linear system at the given frequency. The PROM system is defined by</span>
+<span id="L708"><span class="lineNum">     708</span>              :   // the matrix Aᵣ(ω) = Kᵣ + iω Cᵣ - ω² Mᵣ + Vᴴ A2 V(ω) and source vector RHSᵣ(ω) =</span>
+<span id="L709"><span class="lineNum">     709</span>              :   // iω RHS1ᵣ + Vᴴ RHS2(ω). A2(ω) and RHS2(ω) are constructed only if required and are</span>
+<span id="L710"><span class="lineNum">     710</span>              :   // only nonzero on boundaries, will be empty if not needed.</span>
+<span id="L711"><span class="lineNum">     711</span>              : </span>
+<span id="L712"><span class="lineNum">     712</span>              :   // No basis states ill-defined: return zero vector to match current behaviour.</span>
+<span id="L713"><span class="lineNum">     713</span> <span class="tlaUNC">           0 :   if (V.empty())</span></span>
+<span id="L714"><span class="lineNum">     714</span>              :   {</span>
+<span id="L715"><span class="lineNum">     715</span>              :     u = 0.0;</span>
+<span id="L716"><span class="lineNum">     716</span> <span class="tlaUNC">           0 :     return;</span></span>
+<span id="L717"><span class="lineNum">     717</span>              :   }</span>
+<span id="L718"><span class="lineNum">     718</span>              : </span>
+<span id="L719"><span class="lineNum">     719</span>              :   Ar.resize(V.size(), V.size());</span>
+<span id="L720"><span class="lineNum">     720</span>              :   RHSr.resize(V.size());</span>
+<span id="L721"><span class="lineNum">     721</span>              : </span>
+<span id="L722"><span class="lineNum">     722</span> <span class="tlaUNC">           0 :   if (has_A2)</span></span>
+<span id="L723"><span class="lineNum">     723</span>              :   {</span>
+<span id="L724"><span class="lineNum">     724</span> <span class="tlaUNC">           0 :     A2 = space_op.GetExtraSystemMatrix&lt;ComplexOperator&gt;(omega, Operator::DIAG_ZERO);</span></span>
+<span id="L725"><span class="lineNum">     725</span> <span class="tlaUNC">           0 :     ProjectMatInternal(space_op.GetComm(), V, *A2, Ar, r, 0);</span></span>
+<span id="L726"><span class="lineNum">     726</span>              :   }</span>
+<span id="L727"><span class="lineNum">     727</span>              :   else</span>
+<span id="L728"><span class="lineNum">     728</span>              :   {</span>
+<span id="L729"><span class="lineNum">     729</span> <span class="tlaUNC">           0 :     Ar.setZero();</span></span>
+<span id="L730"><span class="lineNum">     730</span>              :   }</span>
+<span id="L731"><span class="lineNum">     731</span> <span class="tlaUNC">           0 :   Ar += Kr;</span></span>
+<span id="L732"><span class="lineNum">     732</span> <span class="tlaUNC">           0 :   if (C)</span></span>
+<span id="L733"><span class="lineNum">     733</span>              :   {</span>
+<span id="L734"><span class="lineNum">     734</span> <span class="tlaUNC">           0 :     Ar += (1i * omega) * Cr;</span></span>
+<span id="L735"><span class="lineNum">     735</span>              :   }</span>
+<span id="L736"><span class="lineNum">     736</span> <span class="tlaUNC">           0 :   Ar += (-omega * omega) * Mr;</span></span>
+<span id="L737"><span class="lineNum">     737</span>              : </span>
+<span id="L738"><span class="lineNum">     738</span> <span class="tlaUNC">           0 :   if (has_RHS2)</span></span>
+<span id="L739"><span class="lineNum">     739</span>              :   {</span>
+<span id="L740"><span class="lineNum">     740</span> <span class="tlaUNC">           0 :     space_op.GetExcitationVector2(excitation_idx, omega, RHS2);</span></span>
+<span id="L741"><span class="lineNum">     741</span> <span class="tlaUNC">           0 :     ProjectVecInternal(space_op.GetComm(), V, RHS2, RHSr, 0);</span></span>
+<span id="L742"><span class="lineNum">     742</span>              :   }</span>
+<span id="L743"><span class="lineNum">     743</span>              :   else</span>
+<span id="L744"><span class="lineNum">     744</span>              :   {</span>
+<span id="L745"><span class="lineNum">     745</span> <span class="tlaUNC">           0 :     RHSr.setZero();</span></span>
+<span id="L746"><span class="lineNum">     746</span>              :   }</span>
+<span id="L747"><span class="lineNum">     747</span> <span class="tlaUNC">           0 :   if (has_RHS1)</span></span>
+<span id="L748"><span class="lineNum">     748</span>              :   {</span>
+<span id="L749"><span class="lineNum">     749</span> <span class="tlaUNC">           0 :     RHSr += (1i * omega) * RHS1r;</span></span>
+<span id="L750"><span class="lineNum">     750</span>              :   }</span>
+<span id="L751"><span class="lineNum">     751</span>              : </span>
+<span id="L752"><span class="lineNum">     752</span>              :   // Compute PROM solution at the given frequency and expand into high-dimensional space.</span>
+<span id="L753"><span class="lineNum">     753</span>              :   // The PROM is solved on every process so the matrix-vector product for vector expansion</span>
+<span id="L754"><span class="lineNum">     754</span>              :   // does not require communication.</span>
+<span id="L755"><span class="lineNum">     755</span> <span class="tlaUNC">           0 :   BlockTimer bt(Timer::SOLVE_PROM);</span></span>
+<span id="L756"><span class="lineNum">     756</span>              :   if constexpr (false)</span>
+<span id="L757"><span class="lineNum">     757</span>              :   {</span>
+<span id="L758"><span class="lineNum">     758</span>              :     // LDLT solve.</span>
+<span id="L759"><span class="lineNum">     759</span>              :     RHSr = Ar.ldlt().solve(RHSr);</span>
+<span id="L760"><span class="lineNum">     760</span>              :     RHSr = Ar.selfadjointView&lt;Eigen::Lower&gt;().ldlt().solve(RHSr);</span>
+<span id="L761"><span class="lineNum">     761</span>              :   }</span>
+<span id="L762"><span class="lineNum">     762</span>              :   else</span>
+<span id="L763"><span class="lineNum">     763</span>              :   {</span>
+<span id="L764"><span class="lineNum">     764</span>              :     // QR solve, for maximal stability. The small system is cheap to compute but can be</span>
+<span id="L765"><span class="lineNum">     765</span>              :     // numerically poorly conditioned to due the splitting of HDM solutions into Re and Im</span>
+<span id="L766"><span class="lineNum">     766</span>              :     // into separate columns.</span>
+<span id="L767"><span class="lineNum">     767</span> <span class="tlaUNC">           0 :     RHSr = Ar.fullPivHouseholderQr().solve(RHSr);</span></span>
+<span id="L768"><span class="lineNum">     768</span>              :   }</span>
+<span id="L769"><span class="lineNum">     769</span> <span class="tlaUNC">           0 :   ProlongatePROMSolution(V.size(), V, RHSr, u);</span></span>
+<span id="L770"><span class="lineNum">     770</span> <span class="tlaUNC">           0 : }</span></span>
+<span id="L771"><span class="lineNum">     771</span>              : </span>
+<span id="L772"><span class="lineNum">     772</span> <span class="tlaUNC">           0 : std::vector&lt;std::complex&lt;double&gt;&gt; RomOperator::ComputeEigenvalueEstimates() const</span></span>
+<span id="L773"><span class="lineNum">     773</span>              : {</span>
+<span id="L774"><span class="lineNum">     774</span>              :   // XX TODO: Not yet implemented</span>
+<span id="L775"><span class="lineNum">     775</span> <span class="tlaUNC">           0 :   MFEM_ABORT(&quot;Eigenvalue estimates for PROM operators are not yet implemented!&quot;);</span></span>
+<span id="L776"><span class="lineNum">     776</span>              :   return {};</span>
+<span id="L777"><span class="lineNum">     777</span>              : }</span>
+<span id="L778"><span class="lineNum">     778</span>              : </span>
+<span id="L779"><span class="lineNum">     779</span>              : std::tuple&lt;std::unique_ptr&lt;Eigen::MatrixXcd&gt;, std::unique_ptr&lt;Eigen::MatrixXcd&gt;,</span>
+<span id="L780"><span class="lineNum">     780</span>              :            std::unique_ptr&lt;Eigen::MatrixXcd&gt;&gt;</span>
+<span id="L781"><span class="lineNum">     781</span> <span class="tlaGNC tlaBgGNC">          24 : RomOperator::CalculateNormalizedPROMMatrices(const Units &amp;units) const</span></span>
+<span id="L782"><span class="lineNum">     782</span>              : {</span>
+<span id="L783"><span class="lineNum">     783</span>              :   using mat_t = Eigen::MatrixXcd;</span>
+<span id="L784"><span class="lineNum">     784</span> <span class="tlaGNC">          24 :   std::unique_ptr&lt;mat_t&gt; inductance_L_inv = {};</span></span>
+<span id="L785"><span class="lineNum">     785</span> <span class="tlaGNC">          24 :   std::unique_ptr&lt;mat_t&gt; resistance_R_inv = {};</span></span>
+<span id="L786"><span class="lineNum">     786</span> <span class="tlaGNC">          24 :   std::unique_ptr&lt;mat_t&gt; capacitance_C = {};</span></span>
 <span id="L787"><span class="lineNum">     787</span>              : </span>
-<span id="L788"><span class="lineNum">     788</span>              :   // We will only scale the rows and columns corresponding to ports by orth_R(j,j). This</span>
-<span id="L789"><span class="lineNum">     789</span>              :   // will correctly give back the port-port block of the circuit matrices, which is</span>
-<span id="L790"><span class="lineNum">     790</span>              :   // independent of the HDM solutions. The normalization of the rows and columns of the HDM</span>
-<span id="L791"><span class="lineNum">     791</span>              :   // solutions (synthesized nodes) are not relevant for port quantities. We choose v_conc =</span>
-<span id="L792"><span class="lineNum">     792</span>              :   // 1.0, since for nearly degenerate vectors orth_R(j,j) could be tiny, which may lead to</span>
-<span id="L793"><span class="lineNum">     793</span>              :   // poor condition of the circuit matrices.</span>
-<span id="L794"><span class="lineNum">     794</span>              :   //</span>
-<span id="L795"><span class="lineNum">     795</span>              :   // Lumped ports are real, at the beginning and in order</span>
-<span id="L796"><span class="lineNum">     796</span> <span class="tlaGNC tlaBgGNC">          66 :   for (long j = 0; j &lt; space_op.GetLumpedPortOp().Size(); j++)</span></span>
-<span id="L797"><span class="lineNum">     797</span>              :   {</span>
-<span id="L798"><span class="lineNum">     798</span>              :     // For the ideal port defined in LumpedPortOp, this should be: sqrt(\vert e_t \vert^2)</span>
-<span id="L799"><span class="lineNum">     799</span>              :     // = sqrt(port.GetExcitationFieldEtNormSqWithUnityZR()).</span>
-<span id="L800"><span class="lineNum">     800</span> <span class="tlaGNC">          42 :     v_conc[j] = orth_R(j, j);</span></span>
-<span id="L801"><span class="lineNum">     801</span>              :   }</span>
-<span id="L802"><span class="lineNum">     802</span>              : </span>
-<span id="L803"><span class="lineNum">     803</span>              :   // Lazy diagonal representation</span>
-<span id="L804"><span class="lineNum">     804</span>              :   auto v_d = v_conc.asDiagonal();</span>
-<span id="L805"><span class="lineNum">     805</span>              : </span>
-<span id="L806"><span class="lineNum">     806</span> <span class="tlaGNC">          24 :   auto unit_henry_inv = 1.0 / units.GetScaleFactor&lt;Units::ValueType::INDUCTANCE&gt;();</span></span>
-<span id="L807"><span class="lineNum">     807</span> <span class="tlaGNC">          48 :   inductance_L_inv = std::make_unique&lt;mat_t&gt;(((unit_henry_inv * v_d) * Kr * v_d).eval());</span></span>
-<span id="L808"><span class="lineNum">     808</span>              : </span>
-<span id="L809"><span class="lineNum">     809</span>              :   auto unit_farad = units.GetScaleFactor&lt;Units::ValueType::CAPACITANCE&gt;();</span>
-<span id="L810"><span class="lineNum">     810</span> <span class="tlaGNC">          48 :   capacitance_C = std::make_unique&lt;mat_t&gt;(((unit_farad * v_d) * Mr * v_d).eval());</span></span>
-<span id="L811"><span class="lineNum">     811</span>              : </span>
-<span id="L812"><span class="lineNum">     812</span>              :   // C &amp; Cr are optional in UpdatePROM so follow this here. In practice, Cr always exists</span>
-<span id="L813"><span class="lineNum">     813</span>              :   // since we need dissipative ports for a driven response, but this may change.</span>
-<span id="L814"><span class="lineNum">     814</span> <span class="tlaGNC">          24 :   if (C)</span></span>
-<span id="L815"><span class="lineNum">     815</span>              :   {</span>
-<span id="L816"><span class="lineNum">     816</span>              :     auto unit_ohm_inv = 1.0 / units.GetScaleFactor&lt;Units::ValueType::IMPEDANCE&gt;();</span>
-<span id="L817"><span class="lineNum">     817</span> <span class="tlaGNC">          48 :     resistance_R_inv = std::make_unique&lt;mat_t&gt;(((unit_ohm_inv * v_d) * Cr * v_d).eval());</span></span>
-<span id="L818"><span class="lineNum">     818</span>              :   }</span>
-<span id="L819"><span class="lineNum">     819</span>              : </span>
-<span id="L820"><span class="lineNum">     820</span>              :   return std::make_tuple(std::move(inductance_L_inv), std::move(resistance_R_inv),</span>
-<span id="L821"><span class="lineNum">     821</span> <span class="tlaGNC">          24 :                          std::move(capacitance_C));</span></span>
-<span id="L822"><span class="lineNum">     822</span>              : }</span>
-<span id="L823"><span class="lineNum">     823</span>              : </span>
-<span id="L824"><span class="lineNum">     824</span> <span class="tlaUNC tlaBgUNC">           0 : void RomOperator::PrintPROMMatrices(const Units &amp;units, const fs::path &amp;post_dir) const</span></span>
-<span id="L825"><span class="lineNum">     825</span>              : {</span>
-<span id="L826"><span class="lineNum">     826</span> <span class="tlaUNC">           0 :   BlockTimer bt0(Timer::POSTPRO);</span></span>
-<span id="L827"><span class="lineNum">     827</span> <span class="tlaUNC">           0 :   Mpi::Print(&quot; Printing PROM Matrices to disk.\n&quot;);</span></span>
-<span id="L828"><span class="lineNum">     828</span>              : </span>
-<span id="L829"><span class="lineNum">     829</span> <span class="tlaUNC">           0 :   if (!Mpi::Root(space_op.GetComm()))</span></span>
-<span id="L830"><span class="lineNum">     830</span>              :   {</span>
-<span id="L831"><span class="lineNum">     831</span>              :     return;</span>
-<span id="L832"><span class="lineNum">     832</span>              :   }</span>
-<span id="L833"><span class="lineNum">     833</span> <span class="tlaUNC">           0 :   auto print_table = [post_dir, labels = this-&gt;v_node_label](const Eigen::MatrixXd &amp;mat,</span></span>
-<span id="L834"><span class="lineNum">     834</span>              :                                                              std::string_view filename)</span>
-<span id="L835"><span class="lineNum">     835</span>              :   {</span>
-<span id="L836"><span class="lineNum">     836</span> <span class="tlaUNC">           0 :     MFEM_VERIFY((labels.size() == mat.cols()) &amp;&amp; (labels.size() == mat.rows()),</span></span>
-<span id="L837"><span class="lineNum">     837</span>              :                 &quot;Inconsistent PROM size!&quot;);</span>
-<span id="L838"><span class="lineNum">     838</span>              : </span>
-<span id="L839"><span class="lineNum">     839</span> <span class="tlaUNC">           0 :     auto out = TableWithCSVFile(post_dir / filename);</span></span>
-<span id="L840"><span class="lineNum">     840</span> <span class="tlaUNC">           0 :     out.table.col_options.float_precision = 17;</span></span>
-<span id="L841"><span class="lineNum">     841</span> <span class="tlaUNC">           0 :     for (long i = 0; i &lt; mat.cols(); i++)</span></span>
-<span id="L842"><span class="lineNum">     842</span>              :     {</span>
-<span id="L843"><span class="lineNum">     843</span> <span class="tlaUNC">           0 :       out.table.insert(labels[i], labels[i]);</span></span>
-<span id="L844"><span class="lineNum">     844</span>              :       auto &amp;col = out.table[i];</span>
-<span id="L845"><span class="lineNum">     845</span> <span class="tlaUNC">           0 :       for (long j = 0; j &lt; mat.rows(); j++)</span></span>
-<span id="L846"><span class="lineNum">     846</span>              :       {</span>
-<span id="L847"><span class="lineNum">     847</span> <span class="tlaUNC">           0 :         col &lt;&lt; mat(j, i);</span></span>
-<span id="L848"><span class="lineNum">     848</span>              :       }</span>
-<span id="L849"><span class="lineNum">     849</span>              :     }</span>
-<span id="L850"><span class="lineNum">     850</span> <span class="tlaUNC">           0 :     out.WriteFullTableTrunc();</span></span>
-<span id="L851"><span class="lineNum">     851</span> <span class="tlaUNC">           0 :   };</span></span>
-<span id="L852"><span class="lineNum">     852</span>              : </span>
-<span id="L853"><span class="lineNum">     853</span>              :   const auto [inductance_L_inv, resistance_R_inv, capacitance_C] =</span>
-<span id="L854"><span class="lineNum">     854</span> <span class="tlaUNC">           0 :       CalculateNormalizedPROMMatrices(units);</span></span>
-<span id="L855"><span class="lineNum">     855</span>              : </span>
-<span id="L856"><span class="lineNum">     856</span>              :   // Note: When checking for imaginary parts, it is better to do this for K,C,M as this is</span>
-<span id="L857"><span class="lineNum">     857</span>              :   // a nullptr check. Kr, Mr, Cr would require a numerical check on imag elements.</span>
-<span id="L858"><span class="lineNum">     858</span>              : </span>
-<span id="L859"><span class="lineNum">     859</span> <span class="tlaUNC">           0 :   if (K-&gt;Real())</span></span>
-<span id="L860"><span class="lineNum">     860</span>              :   {</span>
-<span id="L861"><span class="lineNum">     861</span> <span class="tlaUNC">           0 :     print_table(inductance_L_inv-&gt;real(), &quot;rom-Linv-re.csv&quot;);</span></span>
-<span id="L862"><span class="lineNum">     862</span>              :   }</span>
-<span id="L863"><span class="lineNum">     863</span> <span class="tlaUNC">           0 :   if (K-&gt;Imag())</span></span>
-<span id="L864"><span class="lineNum">     864</span>              :   {</span>
-<span id="L865"><span class="lineNum">     865</span> <span class="tlaUNC">           0 :     print_table(inductance_L_inv-&gt;imag(), &quot;rom-Linv-im.csv&quot;);</span></span>
-<span id="L866"><span class="lineNum">     866</span>              :   }</span>
-<span id="L867"><span class="lineNum">     867</span>              : </span>
-<span id="L868"><span class="lineNum">     868</span> <span class="tlaUNC">           0 :   if (M-&gt;Real())</span></span>
-<span id="L869"><span class="lineNum">     869</span>              :   {</span>
-<span id="L870"><span class="lineNum">     870</span> <span class="tlaUNC">           0 :     print_table(capacitance_C-&gt;real(), &quot;rom-C-re.csv&quot;);</span></span>
-<span id="L871"><span class="lineNum">     871</span>              :   }</span>
-<span id="L872"><span class="lineNum">     872</span> <span class="tlaUNC">           0 :   if (M-&gt;Imag())</span></span>
-<span id="L873"><span class="lineNum">     873</span>              :   {</span>
-<span id="L874"><span class="lineNum">     874</span> <span class="tlaUNC">           0 :     print_table(capacitance_C-&gt;imag(), &quot;rom-C-im.csv&quot;);</span></span>
-<span id="L875"><span class="lineNum">     875</span>              :   }</span>
-<span id="L876"><span class="lineNum">     876</span>              : </span>
-<span id="L877"><span class="lineNum">     877</span>              :   // C &amp; Cr are optional in UpdatePROM so follow this here. In practice, Cr always exists</span>
-<span id="L878"><span class="lineNum">     878</span>              :   // since we need dissipative ports for a driven response, but this may change.</span>
-<span id="L879"><span class="lineNum">     879</span> <span class="tlaUNC">           0 :   if (C)</span></span>
-<span id="L880"><span class="lineNum">     880</span>              :   {</span>
-<span id="L881"><span class="lineNum">     881</span> <span class="tlaUNC">           0 :     if (C-&gt;Real())</span></span>
-<span id="L882"><span class="lineNum">     882</span>              :     {</span>
-<span id="L883"><span class="lineNum">     883</span> <span class="tlaUNC">           0 :       print_table(resistance_R_inv-&gt;real(), &quot;rom-Rinv-re.csv&quot;);</span></span>
-<span id="L884"><span class="lineNum">     884</span>              :     }</span>
-<span id="L885"><span class="lineNum">     885</span> <span class="tlaUNC">           0 :     if (C-&gt;Imag())</span></span>
-<span id="L886"><span class="lineNum">     886</span>              :     {</span>
-<span id="L887"><span class="lineNum">     887</span> <span class="tlaUNC">           0 :       print_table(resistance_R_inv-&gt;imag(), &quot;rom-Rinv-im.csv&quot;);</span></span>
-<span id="L888"><span class="lineNum">     888</span>              :     }</span>
-<span id="L889"><span class="lineNum">     889</span>              :   }</span>
-<span id="L890"><span class="lineNum">     890</span>              : </span>
-<span id="L891"><span class="lineNum">     891</span>              :   // Print orth-R. Don't divide by diagonal to keep state normalization info.</span>
-<span id="L892"><span class="lineNum">     892</span> <span class="tlaUNC">           0 :   print_table(orth_R, &quot;rom-orthogonalization-matrix-R.csv&quot;);</span></span>
-<span id="L893"><span class="lineNum">     893</span> <span class="tlaUNC">           0 : }</span></span>
-<span id="L894"><span class="lineNum">     894</span>              : </span>
-<span id="L895"><span class="lineNum">     895</span>              : }  // namespace palace</span>
+<span id="L788"><span class="lineNum">     788</span> <span class="tlaUNC tlaBgUNC">           0 :   Eigen::VectorXd v_conc = Eigen::VectorXd::Ones(GetReducedDimension());</span></span>
+<span id="L789"><span class="lineNum">     789</span>              : </span>
+<span id="L790"><span class="lineNum">     790</span>              :   // We will only scale the rows and columns corresponding to ports by orth_R(j,j). This</span>
+<span id="L791"><span class="lineNum">     791</span>              :   // will correctly give back the port-port block of the circuit matrices, which is</span>
+<span id="L792"><span class="lineNum">     792</span>              :   // independent of the HDM solutions. The normalization of the rows and columns of the HDM</span>
+<span id="L793"><span class="lineNum">     793</span>              :   // solutions (synthesized nodes) are not relevant for port quantities. We choose v_conc =</span>
+<span id="L794"><span class="lineNum">     794</span>              :   // 1.0, since for nearly degenerate vectors orth_R(j,j) could be tiny, which may lead to</span>
+<span id="L795"><span class="lineNum">     795</span>              :   // poor condition of the circuit matrices.</span>
+<span id="L796"><span class="lineNum">     796</span>              :   //</span>
+<span id="L797"><span class="lineNum">     797</span>              :   // Lumped ports are real, at the beginning and in order</span>
+<span id="L798"><span class="lineNum">     798</span> <span class="tlaGNC tlaBgGNC">          66 :   for (long j = 0; j &lt; space_op.GetLumpedPortOp().Size(); j++)</span></span>
+<span id="L799"><span class="lineNum">     799</span>              :   {</span>
+<span id="L800"><span class="lineNum">     800</span>              :     // For the ideal port defined in LumpedPortOp, this should be: sqrt(\vert e_t \vert^2)</span>
+<span id="L801"><span class="lineNum">     801</span>              :     // = sqrt(port.GetExcitationFieldEtNormSqWithUnityZR()).</span>
+<span id="L802"><span class="lineNum">     802</span> <span class="tlaGNC">          42 :     v_conc[j] = orth_R(j, j);</span></span>
+<span id="L803"><span class="lineNum">     803</span>              :   }</span>
+<span id="L804"><span class="lineNum">     804</span>              : </span>
+<span id="L805"><span class="lineNum">     805</span>              :   // Lazy diagonal representation</span>
+<span id="L806"><span class="lineNum">     806</span>              :   auto v_d = v_conc.asDiagonal();</span>
+<span id="L807"><span class="lineNum">     807</span>              : </span>
+<span id="L808"><span class="lineNum">     808</span> <span class="tlaGNC">          24 :   auto unit_henry_inv = 1.0 / units.GetScaleFactor&lt;Units::ValueType::INDUCTANCE&gt;();</span></span>
+<span id="L809"><span class="lineNum">     809</span> <span class="tlaGNC">          48 :   inductance_L_inv = std::make_unique&lt;mat_t&gt;(((unit_henry_inv * v_d) * Kr * v_d).eval());</span></span>
+<span id="L810"><span class="lineNum">     810</span>              : </span>
+<span id="L811"><span class="lineNum">     811</span>              :   auto unit_farad = units.GetScaleFactor&lt;Units::ValueType::CAPACITANCE&gt;();</span>
+<span id="L812"><span class="lineNum">     812</span> <span class="tlaGNC">          48 :   capacitance_C = std::make_unique&lt;mat_t&gt;(((unit_farad * v_d) * Mr * v_d).eval());</span></span>
+<span id="L813"><span class="lineNum">     813</span>              : </span>
+<span id="L814"><span class="lineNum">     814</span>              :   // C &amp; Cr are optional in UpdatePROM so follow this here. In practice, Cr always exists</span>
+<span id="L815"><span class="lineNum">     815</span>              :   // since we need dissipative ports for a driven response, but this may change.</span>
+<span id="L816"><span class="lineNum">     816</span> <span class="tlaGNC">          24 :   if (C)</span></span>
+<span id="L817"><span class="lineNum">     817</span>              :   {</span>
+<span id="L818"><span class="lineNum">     818</span>              :     auto unit_ohm_inv = 1.0 / units.GetScaleFactor&lt;Units::ValueType::IMPEDANCE&gt;();</span>
+<span id="L819"><span class="lineNum">     819</span> <span class="tlaGNC">          48 :     resistance_R_inv = std::make_unique&lt;mat_t&gt;(((unit_ohm_inv * v_d) * Cr * v_d).eval());</span></span>
+<span id="L820"><span class="lineNum">     820</span>              :   }</span>
+<span id="L821"><span class="lineNum">     821</span>              : </span>
+<span id="L822"><span class="lineNum">     822</span>              :   return std::make_tuple(std::move(inductance_L_inv), std::move(resistance_R_inv),</span>
+<span id="L823"><span class="lineNum">     823</span> <span class="tlaGNC">          24 :                          std::move(capacitance_C));</span></span>
+<span id="L824"><span class="lineNum">     824</span>              : }</span>
+<span id="L825"><span class="lineNum">     825</span>              : </span>
+<span id="L826"><span class="lineNum">     826</span> <span class="tlaUNC tlaBgUNC">           0 : void RomOperator::PrintPROMMatrices(const Units &amp;units, const fs::path &amp;post_dir) const</span></span>
+<span id="L827"><span class="lineNum">     827</span>              : {</span>
+<span id="L828"><span class="lineNum">     828</span> <span class="tlaUNC">           0 :   BlockTimer bt0(Timer::POSTPRO);</span></span>
+<span id="L829"><span class="lineNum">     829</span> <span class="tlaUNC">           0 :   Mpi::Print(&quot; Printing PROM Matrices to disk.\n&quot;);</span></span>
+<span id="L830"><span class="lineNum">     830</span>              : </span>
+<span id="L831"><span class="lineNum">     831</span> <span class="tlaUNC">           0 :   if (!Mpi::Root(space_op.GetComm()))</span></span>
+<span id="L832"><span class="lineNum">     832</span>              :   {</span>
+<span id="L833"><span class="lineNum">     833</span>              :     return;</span>
+<span id="L834"><span class="lineNum">     834</span>              :   }</span>
+<span id="L835"><span class="lineNum">     835</span> <span class="tlaUNC">           0 :   auto print_table = [post_dir, labels = this-&gt;v_node_label](const Eigen::MatrixXd &amp;mat,</span></span>
+<span id="L836"><span class="lineNum">     836</span>              :                                                              std::string_view filename)</span>
+<span id="L837"><span class="lineNum">     837</span>              :   {</span>
+<span id="L838"><span class="lineNum">     838</span> <span class="tlaUNC">           0 :     MFEM_VERIFY((labels.size() == mat.cols()) &amp;&amp; (labels.size() == mat.rows()),</span></span>
+<span id="L839"><span class="lineNum">     839</span>              :                 &quot;Inconsistent PROM size!&quot;);</span>
+<span id="L840"><span class="lineNum">     840</span>              : </span>
+<span id="L841"><span class="lineNum">     841</span> <span class="tlaUNC">           0 :     auto out = TableWithCSVFile(post_dir / filename);</span></span>
+<span id="L842"><span class="lineNum">     842</span> <span class="tlaUNC">           0 :     out.table.col_options.float_precision = 17;</span></span>
+<span id="L843"><span class="lineNum">     843</span> <span class="tlaUNC">           0 :     for (long i = 0; i &lt; mat.cols(); i++)</span></span>
+<span id="L844"><span class="lineNum">     844</span>              :     {</span>
+<span id="L845"><span class="lineNum">     845</span> <span class="tlaUNC">           0 :       out.table.insert(labels[i], labels[i]);</span></span>
+<span id="L846"><span class="lineNum">     846</span>              :       auto &amp;col = out.table[i];</span>
+<span id="L847"><span class="lineNum">     847</span> <span class="tlaUNC">           0 :       for (long j = 0; j &lt; mat.rows(); j++)</span></span>
+<span id="L848"><span class="lineNum">     848</span>              :       {</span>
+<span id="L849"><span class="lineNum">     849</span> <span class="tlaUNC">           0 :         col &lt;&lt; mat(j, i);</span></span>
+<span id="L850"><span class="lineNum">     850</span>              :       }</span>
+<span id="L851"><span class="lineNum">     851</span>              :     }</span>
+<span id="L852"><span class="lineNum">     852</span> <span class="tlaUNC">           0 :     out.WriteFullTableTrunc();</span></span>
+<span id="L853"><span class="lineNum">     853</span> <span class="tlaUNC">           0 :   };</span></span>
+<span id="L854"><span class="lineNum">     854</span>              : </span>
+<span id="L855"><span class="lineNum">     855</span>              :   const auto [inductance_L_inv, resistance_R_inv, capacitance_C] =</span>
+<span id="L856"><span class="lineNum">     856</span> <span class="tlaUNC">           0 :       CalculateNormalizedPROMMatrices(units);</span></span>
+<span id="L857"><span class="lineNum">     857</span>              : </span>
+<span id="L858"><span class="lineNum">     858</span>              :   // Note: When checking for imaginary parts, it is better to do this for K,C,M as this is</span>
+<span id="L859"><span class="lineNum">     859</span>              :   // a nullptr check. Kr, Mr, Cr would require a numerical check on imag elements.</span>
+<span id="L860"><span class="lineNum">     860</span>              : </span>
+<span id="L861"><span class="lineNum">     861</span> <span class="tlaUNC">           0 :   if (K-&gt;Real())</span></span>
+<span id="L862"><span class="lineNum">     862</span>              :   {</span>
+<span id="L863"><span class="lineNum">     863</span> <span class="tlaUNC">           0 :     print_table(inductance_L_inv-&gt;real(), &quot;rom-Linv-re.csv&quot;);</span></span>
+<span id="L864"><span class="lineNum">     864</span>              :   }</span>
+<span id="L865"><span class="lineNum">     865</span> <span class="tlaUNC">           0 :   if (K-&gt;Imag())</span></span>
+<span id="L866"><span class="lineNum">     866</span>              :   {</span>
+<span id="L867"><span class="lineNum">     867</span> <span class="tlaUNC">           0 :     print_table(inductance_L_inv-&gt;imag(), &quot;rom-Linv-im.csv&quot;);</span></span>
+<span id="L868"><span class="lineNum">     868</span>              :   }</span>
+<span id="L869"><span class="lineNum">     869</span>              : </span>
+<span id="L870"><span class="lineNum">     870</span> <span class="tlaUNC">           0 :   if (M-&gt;Real())</span></span>
+<span id="L871"><span class="lineNum">     871</span>              :   {</span>
+<span id="L872"><span class="lineNum">     872</span> <span class="tlaUNC">           0 :     print_table(capacitance_C-&gt;real(), &quot;rom-C-re.csv&quot;);</span></span>
+<span id="L873"><span class="lineNum">     873</span>              :   }</span>
+<span id="L874"><span class="lineNum">     874</span> <span class="tlaUNC">           0 :   if (M-&gt;Imag())</span></span>
+<span id="L875"><span class="lineNum">     875</span>              :   {</span>
+<span id="L876"><span class="lineNum">     876</span> <span class="tlaUNC">           0 :     print_table(capacitance_C-&gt;imag(), &quot;rom-C-im.csv&quot;);</span></span>
+<span id="L877"><span class="lineNum">     877</span>              :   }</span>
+<span id="L878"><span class="lineNum">     878</span>              : </span>
+<span id="L879"><span class="lineNum">     879</span>              :   // C &amp; Cr are optional in UpdatePROM so follow this here. In practice, Cr always exists</span>
+<span id="L880"><span class="lineNum">     880</span>              :   // since we need dissipative ports for a driven response, but this may change.</span>
+<span id="L881"><span class="lineNum">     881</span> <span class="tlaUNC">           0 :   if (C)</span></span>
+<span id="L882"><span class="lineNum">     882</span>              :   {</span>
+<span id="L883"><span class="lineNum">     883</span> <span class="tlaUNC">           0 :     if (C-&gt;Real())</span></span>
+<span id="L884"><span class="lineNum">     884</span>              :     {</span>
+<span id="L885"><span class="lineNum">     885</span> <span class="tlaUNC">           0 :       print_table(resistance_R_inv-&gt;real(), &quot;rom-Rinv-re.csv&quot;);</span></span>
+<span id="L886"><span class="lineNum">     886</span>              :     }</span>
+<span id="L887"><span class="lineNum">     887</span> <span class="tlaUNC">           0 :     if (C-&gt;Imag())</span></span>
+<span id="L888"><span class="lineNum">     888</span>              :     {</span>
+<span id="L889"><span class="lineNum">     889</span> <span class="tlaUNC">           0 :       print_table(resistance_R_inv-&gt;imag(), &quot;rom-Rinv-im.csv&quot;);</span></span>
+<span id="L890"><span class="lineNum">     890</span>              :     }</span>
+<span id="L891"><span class="lineNum">     891</span>              :   }</span>
+<span id="L892"><span class="lineNum">     892</span>              : </span>
+<span id="L893"><span class="lineNum">     893</span>              :   // Print orth-R. Don't divide by diagonal to keep state normalization info.</span>
+<span id="L894"><span class="lineNum">     894</span> <span class="tlaUNC">           0 :   print_table(orth_R, &quot;rom-orthogonalization-matrix-R.csv&quot;);</span></span>
+<span id="L895"><span class="lineNum">     895</span> <span class="tlaUNC">           0 : }</span></span>
+<span id="L896"><span class="lineNum">     896</span>              : </span>
+<span id="L897"><span class="lineNum">     897</span>              : }  // namespace palace</span>
         </pre>
               </td>
             </tr>

@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2026-05-15 18:39:30</td>
+            <td class="headerValue">2026-06-04 21:57:07</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntryHi">-</td>
@@ -94,30 +94,30 @@
 <span id="L24"><span class="lineNum">      24</span>              :   // J: 0 3 6</span>
 <span id="L25"><span class="lineNum">      25</span>              :   //    1 4 7</span>
 <span id="L26"><span class="lineNum">      26</span>              :   //    2 5 8</span>
-<span id="L27"><span class="lineNum">      27</span> <span class="tlaGNC tlaBgGNC">    74873168 :   adjJt[0] = J[4] * J[8] - J[7] * J[5];</span></span>
-<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC">    74873168 :   adjJt[3] = J[7] * J[2] - J[1] * J[8];</span></span>
-<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">    74873168 :   adjJt[6] = J[1] * J[5] - J[4] * J[2];</span></span>
-<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">    74873168 :   adjJt[1] = J[6] * J[5] - J[3] * J[8];</span></span>
-<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">    74873168 :   adjJt[4] = J[0] * J[8] - J[6] * J[2];</span></span>
-<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">    74873168 :   adjJt[7] = J[3] * J[2] - J[0] * J[5];</span></span>
-<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">    74873168 :   adjJt[2] = J[3] * J[7] - J[6] * J[4];</span></span>
-<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">    74873168 :   adjJt[5] = J[6] * J[1] - J[0] * J[7];</span></span>
-<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">    74873168 :   adjJt[8] = J[0] * J[4] - J[3] * J[1];</span></span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">    30855048 :   return ComputeDet ? (J[0] * adjJt[0] + J[1] * adjJt[1] + J[2] * adjJt[2]) : 0.0;</span></span>
+<span id="L27"><span class="lineNum">      27</span> <span class="tlaGNC tlaBgGNC">    74929904 :   adjJt[0] = J[4] * J[8] - J[7] * J[5];</span></span>
+<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC">    74929904 :   adjJt[3] = J[7] * J[2] - J[1] * J[8];</span></span>
+<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">    74929904 :   adjJt[6] = J[1] * J[5] - J[4] * J[2];</span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">    74929904 :   adjJt[1] = J[6] * J[5] - J[3] * J[8];</span></span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">    74929904 :   adjJt[4] = J[0] * J[8] - J[6] * J[2];</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">    74929904 :   adjJt[7] = J[3] * J[2] - J[0] * J[5];</span></span>
+<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">    74929904 :   adjJt[2] = J[3] * J[7] - J[6] * J[4];</span></span>
+<span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">    74929904 :   adjJt[5] = J[6] * J[1] - J[0] * J[7];</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">    74929904 :   adjJt[8] = J[0] * J[4] - J[3] * J[1];</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">    30911784 :   return ComputeDet ? (J[0] * adjJt[0] + J[1] * adjJt[1] + J[2] * adjJt[2]) : 0.0;</span></span>
 <span id="L37"><span class="lineNum">      37</span>              : }</span>
 <span id="L38"><span class="lineNum">      38</span>              : </span>
 <span id="L39"><span class="lineNum">      39</span>              : CEED_QFUNCTION_HELPER void MatUnpack33(const CeedScalar *A, const CeedInt A_stride,</span>
 <span id="L40"><span class="lineNum">      40</span>              :                                        CeedScalar A_loc[9])</span>
 <span id="L41"><span class="lineNum">      41</span>              : {</span>
-<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">   103710984 :   A_loc[0] = A[A_stride * 0];</span></span>
-<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">   103710984 :   A_loc[1] = A[A_stride * 1];</span></span>
-<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">   103710984 :   A_loc[2] = A[A_stride * 2];</span></span>
-<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">   103710984 :   A_loc[3] = A[A_stride * 3];</span></span>
-<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC">   103710984 :   A_loc[4] = A[A_stride * 4];</span></span>
-<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">   103710984 :   A_loc[5] = A[A_stride * 5];</span></span>
-<span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC">   103710984 :   A_loc[6] = A[A_stride * 6];</span></span>
-<span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC">   103710984 :   A_loc[7] = A[A_stride * 7];</span></span>
-<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">   103710984 :   A_loc[8] = A[A_stride * 8];</span></span>
+<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">   103767720 :   A_loc[0] = A[A_stride * 0];</span></span>
+<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">   103767720 :   A_loc[1] = A[A_stride * 1];</span></span>
+<span id="L44"><span class="lineNum">      44</span> <span class="tlaGNC">   103767720 :   A_loc[2] = A[A_stride * 2];</span></span>
+<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">   103767720 :   A_loc[3] = A[A_stride * 3];</span></span>
+<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC">   103767720 :   A_loc[4] = A[A_stride * 4];</span></span>
+<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">   103767720 :   A_loc[5] = A[A_stride * 5];</span></span>
+<span id="L48"><span class="lineNum">      48</span> <span class="tlaGNC">   103767720 :   A_loc[6] = A[A_stride * 6];</span></span>
+<span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC">   103767720 :   A_loc[7] = A[A_stride * 7];</span></span>
+<span id="L50"><span class="lineNum">      50</span> <span class="tlaGNC">   103767720 :   A_loc[8] = A[A_stride * 8];</span></span>
 <span id="L51"><span class="lineNum">      51</span>              : }</span>
 <span id="L52"><span class="lineNum">      52</span>              : </span>
 <span id="L53"><span class="lineNum">      53</span>              : CEED_QFUNCTION_HELPER void MultBx33(const CeedScalar B[9], const CeedScalar x[3],</span>

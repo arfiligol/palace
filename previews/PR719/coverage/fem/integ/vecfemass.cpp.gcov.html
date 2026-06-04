@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2026-05-15 18:39:30</td>
+            <td class="headerValue">2026-06-04 21:57:07</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
@@ -85,25 +85,25 @@
 <span id="L15"><span class="lineNum">      15</span>              : </span>
 <span id="L16"><span class="lineNum">      16</span>              : using namespace ceed;</span>
 <span id="L17"><span class="lineNum">      17</span>              : </span>
-<span id="L18"><span class="lineNum">      18</span> <span class="tlaGNC tlaBgGNC">        4509 : void VectorFEMassIntegrator::Assemble(Ceed ceed, CeedElemRestriction trial_restr,</span></span>
+<span id="L18"><span class="lineNum">      18</span> <span class="tlaGNC tlaBgGNC">        5029 : void VectorFEMassIntegrator::Assemble(Ceed ceed, CeedElemRestriction trial_restr,</span></span>
 <span id="L19"><span class="lineNum">      19</span>              :                                       CeedElemRestriction test_restr, CeedBasis trial_basis,</span>
 <span id="L20"><span class="lineNum">      20</span>              :                                       CeedBasis test_basis, CeedVector geom_data,</span>
 <span id="L21"><span class="lineNum">      21</span>              :                                       CeedElemRestriction geom_data_restr,</span>
 <span id="L22"><span class="lineNum">      22</span>              :                                       CeedOperator *op) const</span>
 <span id="L23"><span class="lineNum">      23</span>              : {</span>
 <span id="L24"><span class="lineNum">      24</span>              :   CeedQFunctionInfo info;</span>
-<span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC">        4509 :   info.assemble_q_data = assemble_q_data;</span></span>
+<span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC">        5029 :   info.assemble_q_data = assemble_q_data;</span></span>
 <span id="L26"><span class="lineNum">      26</span>              : </span>
 <span id="L27"><span class="lineNum">      27</span>              :   // Set up QFunctions.</span>
 <span id="L28"><span class="lineNum">      28</span>              :   CeedInt dim, space_dim, trial_num_comp, test_num_comp;</span>
-<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">        4509 :   PalaceCeedCall(ceed, CeedBasisGetDimension(trial_basis, &amp;dim));</span></span>
-<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">        4509 :   PalaceCeedCall(ceed, CeedGeometryDataGetSpaceDimension(geom_data_restr, dim, &amp;space_dim));</span></span>
-<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">        4509 :   PalaceCeedCall(ceed, CeedBasisGetNumComponents(trial_basis, &amp;trial_num_comp));</span></span>
-<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">        4509 :   PalaceCeedCall(ceed, CeedBasisGetNumComponents(test_basis, &amp;test_num_comp));</span></span>
-<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">        4509 :   MFEM_VERIFY(</span></span>
+<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">        5029 :   PalaceCeedCall(ceed, CeedBasisGetDimension(trial_basis, &amp;dim));</span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">        5029 :   PalaceCeedCall(ceed, CeedGeometryDataGetSpaceDimension(geom_data_restr, dim, &amp;space_dim));</span></span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">        5029 :   PalaceCeedCall(ceed, CeedBasisGetNumComponents(trial_basis, &amp;trial_num_comp));</span></span>
+<span id="L32"><span class="lineNum">      32</span> <span class="tlaGNC">        5029 :   PalaceCeedCall(ceed, CeedBasisGetNumComponents(test_basis, &amp;test_num_comp));</span></span>
+<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">        5029 :   MFEM_VERIFY(</span></span>
 <span id="L34"><span class="lineNum">      34</span>              :       trial_num_comp == test_num_comp &amp;&amp; trial_num_comp == 1,</span>
 <span id="L35"><span class="lineNum">      35</span>              :       &quot;VectorFEMassIntegrator requires test and trial spaces with a single component!&quot;);</span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">        4509 :   switch (10 * space_dim + dim)</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">        5029 :   switch (10 * space_dim + dim)</span></span>
 <span id="L37"><span class="lineNum">      37</span>              :   {</span>
 <span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">        1736 :     case 22:</span></span>
 <span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">        1736 :       if (trial_map_type == mfem::FiniteElement::H_CURL &amp;&amp;</span></span>
@@ -241,12 +241,12 @@
 <span id="L171"><span class="lineNum">     171</span> <span class="tlaUNC">           0 :         MFEM_ABORT(&quot;Invalid trial/test element map type for VectorFEMassIntegrator!&quot;);</span></span>
 <span id="L172"><span class="lineNum">     172</span>              :       }</span>
 <span id="L173"><span class="lineNum">     173</span>              :       break;</span>
-<span id="L174"><span class="lineNum">     174</span> <span class="tlaGNC tlaBgGNC">         638 :     case 32:</span></span>
-<span id="L175"><span class="lineNum">     175</span> <span class="tlaGNC">         638 :       if (trial_map_type == mfem::FiniteElement::H_CURL &amp;&amp;</span></span>
-<span id="L176"><span class="lineNum">     176</span> <span class="tlaGNC">         638 :           test_map_type == mfem::FiniteElement::H_CURL)</span></span>
+<span id="L174"><span class="lineNum">     174</span> <span class="tlaGNC tlaBgGNC">        1158 :     case 32:</span></span>
+<span id="L175"><span class="lineNum">     175</span> <span class="tlaGNC">        1158 :       if (trial_map_type == mfem::FiniteElement::H_CURL &amp;&amp;</span></span>
+<span id="L176"><span class="lineNum">     176</span> <span class="tlaGNC">        1158 :           test_map_type == mfem::FiniteElement::H_CURL)</span></span>
 <span id="L177"><span class="lineNum">     177</span>              :       {</span>
-<span id="L178"><span class="lineNum">     178</span> <span class="tlaGNC">         638 :         info.apply_qf = assemble_q_data ? f_build_hcurl_32 : f_apply_hcurl_32;</span></span>
-<span id="L179"><span class="lineNum">     179</span> <span class="tlaGNC">         638 :         info.apply_qf_path = PalaceQFunctionRelativePath(</span></span>
+<span id="L178"><span class="lineNum">     178</span> <span class="tlaGNC">        1158 :         info.apply_qf = assemble_q_data ? f_build_hcurl_32 : f_apply_hcurl_32;</span></span>
+<span id="L179"><span class="lineNum">     179</span> <span class="tlaGNC">        1158 :         info.apply_qf_path = PalaceQFunctionRelativePath(</span></span>
 <span id="L180"><span class="lineNum">     180</span>              :             assemble_q_data ? f_build_hcurl_32_loc : f_apply_hcurl_32_loc);</span>
 <span id="L181"><span class="lineNum">     181</span>              :       }</span>
 <span id="L182"><span class="lineNum">     182</span> <span class="tlaUNC tlaBgUNC">           0 :       else if (trial_map_type == mfem::FiniteElement::H_DIV &amp;&amp;</span></span>
@@ -279,15 +279,15 @@
 <span id="L209"><span class="lineNum">     209</span> <span class="tlaUNC">           0 :       MFEM_ABORT(&quot;Invalid value of (dim, space_dim) = (&quot;</span></span>
 <span id="L210"><span class="lineNum">     210</span>              :                  &lt;&lt; dim &lt;&lt; &quot;, &quot; &lt;&lt; space_dim &lt;&lt; &quot;) for VectorFEMassIntegrator!&quot;);</span>
 <span id="L211"><span class="lineNum">     211</span>              :   }</span>
-<span id="L212"><span class="lineNum">     212</span> <span class="tlaGNC tlaBgGNC">        4509 :   info.trial_ops = EvalMode::Interp;</span></span>
-<span id="L213"><span class="lineNum">     213</span> <span class="tlaGNC">        4509 :   info.test_ops = EvalMode::Interp;</span></span>
+<span id="L212"><span class="lineNum">     212</span> <span class="tlaGNC tlaBgGNC">        5029 :   info.trial_ops = EvalMode::Interp;</span></span>
+<span id="L213"><span class="lineNum">     213</span> <span class="tlaGNC">        5029 :   info.test_ops = EvalMode::Interp;</span></span>
 <span id="L214"><span class="lineNum">     214</span>              : </span>
 <span id="L215"><span class="lineNum">     215</span>              :   // Set up the coefficient and assemble.</span>
-<span id="L216"><span class="lineNum">     216</span> <span class="tlaGNC">        4509 :   auto ctx = PopulateCoefficientContext(space_dim, Q, transpose);</span></span>
-<span id="L217"><span class="lineNum">     217</span> <span class="tlaGNC">        4509 :   AssembleCeedOperator(info, (void *)ctx.data(), ctx.size() * sizeof(CeedIntScalar), ceed,</span></span>
+<span id="L216"><span class="lineNum">     216</span> <span class="tlaGNC">        5029 :   auto ctx = PopulateCoefficientContext(space_dim, Q, transpose);</span></span>
+<span id="L217"><span class="lineNum">     217</span> <span class="tlaGNC">        5029 :   AssembleCeedOperator(info, (void *)ctx.data(), ctx.size() * sizeof(CeedIntScalar), ceed,</span></span>
 <span id="L218"><span class="lineNum">     218</span>              :                        trial_restr, test_restr, trial_basis, test_basis, geom_data,</span>
 <span id="L219"><span class="lineNum">     219</span>              :                        geom_data_restr, op);</span>
-<span id="L220"><span class="lineNum">     220</span> <span class="tlaGNC">        4509 : }</span></span>
+<span id="L220"><span class="lineNum">     220</span> <span class="tlaGNC">        5029 : }</span></span>
 <span id="L221"><span class="lineNum">     221</span>              : </span>
 <span id="L222"><span class="lineNum">     222</span>              : }  // namespace palace</span>
         </pre>

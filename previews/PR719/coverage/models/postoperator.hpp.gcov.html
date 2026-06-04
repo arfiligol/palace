@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2026-05-15 18:39:30</td>
+            <td class="headerValue">2026-06-04 21:57:07</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntryLo">14.6&nbsp;%</td>
@@ -507,89 +507,84 @@
 <span id="L437"><span class="lineNum">     437</span>              :       -&gt; std::enable_if_t&lt;U == ProblemType::TRANSIENT, double&gt;;</span>
 <span id="L438"><span class="lineNum">     438</span>              : </span>
 <span id="L439"><span class="lineNum">     439</span>              :   // Mode analysis: complex E-field tangential (ND) and normal (H1) eigenvectors,</span>
-<span id="L440"><span class="lineNum">     440</span>              :   // propagation constant kn, and eigensolver error estimates.</span>
-<span id="L441"><span class="lineNum">     441</span>              :   template &lt;ProblemType U = solver_t&gt;</span>
-<span id="L442"><span class="lineNum">     442</span>              :   auto MeasureAndPrintAll(int step, const ComplexVector &amp;et, const ComplexVector &amp;en,</span>
-<span id="L443"><span class="lineNum">     443</span>              :                           std::complex&lt;double&gt; kn, double omega, double error_abs,</span>
-<span id="L444"><span class="lineNum">     444</span>              :                           double error_bkwd, int num_conv)</span>
-<span id="L445"><span class="lineNum">     445</span>              :       -&gt; std::enable_if_t&lt;U == ProblemType::BOUNDARYMODE, double&gt;;</span>
-<span id="L446"><span class="lineNum">     446</span>              : </span>
-<span id="L447"><span class="lineNum">     447</span>              :   // Write error indicator into ParaView file and print summary statistics to csv. Should be</span>
-<span id="L448"><span class="lineNum">     448</span>              :   // called once at the end of the solver loop.</span>
-<span id="L449"><span class="lineNum">     449</span>              :   void MeasureFinalize(const ErrorIndicator &amp;indicator);</span>
-<span id="L450"><span class="lineNum">     450</span>              : </span>
-<span id="L451"><span class="lineNum">     451</span>              :   // Measurement of the domain energy without printing. This is needed during the driven</span>
-<span id="L452"><span class="lineNum">     452</span>              :   // simulation with PROM. There samples are taken and we need the total domain energy for</span>
-<span id="L453"><span class="lineNum">     453</span>              :   // the error indicator, but no other measurement / printing should be done.</span>
-<span id="L454"><span class="lineNum">     454</span>              :   //</span>
-<span id="L455"><span class="lineNum">     455</span>              :   // TODO(C++20): SFINAE to requires.</span>
-<span id="L456"><span class="lineNum">     456</span>              :   template &lt;ProblemType U = solver_t&gt;</span>
-<span id="L457"><span class="lineNum">     457</span>              :   auto MeasureDomainFieldEnergyOnly(const ComplexVector &amp;e, const ComplexVector &amp;b)</span>
-<span id="L458"><span class="lineNum">     458</span>              :       -&gt; std::enable_if_t&lt;U == ProblemType::DRIVEN, double&gt;;</span>
-<span id="L459"><span class="lineNum">     459</span>              : </span>
-<span id="L460"><span class="lineNum">     460</span>              :   // Access grid functions for field solutions. Note that these are NOT const functions. The</span>
-<span id="L461"><span class="lineNum">     461</span>              :   // electrostatics / magnetostatics solver do measurements of the capacitance/ inductance</span>
-<span id="L462"><span class="lineNum">     462</span>              :   // matrix globally at the end of all solves. This is done in the solver class, but uses</span>
-<span id="L463"><span class="lineNum">     463</span>              :   // the GridFunctions in this (PostOp) class as already allocated scratch workspace.</span>
-<span id="L464"><span class="lineNum">     464</span>              :   //</span>
-<span id="L465"><span class="lineNum">     465</span>              :   // Future: Consider moving those cap/ind measurements into this class and MeasureFinalize?</span>
-<span id="L466"><span class="lineNum">     466</span>              :   // Would need to store vector of V,A.</span>
-<span id="L467"><span class="lineNum">     467</span>              :   //</span>
-<span id="L468"><span class="lineNum">     468</span>              :   // TODO(C++20): Switch SFINAE to requires.</span>
-<span id="L469"><span class="lineNum">     469</span>              :   template &lt;ProblemType U = solver_t&gt;</span>
-<span id="L470"><span class="lineNum">     470</span>              :   auto GetEGridFunction() -&gt; std::enable_if_t&lt;HasEGridFunction&lt;U&gt;(), decltype(*E) &amp;&gt;</span>
-<span id="L471"><span class="lineNum">     471</span>              :   {</span>
-<span id="L472"><span class="lineNum">     472</span>              :     return *E;</span>
-<span id="L473"><span class="lineNum">     473</span>              :   }</span>
-<span id="L474"><span class="lineNum">     474</span>              : </span>
-<span id="L475"><span class="lineNum">     475</span>              :   template &lt;ProblemType U = solver_t&gt;</span>
-<span id="L476"><span class="lineNum">     476</span>              :   auto GetBGridFunction() -&gt; std::enable_if_t&lt;HasBGridFunction&lt;U&gt;(), decltype(*B) &amp;&gt;</span>
-<span id="L477"><span class="lineNum">     477</span>              :   {</span>
-<span id="L478"><span class="lineNum">     478</span>              :     return *B;</span>
-<span id="L479"><span class="lineNum">     479</span>              :   }</span>
-<span id="L480"><span class="lineNum">     480</span>              : </span>
-<span id="L481"><span class="lineNum">     481</span>              :   template &lt;ProblemType U = solver_t&gt;</span>
-<span id="L482"><span class="lineNum">     482</span>              :   auto GetVGridFunction() -&gt; std::enable_if_t&lt;HasVGridFunction&lt;U&gt;(), decltype(*V) &amp;&gt;</span>
-<span id="L483"><span class="lineNum">     483</span>              :   {</span>
-<span id="L484"><span class="lineNum">     484</span>              :     return *V;</span>
-<span id="L485"><span class="lineNum">     485</span>              :   }</span>
-<span id="L486"><span class="lineNum">     486</span>              : </span>
-<span id="L487"><span class="lineNum">     487</span>              :   template &lt;ProblemType U = solver_t&gt;</span>
-<span id="L488"><span class="lineNum">     488</span>              :   auto GetAGridFunction() -&gt; std::enable_if_t&lt;HasAGridFunction&lt;U&gt;(), decltype(*A) &amp;&gt;</span>
-<span id="L489"><span class="lineNum">     489</span>              :   {</span>
-<span id="L490"><span class="lineNum">     490</span>              :     return *A;</span>
-<span id="L491"><span class="lineNum">     491</span>              :   }</span>
-<span id="L492"><span class="lineNum">     492</span>              : </span>
-<span id="L493"><span class="lineNum">     493</span>              :   // Whether impedance/voltage postprocessing is configured (mode analysis).</span>
-<span id="L494"><span class="lineNum">     494</span> <span class="tlaUNC tlaBgUNC">           0 :   bool HasImpedancePostprocessing() const { return !impedance_postpro.empty(); }</span></span>
-<span id="L495"><span class="lineNum">     495</span> <span class="tlaUNC">           0 :   bool HasCurrent() const</span></span>
-<span id="L496"><span class="lineNum">     496</span>              :   {</span>
-<span id="L497"><span class="lineNum">     497</span>              :     return std::any_of(impedance_postpro.begin(), impedance_postpro.end(),</span>
-<span id="L498"><span class="lineNum">     498</span> <span class="tlaUNC">           0 :                        [](const auto &amp;p) { return p.second.has_current; });</span></span>
-<span id="L499"><span class="lineNum">     499</span>              :   }</span>
-<span id="L500"><span class="lineNum">     500</span> <span class="tlaUNC">           0 :   bool HasVoltagePostprocessing() const { return !voltage_postpro.empty(); }</span></span>
-<span id="L501"><span class="lineNum">     501</span>              : </span>
-<span id="L502"><span class="lineNum">     502</span>              :   // Project 3D impedance/voltage path coordinates to 2D local frame (submesh).</span>
-<span id="L503"><span class="lineNum">     503</span>              :   void ProjectImpedancePaths(const mfem::Vector &amp;centroid, const mfem::Vector &amp;e1,</span>
-<span id="L504"><span class="lineNum">     504</span>              :                              const mfem::Vector &amp;e2);</span>
-<span id="L505"><span class="lineNum">     505</span>              :   void ProjectVoltagePaths(const mfem::Vector &amp;centroid, const mfem::Vector &amp;e1,</span>
-<span id="L506"><span class="lineNum">     506</span>              :                            const mfem::Vector &amp;e2);</span>
-<span id="L507"><span class="lineNum">     507</span>              : </span>
-<span id="L508"><span class="lineNum">     508</span>              :   // Access to number of padding digits.</span>
-<span id="L509"><span class="lineNum">     509</span> <span class="tlaGNC tlaBgGNC">          15 :   constexpr auto GetPadDigitsDefault() const { return pad_digits_default; }</span></span>
-<span id="L510"><span class="lineNum">     510</span>              : </span>
-<span id="L511"><span class="lineNum">     511</span>              :   // Access to domain postprocessing objects. Use in electrostatic &amp; magnetostatic matrix</span>
-<span id="L512"><span class="lineNum">     512</span>              :   // measurement (see above).</span>
-<span id="L513"><span class="lineNum">     513</span> <span class="tlaUNC tlaBgUNC">           0 :   const auto &amp;GetDomainPostOp() const { return dom_post_op; }</span></span>
+<span id="L440"><span class="lineNum">     440</span>              :   // propagation constant kn, and eigensolver error estimates. The Poynting power is</span>
+<span id="L441"><span class="lineNum">     441</span>              :   // computed internally via fem_op-&gt;ComputePoyntingPower.</span>
+<span id="L442"><span class="lineNum">     442</span>              :   template &lt;ProblemType U = solver_t&gt;</span>
+<span id="L443"><span class="lineNum">     443</span>              :   auto MeasureAndPrintAll(int step, const ComplexVector &amp;et, const ComplexVector &amp;en,</span>
+<span id="L444"><span class="lineNum">     444</span>              :                           std::complex&lt;double&gt; kn, double omega, double error_abs,</span>
+<span id="L445"><span class="lineNum">     445</span>              :                           double error_bkwd, int num_conv)</span>
+<span id="L446"><span class="lineNum">     446</span>              :       -&gt; std::enable_if_t&lt;U == ProblemType::BOUNDARYMODE, double&gt;;</span>
+<span id="L447"><span class="lineNum">     447</span>              : </span>
+<span id="L448"><span class="lineNum">     448</span>              :   // Write error indicator into ParaView file and print summary statistics to csv. Should be</span>
+<span id="L449"><span class="lineNum">     449</span>              :   // called once at the end of the solver loop.</span>
+<span id="L450"><span class="lineNum">     450</span>              :   void MeasureFinalize(const ErrorIndicator &amp;indicator);</span>
+<span id="L451"><span class="lineNum">     451</span>              : </span>
+<span id="L452"><span class="lineNum">     452</span>              :   // Measurement of the domain energy without printing. This is needed during the driven</span>
+<span id="L453"><span class="lineNum">     453</span>              :   // simulation with PROM. There samples are taken and we need the total domain energy for</span>
+<span id="L454"><span class="lineNum">     454</span>              :   // the error indicator, but no other measurement / printing should be done.</span>
+<span id="L455"><span class="lineNum">     455</span>              :   //</span>
+<span id="L456"><span class="lineNum">     456</span>              :   // TODO(C++20): SFINAE to requires.</span>
+<span id="L457"><span class="lineNum">     457</span>              :   template &lt;ProblemType U = solver_t&gt;</span>
+<span id="L458"><span class="lineNum">     458</span>              :   auto MeasureDomainFieldEnergyOnly(const ComplexVector &amp;e, const ComplexVector &amp;b)</span>
+<span id="L459"><span class="lineNum">     459</span>              :       -&gt; std::enable_if_t&lt;U == ProblemType::DRIVEN, double&gt;;</span>
+<span id="L460"><span class="lineNum">     460</span>              : </span>
+<span id="L461"><span class="lineNum">     461</span>              :   // Access grid functions for field solutions. Note that these are NOT const functions. The</span>
+<span id="L462"><span class="lineNum">     462</span>              :   // electrostatics / magnetostatics solver do measurements of the capacitance/ inductance</span>
+<span id="L463"><span class="lineNum">     463</span>              :   // matrix globally at the end of all solves. This is done in the solver class, but uses</span>
+<span id="L464"><span class="lineNum">     464</span>              :   // the GridFunctions in this (PostOp) class as already allocated scratch workspace.</span>
+<span id="L465"><span class="lineNum">     465</span>              :   //</span>
+<span id="L466"><span class="lineNum">     466</span>              :   // Future: Consider moving those cap/ind measurements into this class and MeasureFinalize?</span>
+<span id="L467"><span class="lineNum">     467</span>              :   // Would need to store vector of V,A.</span>
+<span id="L468"><span class="lineNum">     468</span>              :   //</span>
+<span id="L469"><span class="lineNum">     469</span>              :   // TODO(C++20): Switch SFINAE to requires.</span>
+<span id="L470"><span class="lineNum">     470</span>              :   template &lt;ProblemType U = solver_t&gt;</span>
+<span id="L471"><span class="lineNum">     471</span>              :   auto GetEGridFunction() -&gt; std::enable_if_t&lt;HasEGridFunction&lt;U&gt;(), decltype(*E) &amp;&gt;</span>
+<span id="L472"><span class="lineNum">     472</span>              :   {</span>
+<span id="L473"><span class="lineNum">     473</span>              :     return *E;</span>
+<span id="L474"><span class="lineNum">     474</span>              :   }</span>
+<span id="L475"><span class="lineNum">     475</span>              : </span>
+<span id="L476"><span class="lineNum">     476</span>              :   template &lt;ProblemType U = solver_t&gt;</span>
+<span id="L477"><span class="lineNum">     477</span>              :   auto GetBGridFunction() -&gt; std::enable_if_t&lt;HasBGridFunction&lt;U&gt;(), decltype(*B) &amp;&gt;</span>
+<span id="L478"><span class="lineNum">     478</span>              :   {</span>
+<span id="L479"><span class="lineNum">     479</span>              :     return *B;</span>
+<span id="L480"><span class="lineNum">     480</span>              :   }</span>
+<span id="L481"><span class="lineNum">     481</span>              : </span>
+<span id="L482"><span class="lineNum">     482</span>              :   template &lt;ProblemType U = solver_t&gt;</span>
+<span id="L483"><span class="lineNum">     483</span>              :   auto GetVGridFunction() -&gt; std::enable_if_t&lt;HasVGridFunction&lt;U&gt;(), decltype(*V) &amp;&gt;</span>
+<span id="L484"><span class="lineNum">     484</span>              :   {</span>
+<span id="L485"><span class="lineNum">     485</span>              :     return *V;</span>
+<span id="L486"><span class="lineNum">     486</span>              :   }</span>
+<span id="L487"><span class="lineNum">     487</span>              : </span>
+<span id="L488"><span class="lineNum">     488</span>              :   template &lt;ProblemType U = solver_t&gt;</span>
+<span id="L489"><span class="lineNum">     489</span>              :   auto GetAGridFunction() -&gt; std::enable_if_t&lt;HasAGridFunction&lt;U&gt;(), decltype(*A) &amp;&gt;</span>
+<span id="L490"><span class="lineNum">     490</span>              :   {</span>
+<span id="L491"><span class="lineNum">     491</span>              :     return *A;</span>
+<span id="L492"><span class="lineNum">     492</span>              :   }</span>
+<span id="L493"><span class="lineNum">     493</span>              : </span>
+<span id="L494"><span class="lineNum">     494</span>              :   // Whether impedance/voltage postprocessing is configured (mode analysis).</span>
+<span id="L495"><span class="lineNum">     495</span> <span class="tlaUNC tlaBgUNC">           0 :   bool HasImpedancePostprocessing() const { return !impedance_postpro.empty(); }</span></span>
+<span id="L496"><span class="lineNum">     496</span> <span class="tlaUNC">           0 :   bool HasCurrent() const</span></span>
+<span id="L497"><span class="lineNum">     497</span>              :   {</span>
+<span id="L498"><span class="lineNum">     498</span>              :     return std::any_of(impedance_postpro.begin(), impedance_postpro.end(),</span>
+<span id="L499"><span class="lineNum">     499</span> <span class="tlaUNC">           0 :                        [](const auto &amp;p) { return p.second.has_current; });</span></span>
+<span id="L500"><span class="lineNum">     500</span>              :   }</span>
+<span id="L501"><span class="lineNum">     501</span> <span class="tlaUNC">           0 :   bool HasVoltagePostprocessing() const { return !voltage_postpro.empty(); }</span></span>
+<span id="L502"><span class="lineNum">     502</span>              : </span>
+<span id="L503"><span class="lineNum">     503</span>              :   // Access to number of padding digits.</span>
+<span id="L504"><span class="lineNum">     504</span> <span class="tlaGNC tlaBgGNC">          15 :   constexpr auto GetPadDigitsDefault() const { return pad_digits_default; }</span></span>
+<span id="L505"><span class="lineNum">     505</span>              : </span>
+<span id="L506"><span class="lineNum">     506</span>              :   // Access to domain postprocessing objects. Use in electrostatic &amp; magnetostatic matrix</span>
+<span id="L507"><span class="lineNum">     507</span>              :   // measurement (see above).</span>
+<span id="L508"><span class="lineNum">     508</span> <span class="tlaUNC tlaBgUNC">           0 :   const auto &amp;GetDomainPostOp() const { return dom_post_op; }</span></span>
+<span id="L509"><span class="lineNum">     509</span>              : </span>
+<span id="L510"><span class="lineNum">     510</span>              :   // Expose MPI communicator from fem_op for electrostatic &amp; magnetostatic matrix processing</span>
+<span id="L511"><span class="lineNum">     511</span>              :   // (see above).</span>
+<span id="L512"><span class="lineNum">     512</span> <span class="tlaUNC">           0 :   auto GetComm() const { return fem_op-&gt;GetComm(); }</span></span>
+<span id="L513"><span class="lineNum">     513</span>              : };</span>
 <span id="L514"><span class="lineNum">     514</span>              : </span>
-<span id="L515"><span class="lineNum">     515</span>              :   // Expose MPI communicator from fem_op for electrostatic &amp; magnetostatic matrix processing</span>
-<span id="L516"><span class="lineNum">     516</span>              :   // (see above).</span>
-<span id="L517"><span class="lineNum">     517</span> <span class="tlaUNC">           0 :   auto GetComm() const { return fem_op-&gt;GetComm(); }</span></span>
-<span id="L518"><span class="lineNum">     518</span>              : };</span>
-<span id="L519"><span class="lineNum">     519</span>              : </span>
-<span id="L520"><span class="lineNum">     520</span>              : }  // namespace palace</span>
-<span id="L521"><span class="lineNum">     521</span>              : </span>
-<span id="L522"><span class="lineNum">     522</span>              : #endif  // PALACE_MODELS_POST_OPERATOR_HPP</span>
+<span id="L515"><span class="lineNum">     515</span>              : }  // namespace palace</span>
+<span id="L516"><span class="lineNum">     516</span>              : </span>
+<span id="L517"><span class="lineNum">     517</span>              : #endif  // PALACE_MODELS_POST_OPERATOR_HPP</span>
         </pre>
               </td>
             </tr>

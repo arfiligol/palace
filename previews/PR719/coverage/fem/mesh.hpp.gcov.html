@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2026-05-15 18:39:30</td>
+            <td class="headerValue">2026-06-04 21:57:07</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntryHi">90.0&nbsp;%</td>
@@ -89,7 +89,7 @@
 <span id="L19"><span class="lineNum">      19</span>              : //</span>
 <span id="L20"><span class="lineNum">      20</span>              : // Data structure for geometry information stored at quadrature points.</span>
 <span id="L21"><span class="lineNum">      21</span>              : //</span>
-<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC tlaBgGNC">       57089 : struct CeedGeomFactorData</span></span>
+<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC tlaBgGNC">       57521 : struct CeedGeomFactorData</span></span>
 <span id="L23"><span class="lineNum">      23</span>              : {</span>
 <span id="L24"><span class="lineNum">      24</span>              :   // Dimension of this element topology and space dimension of the underlying mesh.</span>
 <span id="L25"><span class="lineNum">      25</span>              :   int dim, space_dim;</span>
@@ -188,23 +188,23 @@
 <span id="L118"><span class="lineNum">     118</span>              :   // Convert a list of global boundary attributes to the corresponding process-local libCEED</span>
 <span id="L119"><span class="lineNum">     119</span>              :   // ones.</span>
 <span id="L120"><span class="lineNum">     120</span>              :   template &lt;typename T&gt;</span>
-<span id="L121"><span class="lineNum">     121</span> <span class="tlaGNC">       52924 :   auto GetCeedBdrAttributes(const T &amp;attr_list) const</span></span>
+<span id="L121"><span class="lineNum">     121</span> <span class="tlaGNC">       53520 :   auto GetCeedBdrAttributes(const T &amp;attr_list) const</span></span>
 <span id="L122"><span class="lineNum">     122</span>              :   {</span>
 <span id="L123"><span class="lineNum">     123</span>              :     // Skip any entries in the input global boundary attribute list which are not local</span>
 <span id="L124"><span class="lineNum">     124</span>              :     // to this process.</span>
 <span id="L125"><span class="lineNum">     125</span>              :     mfem::Array&lt;int&gt; loc_attr_list;</span>
-<span id="L126"><span class="lineNum">     126</span> <span class="tlaGNC">      106064 :     for (auto attr : attr_list)</span></span>
+<span id="L126"><span class="lineNum">     126</span> <span class="tlaGNC">      107688 :     for (auto attr : attr_list)</span></span>
 <span id="L127"><span class="lineNum">     127</span>              :     {</span>
-<span id="L128"><span class="lineNum">     128</span> <span class="tlaGNC">       53140 :       if (loc_bdr_attr.find(attr) != loc_bdr_attr.end())</span></span>
+<span id="L128"><span class="lineNum">     128</span> <span class="tlaGNC">       54168 :       if (loc_bdr_attr.find(attr) != loc_bdr_attr.end())</span></span>
 <span id="L129"><span class="lineNum">     129</span>              :       {</span>
 <span id="L130"><span class="lineNum">     130</span>              :         const auto &amp;bdr_attr_map = loc_bdr_attr.at(attr);</span>
-<span id="L131"><span class="lineNum">     131</span> <span class="tlaGNC">      107365 :         for (auto it = bdr_attr_map.begin(); it != bdr_attr_map.end(); ++it)</span></span>
+<span id="L131"><span class="lineNum">     131</span> <span class="tlaGNC">      108797 :         for (auto it = bdr_attr_map.begin(); it != bdr_attr_map.end(); ++it)</span></span>
 <span id="L132"><span class="lineNum">     132</span>              :         {</span>
-<span id="L133"><span class="lineNum">     133</span> <span class="tlaGNC">       67886 :           loc_attr_list.Append(it-&gt;second);</span></span>
+<span id="L133"><span class="lineNum">     133</span> <span class="tlaGNC">       68602 :           loc_attr_list.Append(it-&gt;second);</span></span>
 <span id="L134"><span class="lineNum">     134</span>              :         }</span>
 <span id="L135"><span class="lineNum">     135</span>              :       }</span>
 <span id="L136"><span class="lineNum">     136</span>              :     }</span>
-<span id="L137"><span class="lineNum">     137</span> <span class="tlaGNC">       52924 :     return loc_attr_list;</span></span>
+<span id="L137"><span class="lineNum">     137</span> <span class="tlaGNC">       53520 :     return loc_attr_list;</span></span>
 <span id="L138"><span class="lineNum">     138</span>              :   }</span>
 <span id="L139"><span class="lineNum">     139</span>              : </span>
 <span id="L140"><span class="lineNum">     140</span> <span class="tlaGNC">       47724 :   auto GetCeedAttributes(const int attr) const</span></span>
@@ -221,9 +221,9 @@
 <span id="L151"><span class="lineNum">     151</span>              :   auto MaxCeedBdrAttribute() const</span>
 <span id="L152"><span class="lineNum">     152</span>              :   {</span>
 <span id="L153"><span class="lineNum">     153</span>              :     std::size_t bdr_attr_max = 0;</span>
-<span id="L154"><span class="lineNum">     154</span> <span class="tlaGNC">       45710 :     for (const auto &amp;[attr, bdr_attr_map] : GetCeedBdrAttributes())</span></span>
+<span id="L154"><span class="lineNum">     154</span> <span class="tlaGNC">       51898 :     for (const auto &amp;[attr, bdr_attr_map] : GetCeedBdrAttributes())</span></span>
 <span id="L155"><span class="lineNum">     155</span>              :     {</span>
-<span id="L156"><span class="lineNum">     156</span> <span class="tlaGNC">       41567 :       bdr_attr_max += bdr_attr_map.size();</span></span>
+<span id="L156"><span class="lineNum">     156</span> <span class="tlaGNC">       47447 :       bdr_attr_max += bdr_attr_map.size();</span></span>
 <span id="L157"><span class="lineNum">     157</span>              :     }</span>
 <span id="L158"><span class="lineNum">     158</span>              :     return bdr_attr_max;</span>
 <span id="L159"><span class="lineNum">     159</span>              :   }</span>

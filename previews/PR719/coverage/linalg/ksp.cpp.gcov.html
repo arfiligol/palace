@@ -31,18 +31,18 @@
             <td class="headerValue">Palace Coverage Report</td>
             <td></td>
             <td class="headerItem">Lines:</td>
-            <td class="headerCovTableEntryLo">59.1&nbsp;%</td>
-            <td class="headerCovTableEntry">110</td>
-            <td class="headerCovTableEntry">65</td>
+            <td class="headerCovTableEntryLo">60.3&nbsp;%</td>
+            <td class="headerCovTableEntry">116</td>
+            <td class="headerCovTableEntry">70</td>
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2026-05-15 18:39:30</td>
+            <td class="headerValue">2026-06-04 21:57:07</td>
             <td></td>
             <td class="headerItem">Functions:</td>
-            <td class="headerCovTableEntryLo">33.3&nbsp;%</td>
-            <td class="headerCovTableEntry">24</td>
-            <td class="headerCovTableEntry">8</td>
+            <td class="headerCovTableEntryLo">48.0&nbsp;%</td>
+            <td class="headerCovTableEntry">25</td>
+            <td class="headerCovTableEntry">12</td>
           </tr>
           <tr>
             <td class="headerItem">Legend:</td>
@@ -194,183 +194,204 @@
 <span id="L124"><span class="lineNum">     124</span>              : </span>
 <span id="L125"><span class="lineNum">     125</span>              : template &lt;typename OperType&gt;</span>
 <span id="L126"><span class="lineNum">     126</span>              : std::unique_ptr&lt;Solver&lt;OperType&gt;&gt;</span>
-<span id="L127"><span class="lineNum">     127</span> <span class="tlaGNC">          31 : ConfigurePreconditionerSolver(const config::LinearSolverData &amp;linear, int verbose,</span></span>
-<span id="L128"><span class="lineNum">     128</span>              :                               MPI_Comm comm, FiniteElementSpaceHierarchy &amp;fespaces,</span>
-<span id="L129"><span class="lineNum">     129</span>              :                               FiniteElementSpaceHierarchy *aux_fespaces)</span>
-<span id="L130"><span class="lineNum">     130</span>              : {</span>
-<span id="L131"><span class="lineNum">     131</span>              :   // Create the real-valued solver first.</span>
-<span id="L132"><span class="lineNum">     132</span> <span class="tlaGNC">          31 :   std::unique_ptr&lt;Solver&lt;OperType&gt;&gt; pc;</span></span>
-<span id="L133"><span class="lineNum">     133</span> <span class="tlaGNC">          31 :   const auto type = linear.type;</span></span>
-<span id="L134"><span class="lineNum">     134</span> <span class="tlaGNC">          31 :   const int print = verbose - 1;</span></span>
-<span id="L135"><span class="lineNum">     135</span>              :   const bool coarse_solver = fespaces.GetNumLevels() &gt; 1;</span>
-<span id="L136"><span class="lineNum">     136</span> <span class="tlaGNC">          31 :   switch (type)</span></span>
-<span id="L137"><span class="lineNum">     137</span>              :   {</span>
-<span id="L138"><span class="lineNum">     138</span> <span class="tlaUNC tlaBgUNC">           0 :     case LinearSolver::AMS:</span></span>
-<span id="L139"><span class="lineNum">     139</span>              :       // Can either be the coarse solve for geometric multigrid or the solver at the finest</span>
-<span id="L140"><span class="lineNum">     140</span>              :       // space (in which case fespaces.GetNumLevels() == 1).</span>
-<span id="L141"><span class="lineNum">     141</span> <span class="tlaUNC">           0 :       MFEM_VERIFY(aux_fespaces, &quot;AMS solver relies on both primary space &quot;</span></span>
-<span id="L142"><span class="lineNum">     142</span>              :                                 &quot;and auxiliary spaces for construction!&quot;);</span>
-<span id="L143"><span class="lineNum">     143</span> <span class="tlaUNC">           0 :       pc = MakeWrapperSolver&lt;OperType, HypreAmsSolver&gt;(</span></span>
-<span id="L144"><span class="lineNum">     144</span>              :           linear, fespaces.GetFESpaceAtLevel(0), aux_fespaces-&gt;GetFESpaceAtLevel(0),</span>
-<span id="L145"><span class="lineNum">     145</span> <span class="tlaUNC">           0 :           coarse_solver ? linear.ams_max_it : linear.mg_cycle_it, linear.mg_smooth_it,</span></span>
-<span id="L146"><span class="lineNum">     146</span> <span class="tlaUNC">           0 :           linear.ams_vector_interp, linear.ams_singular_op, linear.amg_agg_coarsen, print);</span></span>
-<span id="L147"><span class="lineNum">     147</span> <span class="tlaUNC">           0 :       break;</span></span>
-<span id="L148"><span class="lineNum">     148</span> <span class="tlaUNC">           0 :     case LinearSolver::BOOMER_AMG:</span></span>
-<span id="L149"><span class="lineNum">     149</span> <span class="tlaUNC">           0 :       pc = MakeWrapperSolver&lt;OperType, BoomerAmgSolver&gt;(</span></span>
-<span id="L150"><span class="lineNum">     150</span> <span class="tlaUNC">           0 :           linear, coarse_solver ? 1 : linear.mg_cycle_it, linear.mg_smooth_it,</span></span>
-<span id="L151"><span class="lineNum">     151</span> <span class="tlaUNC">           0 :           linear.amg_agg_coarsen, print);</span></span>
-<span id="L152"><span class="lineNum">     152</span> <span class="tlaUNC">           0 :       break;</span></span>
-<span id="L153"><span class="lineNum">     153</span>              :     case LinearSolver::SUPERLU:</span>
-<span id="L154"><span class="lineNum">     154</span>              : #if defined(MFEM_USE_SUPERLU)</span>
-<span id="L155"><span class="lineNum">     155</span>              :       pc = MakeWrapperSolver&lt;OperType, SuperLUSolver&gt;(</span>
-<span id="L156"><span class="lineNum">     156</span>              :           linear, comm, linear.sym_factorization, linear.superlu_3d, linear.reorder_reuse,</span>
-<span id="L157"><span class="lineNum">     157</span>              :           print);</span>
-<span id="L158"><span class="lineNum">     158</span>              : #endif</span>
-<span id="L159"><span class="lineNum">     159</span>              :       break;</span>
-<span id="L160"><span class="lineNum">     160</span> <span class="tlaGNC tlaBgGNC">          31 :     case LinearSolver::STRUMPACK:</span></span>
-<span id="L161"><span class="lineNum">     161</span>              : #if defined(MFEM_USE_STRUMPACK)</span>
-<span id="L162"><span class="lineNum">     162</span> <span class="tlaGNC">          62 :       pc = MakeWrapperSolver&lt;OperType, StrumpackSolver&gt;(</span></span>
-<span id="L163"><span class="lineNum">     163</span> <span class="tlaGNC">          31 :           linear, comm, linear.sym_factorization, linear.strumpack_compression_type,</span></span>
-<span id="L164"><span class="lineNum">     164</span> <span class="tlaGNC">          31 :           linear.strumpack_lr_tol, linear.strumpack_butterfly_l,</span></span>
-<span id="L165"><span class="lineNum">     165</span> <span class="tlaGNC">          31 :           linear.strumpack_lossy_precision, linear.reorder_reuse, print);</span></span>
-<span id="L166"><span class="lineNum">     166</span>              : #endif</span>
-<span id="L167"><span class="lineNum">     167</span> <span class="tlaGNC">          31 :       break;</span></span>
-<span id="L168"><span class="lineNum">     168</span> <span class="tlaUNC tlaBgUNC">           0 :     case LinearSolver::STRUMPACK_MP:</span></span>
-<span id="L169"><span class="lineNum">     169</span>              : #if defined(MFEM_USE_STRUMPACK)</span>
-<span id="L170"><span class="lineNum">     170</span> <span class="tlaUNC">           0 :       pc = MakeWrapperSolver&lt;OperType, StrumpackMixedPrecisionSolver&gt;(</span></span>
-<span id="L171"><span class="lineNum">     171</span> <span class="tlaUNC">           0 :           linear, comm, linear.sym_factorization, linear.strumpack_compression_type,</span></span>
-<span id="L172"><span class="lineNum">     172</span> <span class="tlaUNC">           0 :           linear.strumpack_lr_tol, linear.strumpack_butterfly_l,</span></span>
-<span id="L173"><span class="lineNum">     173</span> <span class="tlaUNC">           0 :           linear.strumpack_lossy_precision, linear.reorder_reuse, print);</span></span>
-<span id="L174"><span class="lineNum">     174</span>              : #endif</span>
-<span id="L175"><span class="lineNum">     175</span> <span class="tlaUNC">           0 :       break;</span></span>
-<span id="L176"><span class="lineNum">     176</span>              :     case LinearSolver::MUMPS:</span>
-<span id="L177"><span class="lineNum">     177</span>              : #if defined(MFEM_USE_MUMPS)</span>
-<span id="L178"><span class="lineNum">     178</span>              :       pc = MakeWrapperSolver&lt;OperType, MumpsSolver&gt;(</span>
-<span id="L179"><span class="lineNum">     179</span>              :           linear, comm, linear.pc_mat_sym, linear.sym_factorization,</span>
-<span id="L180"><span class="lineNum">     180</span>              :           (linear.strumpack_compression_type == SparseCompression::BLR)</span>
-<span id="L181"><span class="lineNum">     181</span>              :               ? linear.strumpack_lr_tol</span>
-<span id="L182"><span class="lineNum">     182</span>              :               : 0.0,</span>
-<span id="L183"><span class="lineNum">     183</span>              :           linear.reorder_reuse, print);</span>
-<span id="L184"><span class="lineNum">     184</span>              : #endif</span>
-<span id="L185"><span class="lineNum">     185</span>              :       break;</span>
-<span id="L186"><span class="lineNum">     186</span> <span class="tlaUNC">           0 :     case LinearSolver::JACOBI:</span></span>
-<span id="L187"><span class="lineNum">     187</span> <span class="tlaUNC">           0 :       pc = std::make_unique&lt;JacobiSmoother&lt;OperType&gt;&gt;(comm);</span></span>
-<span id="L188"><span class="lineNum">     188</span> <span class="tlaUNC">           0 :       break;</span></span>
-<span id="L189"><span class="lineNum">     189</span> <span class="tlaUNC">           0 :     case LinearSolver::DEFAULT:</span></span>
-<span id="L190"><span class="lineNum">     190</span> <span class="tlaUNC">           0 :       MFEM_ABORT(&quot;Unexpected solver type for preconditioner configuration!&quot;);</span></span>
-<span id="L191"><span class="lineNum">     191</span>              :       break;</span>
-<span id="L192"><span class="lineNum">     192</span>              :   }</span>
-<span id="L193"><span class="lineNum">     193</span>              : </span>
-<span id="L194"><span class="lineNum">     194</span>              :   // Construct the actual solver, which has the right value type.</span>
-<span id="L195"><span class="lineNum">     195</span> <span class="tlaGNC tlaBgGNC">          31 :   if (fespaces.GetNumLevels() &gt; 1)</span></span>
-<span id="L196"><span class="lineNum">     196</span>              :   {</span>
-<span id="L197"><span class="lineNum">     197</span>              :     // This will construct the multigrid hierarchy using pc as the coarse solver</span>
-<span id="L198"><span class="lineNum">     198</span>              :     // (ownership of pc is transferred to the GeometricMultigridSolver). When a special</span>
-<span id="L199"><span class="lineNum">     199</span>              :     // auxiliary space smoother for pre-/post-smoothing is not desired, the auxiliary</span>
-<span id="L200"><span class="lineNum">     200</span>              :     // space is a nullptr here.</span>
-<span id="L201"><span class="lineNum">     201</span> <span class="tlaGNC">          36 :     auto gmg = [&amp;]()</span></span>
-<span id="L202"><span class="lineNum">     202</span>              :     {</span>
-<span id="L203"><span class="lineNum">     203</span> <span class="tlaGNC">          18 :       if (linear.mg_smooth_aux)</span></span>
-<span id="L204"><span class="lineNum">     204</span>              :       {</span>
-<span id="L205"><span class="lineNum">     205</span> <span class="tlaGNC">          18 :         MFEM_VERIFY(aux_fespaces, &quot;Multigrid with auxiliary space smoothers requires both &quot;</span></span>
-<span id="L206"><span class="lineNum">     206</span>              :                                   &quot;primary space and auxiliary spaces for construction!&quot;);</span>
-<span id="L207"><span class="lineNum">     207</span> <span class="tlaGNC">          18 :         const auto G = fespaces.GetDiscreteInterpolators(*aux_fespaces);</span></span>
-<span id="L208"><span class="lineNum">     208</span>              :         return std::make_unique&lt;GeometricMultigridSolver&lt;OperType&gt;&gt;(</span>
-<span id="L209"><span class="lineNum">     209</span> <span class="tlaGNC">          18 :             comm, std::move(pc), fespaces.GetProlongationOperators(), &amp;G,</span></span>
-<span id="L210"><span class="lineNum">     210</span> <span class="tlaGNC">          18 :             linear.mg_cycle_it, linear.mg_smooth_it, linear.mg_smooth_order,</span></span>
-<span id="L211"><span class="lineNum">     211</span> <span class="tlaGNC">          18 :             linear.mg_smooth_sf_max, linear.mg_smooth_sf_min, linear.mg_smooth_cheby_4th);</span></span>
-<span id="L212"><span class="lineNum">     212</span>              :       }</span>
-<span id="L213"><span class="lineNum">     213</span>              :       else</span>
-<span id="L214"><span class="lineNum">     214</span>              :       {</span>
-<span id="L215"><span class="lineNum">     215</span>              :         return std::make_unique&lt;GeometricMultigridSolver&lt;OperType&gt;&gt;(</span>
-<span id="L216"><span class="lineNum">     216</span> <span class="tlaUNC tlaBgUNC">           0 :             comm, std::move(pc), fespaces.GetProlongationOperators(), nullptr,</span></span>
-<span id="L217"><span class="lineNum">     217</span> <span class="tlaUNC">           0 :             linear.mg_cycle_it, linear.mg_smooth_it, linear.mg_smooth_order,</span></span>
-<span id="L218"><span class="lineNum">     218</span> <span class="tlaUNC">           0 :             linear.mg_smooth_sf_max, linear.mg_smooth_sf_min, linear.mg_smooth_cheby_4th);</span></span>
-<span id="L219"><span class="lineNum">     219</span>              :       }</span>
-<span id="L220"><span class="lineNum">     220</span>              :     }();</span>
-<span id="L221"><span class="lineNum">     221</span>              :     gmg-&gt;EnableTimer();  // Enable timing for primary geometric multigrid solver</span>
-<span id="L222"><span class="lineNum">     222</span>              :     return gmg;</span>
-<span id="L223"><span class="lineNum">     223</span>              :   }</span>
-<span id="L224"><span class="lineNum">     224</span>              :   else</span>
-<span id="L225"><span class="lineNum">     225</span>              :   {</span>
-<span id="L226"><span class="lineNum">     226</span>              :     return pc;</span>
-<span id="L227"><span class="lineNum">     227</span>              :   }</span>
-<span id="L228"><span class="lineNum">     228</span>              : }</span>
-<span id="L229"><span class="lineNum">     229</span>              : </span>
-<span id="L230"><span class="lineNum">     230</span>              : }  // namespace</span>
-<span id="L231"><span class="lineNum">     231</span>              : </span>
-<span id="L232"><span class="lineNum">     232</span>              : template &lt;typename OperType&gt;</span>
-<span id="L233"><span class="lineNum">     233</span> <span class="tlaGNC tlaBgGNC">          31 : BaseKspSolver&lt;OperType&gt;::BaseKspSolver(const config::LinearSolverData &amp;linear, int verbose,</span></span>
-<span id="L234"><span class="lineNum">     234</span>              :                                        FiniteElementSpaceHierarchy &amp;fespaces,</span>
-<span id="L235"><span class="lineNum">     235</span>              :                                        FiniteElementSpaceHierarchy *aux_fespaces)</span>
-<span id="L236"><span class="lineNum">     236</span>              :   : BaseKspSolver(</span>
-<span id="L237"><span class="lineNum">     237</span> <span class="tlaGNC">          31 :         ConfigureKrylovSolver&lt;OperType&gt;(linear, verbose,</span></span>
-<span id="L238"><span class="lineNum">     238</span>              :                                         fespaces.GetFinestFESpace().GetComm()),</span>
-<span id="L239"><span class="lineNum">     239</span> <span class="tlaGNC">          31 :         ConfigurePreconditionerSolver&lt;OperType&gt;(</span></span>
-<span id="L240"><span class="lineNum">     240</span>              :             linear, verbose, fespaces.GetFinestFESpace().GetComm(), fespaces, aux_fespaces))</span>
-<span id="L241"><span class="lineNum">     241</span>              : {</span>
-<span id="L242"><span class="lineNum">     242</span> <span class="tlaGNC">          31 :   use_timer = true;</span></span>
-<span id="L243"><span class="lineNum">     243</span> <span class="tlaGNC">          31 : }</span></span>
-<span id="L244"><span class="lineNum">     244</span>              : </span>
-<span id="L245"><span class="lineNum">     245</span>              : template &lt;typename OperType&gt;</span>
-<span id="L246"><span class="lineNum">     246</span> <span class="tlaUNC tlaBgUNC">           0 : BaseKspSolver&lt;OperType&gt;::BaseKspSolver(const IoData &amp;iodata,</span></span>
-<span id="L247"><span class="lineNum">     247</span>              :                                        FiniteElementSpaceHierarchy &amp;fespaces,</span>
-<span id="L248"><span class="lineNum">     248</span>              :                                        FiniteElementSpaceHierarchy *aux_fespaces)</span>
-<span id="L249"><span class="lineNum">     249</span> <span class="tlaUNC">           0 :   : BaseKspSolver(iodata.solver.linear, iodata.problem.verbose, fespaces, aux_fespaces)</span></span>
-<span id="L250"><span class="lineNum">     250</span>              : {</span>
-<span id="L251"><span class="lineNum">     251</span> <span class="tlaUNC">           0 : }</span></span>
-<span id="L252"><span class="lineNum">     252</span>              : </span>
-<span id="L253"><span class="lineNum">     253</span>              : template &lt;typename OperType&gt;</span>
-<span id="L254"><span class="lineNum">     254</span> <span class="tlaGNC tlaBgGNC">          36 : BaseKspSolver&lt;OperType&gt;::BaseKspSolver(std::unique_ptr&lt;IterativeSolver&lt;OperType&gt;&gt; &amp;&amp;ksp,</span></span>
-<span id="L255"><span class="lineNum">     255</span>              :                                        std::unique_ptr&lt;Solver&lt;OperType&gt;&gt; &amp;&amp;pc)</span>
-<span id="L256"><span class="lineNum">     256</span> <span class="tlaGNC">          36 :   : ksp(std::move(ksp)), pc(std::move(pc)), ksp_mult(0), ksp_mult_it(0), use_timer(false)</span></span>
-<span id="L257"><span class="lineNum">     257</span>              : {</span>
-<span id="L258"><span class="lineNum">     258</span> <span class="tlaGNC">          36 :   if (this-&gt;pc)</span></span>
-<span id="L259"><span class="lineNum">     259</span>              :   {</span>
-<span id="L260"><span class="lineNum">     260</span>              :     this-&gt;ksp-&gt;SetPreconditioner(*this-&gt;pc);</span>
-<span id="L261"><span class="lineNum">     261</span>              :   }</span>
-<span id="L262"><span class="lineNum">     262</span> <span class="tlaGNC">           5 : }</span></span>
-<span id="L263"><span class="lineNum">     263</span>              : </span>
-<span id="L264"><span class="lineNum">     264</span>              : template &lt;typename OperType&gt;</span>
-<span id="L265"><span class="lineNum">     265</span> <span class="tlaGNC">           5 : void BaseKspSolver&lt;OperType&gt;::SetOperators(const OperType &amp;op, const OperType &amp;pc_op)</span></span>
-<span id="L266"><span class="lineNum">     266</span>              : {</span>
-<span id="L267"><span class="lineNum">     267</span> <span class="tlaGNC">           5 :   BlockTimer bt(Timer::KSP_SETUP, use_timer);</span></span>
-<span id="L268"><span class="lineNum">     268</span> <span class="tlaGNC">           5 :   ksp-&gt;SetOperator(op);</span></span>
-<span id="L269"><span class="lineNum">     269</span> <span class="tlaGNC">           5 :   if (pc)</span></span>
-<span id="L270"><span class="lineNum">     270</span>              :   {</span>
-<span id="L271"><span class="lineNum">     271</span> <span class="tlaGNC">           5 :     const auto *mg_op = dynamic_cast&lt;const BaseMultigridOperator&lt;OperType&gt; *&gt;(&amp;pc_op);</span></span>
-<span id="L272"><span class="lineNum">     272</span> <span class="tlaGNC">           5 :     const auto *mg_pc = dynamic_cast&lt;const GeometricMultigridSolver&lt;OperType&gt; *&gt;(pc.get());</span></span>
-<span id="L273"><span class="lineNum">     273</span> <span class="tlaGNC">           5 :     if (mg_op &amp;&amp; !mg_pc)</span></span>
-<span id="L274"><span class="lineNum">     274</span>              :     {</span>
-<span id="L275"><span class="lineNum">     275</span> <span class="tlaUNC tlaBgUNC">           0 :       pc-&gt;SetOperator(mg_op-&gt;GetFinestOperator());</span></span>
-<span id="L276"><span class="lineNum">     276</span>              :     }</span>
-<span id="L277"><span class="lineNum">     277</span>              :     else</span>
-<span id="L278"><span class="lineNum">     278</span>              :     {</span>
-<span id="L279"><span class="lineNum">     279</span> <span class="tlaGNC tlaBgGNC">           5 :       pc-&gt;SetOperator(pc_op);</span></span>
-<span id="L280"><span class="lineNum">     280</span>              :     }</span>
-<span id="L281"><span class="lineNum">     281</span>              :   }</span>
-<span id="L282"><span class="lineNum">     282</span> <span class="tlaGNC">           5 : }</span></span>
-<span id="L283"><span class="lineNum">     283</span>              : </span>
-<span id="L284"><span class="lineNum">     284</span>              : template &lt;typename OperType&gt;</span>
-<span id="L285"><span class="lineNum">     285</span> <span class="tlaGNC">         161 : void BaseKspSolver&lt;OperType&gt;::Mult(const VecType &amp;x, VecType &amp;y) const</span></span>
-<span id="L286"><span class="lineNum">     286</span>              : {</span>
-<span id="L287"><span class="lineNum">     287</span> <span class="tlaGNC">         161 :   BlockTimer bt(Timer::KSP, use_timer);</span></span>
-<span id="L288"><span class="lineNum">     288</span> <span class="tlaGNC">         161 :   ksp-&gt;Mult(x, y);</span></span>
-<span id="L289"><span class="lineNum">     289</span>              :   if (!ksp-&gt;GetConverged())</span>
-<span id="L290"><span class="lineNum">     290</span>              :   {</span>
-<span id="L291"><span class="lineNum">     291</span> <span class="tlaUNC tlaBgUNC">           0 :     Mpi::Warning(</span></span>
-<span id="L292"><span class="lineNum">     292</span>              :         ksp-&gt;GetComm(),</span>
-<span id="L293"><span class="lineNum">     293</span>              :         &quot;Linear solver did not converge, norm(Ax-b)/norm(b) = {:.3e} (norm(b) = {:.3e})!\n&quot;,</span>
-<span id="L294"><span class="lineNum">     294</span> <span class="tlaUNC">           0 :         ksp-&gt;GetFinalRes() / ksp-&gt;GetInitialRes(), ksp-&gt;GetInitialRes());</span></span>
-<span id="L295"><span class="lineNum">     295</span>              :   }</span>
-<span id="L296"><span class="lineNum">     296</span> <span class="tlaGNC tlaBgGNC">         161 :   ksp_mult++;</span></span>
-<span id="L297"><span class="lineNum">     297</span> <span class="tlaGNC">         161 :   ksp_mult_it += ksp-&gt;GetNumIterations();</span></span>
-<span id="L298"><span class="lineNum">     298</span> <span class="tlaGNC">         161 : }</span></span>
-<span id="L299"><span class="lineNum">     299</span>              : </span>
-<span id="L300"><span class="lineNum">     300</span>              : template class BaseKspSolver&lt;Operator&gt;;</span>
-<span id="L301"><span class="lineNum">     301</span>              : template class BaseKspSolver&lt;ComplexOperator&gt;;</span>
-<span id="L302"><span class="lineNum">     302</span>              : </span>
-<span id="L303"><span class="lineNum">     303</span>              : }  // namespace palace</span>
+<span id="L127"><span class="lineNum">     127</span> <span class="tlaGNC">          31 : ConfigurePreconditionerSolver(const config::LinearSolverData &amp;linear,</span></span>
+<span id="L128"><span class="lineNum">     128</span>              :                               MatrixSymmetry pc_mat_sym, int verbose, MPI_Comm comm,</span>
+<span id="L129"><span class="lineNum">     129</span>              :                               FiniteElementSpaceHierarchy &amp;fespaces,</span>
+<span id="L130"><span class="lineNum">     130</span>              :                               FiniteElementSpaceHierarchy *aux_fespaces)</span>
+<span id="L131"><span class="lineNum">     131</span>              : {</span>
+<span id="L132"><span class="lineNum">     132</span>              :   // Create the real-valued solver first.</span>
+<span id="L133"><span class="lineNum">     133</span> <span class="tlaGNC">          31 :   std::unique_ptr&lt;Solver&lt;OperType&gt;&gt; pc;</span></span>
+<span id="L134"><span class="lineNum">     134</span> <span class="tlaGNC">          31 :   const auto type = linear.type;</span></span>
+<span id="L135"><span class="lineNum">     135</span> <span class="tlaGNC">          31 :   const int print = verbose - 1;</span></span>
+<span id="L136"><span class="lineNum">     136</span>              :   const bool coarse_solver = fespaces.GetNumLevels() &gt; 1;</span>
+<span id="L137"><span class="lineNum">     137</span> <span class="tlaGNC">          31 :   switch (type)</span></span>
+<span id="L138"><span class="lineNum">     138</span>              :   {</span>
+<span id="L139"><span class="lineNum">     139</span> <span class="tlaUNC tlaBgUNC">           0 :     case LinearSolver::AMS:</span></span>
+<span id="L140"><span class="lineNum">     140</span>              :       // Can either be the coarse solve for geometric multigrid or the solver at the finest</span>
+<span id="L141"><span class="lineNum">     141</span>              :       // space (in which case fespaces.GetNumLevels() == 1).</span>
+<span id="L142"><span class="lineNum">     142</span> <span class="tlaUNC">           0 :       MFEM_VERIFY(aux_fespaces, &quot;AMS solver relies on both primary space &quot;</span></span>
+<span id="L143"><span class="lineNum">     143</span>              :                                 &quot;and auxiliary spaces for construction!&quot;);</span>
+<span id="L144"><span class="lineNum">     144</span> <span class="tlaUNC">           0 :       pc = MakeWrapperSolver&lt;OperType, HypreAmsSolver&gt;(</span></span>
+<span id="L145"><span class="lineNum">     145</span>              :           linear, fespaces.GetFESpaceAtLevel(0), aux_fespaces-&gt;GetFESpaceAtLevel(0),</span>
+<span id="L146"><span class="lineNum">     146</span> <span class="tlaUNC">           0 :           coarse_solver ? linear.ams_max_it : linear.mg_cycle_it, linear.mg_smooth_it,</span></span>
+<span id="L147"><span class="lineNum">     147</span> <span class="tlaUNC">           0 :           linear.ams_vector_interp, linear.ams_singular_op, linear.amg_agg_coarsen, print);</span></span>
+<span id="L148"><span class="lineNum">     148</span> <span class="tlaUNC">           0 :       break;</span></span>
+<span id="L149"><span class="lineNum">     149</span> <span class="tlaUNC">           0 :     case LinearSolver::BOOMER_AMG:</span></span>
+<span id="L150"><span class="lineNum">     150</span> <span class="tlaUNC">           0 :       pc = MakeWrapperSolver&lt;OperType, BoomerAmgSolver&gt;(</span></span>
+<span id="L151"><span class="lineNum">     151</span> <span class="tlaUNC">           0 :           linear, coarse_solver ? 1 : linear.mg_cycle_it, linear.mg_smooth_it,</span></span>
+<span id="L152"><span class="lineNum">     152</span> <span class="tlaUNC">           0 :           linear.amg_agg_coarsen, print);</span></span>
+<span id="L153"><span class="lineNum">     153</span> <span class="tlaUNC">           0 :       break;</span></span>
+<span id="L154"><span class="lineNum">     154</span>              :     case LinearSolver::SUPERLU:</span>
+<span id="L155"><span class="lineNum">     155</span>              : #if defined(MFEM_USE_SUPERLU)</span>
+<span id="L156"><span class="lineNum">     156</span>              :       pc = MakeWrapperSolver&lt;OperType, SuperLUSolver&gt;(</span>
+<span id="L157"><span class="lineNum">     157</span>              :           linear, comm, linear.sym_factorization, linear.superlu_3d, linear.reorder_reuse,</span>
+<span id="L158"><span class="lineNum">     158</span>              :           print);</span>
+<span id="L159"><span class="lineNum">     159</span>              : #endif</span>
+<span id="L160"><span class="lineNum">     160</span>              :       break;</span>
+<span id="L161"><span class="lineNum">     161</span> <span class="tlaGNC tlaBgGNC">          31 :     case LinearSolver::STRUMPACK:</span></span>
+<span id="L162"><span class="lineNum">     162</span>              : #if defined(MFEM_USE_STRUMPACK)</span>
+<span id="L163"><span class="lineNum">     163</span> <span class="tlaGNC">          62 :       pc = MakeWrapperSolver&lt;OperType, StrumpackSolver&gt;(</span></span>
+<span id="L164"><span class="lineNum">     164</span> <span class="tlaGNC">          31 :           linear, comm, linear.sym_factorization, linear.strumpack_compression_type,</span></span>
+<span id="L165"><span class="lineNum">     165</span> <span class="tlaGNC">          31 :           linear.strumpack_lr_tol, linear.strumpack_butterfly_l,</span></span>
+<span id="L166"><span class="lineNum">     166</span> <span class="tlaGNC">          31 :           linear.strumpack_lossy_precision, linear.reorder_reuse, print);</span></span>
+<span id="L167"><span class="lineNum">     167</span>              : #endif</span>
+<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC">          31 :       break;</span></span>
+<span id="L169"><span class="lineNum">     169</span> <span class="tlaUNC tlaBgUNC">           0 :     case LinearSolver::STRUMPACK_MP:</span></span>
+<span id="L170"><span class="lineNum">     170</span>              : #if defined(MFEM_USE_STRUMPACK)</span>
+<span id="L171"><span class="lineNum">     171</span> <span class="tlaUNC">           0 :       pc = MakeWrapperSolver&lt;OperType, StrumpackMixedPrecisionSolver&gt;(</span></span>
+<span id="L172"><span class="lineNum">     172</span> <span class="tlaUNC">           0 :           linear, comm, linear.sym_factorization, linear.strumpack_compression_type,</span></span>
+<span id="L173"><span class="lineNum">     173</span> <span class="tlaUNC">           0 :           linear.strumpack_lr_tol, linear.strumpack_butterfly_l,</span></span>
+<span id="L174"><span class="lineNum">     174</span> <span class="tlaUNC">           0 :           linear.strumpack_lossy_precision, linear.reorder_reuse, print);</span></span>
+<span id="L175"><span class="lineNum">     175</span>              : #endif</span>
+<span id="L176"><span class="lineNum">     176</span> <span class="tlaUNC">           0 :       break;</span></span>
+<span id="L177"><span class="lineNum">     177</span>              :     case LinearSolver::MUMPS:</span>
+<span id="L178"><span class="lineNum">     178</span>              : #if defined(MFEM_USE_MUMPS)</span>
+<span id="L179"><span class="lineNum">     179</span>              :       pc = MakeWrapperSolver&lt;OperType, MumpsSolver&gt;(</span>
+<span id="L180"><span class="lineNum">     180</span>              :           linear, comm, pc_mat_sym, linear.sym_factorization,</span>
+<span id="L181"><span class="lineNum">     181</span>              :           (linear.strumpack_compression_type == SparseCompression::BLR)</span>
+<span id="L182"><span class="lineNum">     182</span>              :               ? linear.strumpack_lr_tol</span>
+<span id="L183"><span class="lineNum">     183</span>              :               : 0.0,</span>
+<span id="L184"><span class="lineNum">     184</span>              :           linear.reorder_reuse, print);</span>
+<span id="L185"><span class="lineNum">     185</span>              : #endif</span>
+<span id="L186"><span class="lineNum">     186</span>              :       break;</span>
+<span id="L187"><span class="lineNum">     187</span> <span class="tlaUNC">           0 :     case LinearSolver::JACOBI:</span></span>
+<span id="L188"><span class="lineNum">     188</span> <span class="tlaUNC">           0 :       pc = std::make_unique&lt;JacobiSmoother&lt;OperType&gt;&gt;(comm);</span></span>
+<span id="L189"><span class="lineNum">     189</span> <span class="tlaUNC">           0 :       break;</span></span>
+<span id="L190"><span class="lineNum">     190</span> <span class="tlaUNC">           0 :     case LinearSolver::DEFAULT:</span></span>
+<span id="L191"><span class="lineNum">     191</span> <span class="tlaUNC">           0 :       MFEM_ABORT(&quot;Unexpected solver type for preconditioner configuration!&quot;);</span></span>
+<span id="L192"><span class="lineNum">     192</span>              :       break;</span>
+<span id="L193"><span class="lineNum">     193</span>              :   }</span>
+<span id="L194"><span class="lineNum">     194</span>              : </span>
+<span id="L195"><span class="lineNum">     195</span>              :   // Construct the actual solver, which has the right value type.</span>
+<span id="L196"><span class="lineNum">     196</span> <span class="tlaGNC tlaBgGNC">          31 :   if (fespaces.GetNumLevels() &gt; 1)</span></span>
+<span id="L197"><span class="lineNum">     197</span>              :   {</span>
+<span id="L198"><span class="lineNum">     198</span>              :     // This will construct the multigrid hierarchy using pc as the coarse solver</span>
+<span id="L199"><span class="lineNum">     199</span>              :     // (ownership of pc is transferred to the GeometricMultigridSolver). When a special</span>
+<span id="L200"><span class="lineNum">     200</span>              :     // auxiliary space smoother for pre-/post-smoothing is not desired, the auxiliary</span>
+<span id="L201"><span class="lineNum">     201</span>              :     // space is a nullptr here.</span>
+<span id="L202"><span class="lineNum">     202</span> <span class="tlaGNC">          36 :     auto gmg = [&amp;]()</span></span>
+<span id="L203"><span class="lineNum">     203</span>              :     {</span>
+<span id="L204"><span class="lineNum">     204</span> <span class="tlaGNC">          18 :       if (linear.mg_smooth_aux)</span></span>
+<span id="L205"><span class="lineNum">     205</span>              :       {</span>
+<span id="L206"><span class="lineNum">     206</span> <span class="tlaGNC">          18 :         MFEM_VERIFY(aux_fespaces, &quot;Multigrid with auxiliary space smoothers requires both &quot;</span></span>
+<span id="L207"><span class="lineNum">     207</span>              :                                   &quot;primary space and auxiliary spaces for construction!&quot;);</span>
+<span id="L208"><span class="lineNum">     208</span> <span class="tlaGNC">          18 :         const auto G = fespaces.GetDiscreteInterpolators(*aux_fespaces);</span></span>
+<span id="L209"><span class="lineNum">     209</span>              :         return std::make_unique&lt;GeometricMultigridSolver&lt;OperType&gt;&gt;(</span>
+<span id="L210"><span class="lineNum">     210</span> <span class="tlaGNC">          18 :             comm, std::move(pc), fespaces.GetProlongationOperators(), &amp;G,</span></span>
+<span id="L211"><span class="lineNum">     211</span> <span class="tlaGNC">          18 :             linear.mg_cycle_it, linear.mg_smooth_it, linear.mg_smooth_order,</span></span>
+<span id="L212"><span class="lineNum">     212</span> <span class="tlaGNC">          18 :             linear.mg_smooth_sf_max, linear.mg_smooth_sf_min, linear.mg_smooth_cheby_4th);</span></span>
+<span id="L213"><span class="lineNum">     213</span>              :       }</span>
+<span id="L214"><span class="lineNum">     214</span>              :       else</span>
+<span id="L215"><span class="lineNum">     215</span>              :       {</span>
+<span id="L216"><span class="lineNum">     216</span>              :         return std::make_unique&lt;GeometricMultigridSolver&lt;OperType&gt;&gt;(</span>
+<span id="L217"><span class="lineNum">     217</span> <span class="tlaUNC tlaBgUNC">           0 :             comm, std::move(pc), fespaces.GetProlongationOperators(), nullptr,</span></span>
+<span id="L218"><span class="lineNum">     218</span> <span class="tlaUNC">           0 :             linear.mg_cycle_it, linear.mg_smooth_it, linear.mg_smooth_order,</span></span>
+<span id="L219"><span class="lineNum">     219</span> <span class="tlaUNC">           0 :             linear.mg_smooth_sf_max, linear.mg_smooth_sf_min, linear.mg_smooth_cheby_4th);</span></span>
+<span id="L220"><span class="lineNum">     220</span>              :       }</span>
+<span id="L221"><span class="lineNum">     221</span>              :     }();</span>
+<span id="L222"><span class="lineNum">     222</span>              :     gmg-&gt;EnableTimer();  // Enable timing for primary geometric multigrid solver</span>
+<span id="L223"><span class="lineNum">     223</span>              :     return gmg;</span>
+<span id="L224"><span class="lineNum">     224</span>              :   }</span>
+<span id="L225"><span class="lineNum">     225</span>              :   else</span>
+<span id="L226"><span class="lineNum">     226</span>              :   {</span>
+<span id="L227"><span class="lineNum">     227</span>              :     return pc;</span>
+<span id="L228"><span class="lineNum">     228</span>              :   }</span>
+<span id="L229"><span class="lineNum">     229</span>              : }</span>
+<span id="L230"><span class="lineNum">     230</span>              : </span>
+<span id="L231"><span class="lineNum">     231</span>              : }  // namespace</span>
+<span id="L232"><span class="lineNum">     232</span>              : </span>
+<span id="L233"><span class="lineNum">     233</span> <span class="tlaGNC tlaBgGNC">          33 : MatrixSymmetry GetPreconditionerMatrixSymmetry(const IoData &amp;iodata)</span></span>
+<span id="L234"><span class="lineNum">     234</span>              : {</span>
+<span id="L235"><span class="lineNum">     235</span>              :   // Mirrors the prior derivation that used to be stored on LinearSolverData::pc_mat_sym.</span>
+<span id="L236"><span class="lineNum">     236</span>              :   const auto &amp;linear = iodata.solver.linear;</span>
+<span id="L237"><span class="lineNum">     237</span> <span class="tlaGNC">          33 :   if (linear.pc_mat_shifted || iodata.problem.type == ProblemType::TRANSIENT ||</span></span>
+<span id="L238"><span class="lineNum">     238</span> <span class="tlaGNC">          32 :       iodata.problem.type == ProblemType::ELECTROSTATIC ||</span></span>
+<span id="L239"><span class="lineNum">     239</span>              :       iodata.problem.type == ProblemType::MAGNETOSTATIC)</span>
+<span id="L240"><span class="lineNum">     240</span>              :   {</span>
+<span id="L241"><span class="lineNum">     241</span>              :     return MatrixSymmetry::SPD;</span>
+<span id="L242"><span class="lineNum">     242</span>              :   }</span>
+<span id="L243"><span class="lineNum">     243</span> <span class="tlaGNC">          62 :   if (iodata.boundaries.periodic.wave_vector == std::array&lt;double, 3&gt;{0.0, 0.0, 0.0})</span></span>
+<span id="L244"><span class="lineNum">     244</span>              :   {</span>
+<span id="L245"><span class="lineNum">     245</span> <span class="tlaGNC">          31 :     return MatrixSymmetry::SYMMETRIC;</span></span>
+<span id="L246"><span class="lineNum">     246</span>              :   }</span>
+<span id="L247"><span class="lineNum">     247</span>              :   return MatrixSymmetry::UNSYMMETRIC;</span>
+<span id="L248"><span class="lineNum">     248</span>              : }</span>
+<span id="L249"><span class="lineNum">     249</span>              : </span>
+<span id="L250"><span class="lineNum">     250</span>              : template &lt;typename OperType&gt;</span>
+<span id="L251"><span class="lineNum">     251</span> <span class="tlaGNC">          31 : BaseKspSolver&lt;OperType&gt;::BaseKspSolver(const config::LinearSolverData &amp;linear,</span></span>
+<span id="L252"><span class="lineNum">     252</span>              :                                        MatrixSymmetry pc_mat_sym, int verbose,</span>
+<span id="L253"><span class="lineNum">     253</span>              :                                        FiniteElementSpaceHierarchy &amp;fespaces,</span>
+<span id="L254"><span class="lineNum">     254</span>              :                                        FiniteElementSpaceHierarchy *aux_fespaces)</span>
+<span id="L255"><span class="lineNum">     255</span>              :   : BaseKspSolver(</span>
+<span id="L256"><span class="lineNum">     256</span> <span class="tlaGNC">          31 :         ConfigureKrylovSolver&lt;OperType&gt;(linear, verbose,</span></span>
+<span id="L257"><span class="lineNum">     257</span>              :                                         fespaces.GetFinestFESpace().GetComm()),</span>
+<span id="L258"><span class="lineNum">     258</span> <span class="tlaGNC">          31 :         ConfigurePreconditionerSolver&lt;OperType&gt;(</span></span>
+<span id="L259"><span class="lineNum">     259</span>              :             linear, pc_mat_sym, verbose, fespaces.GetFinestFESpace().GetComm(), fespaces,</span>
+<span id="L260"><span class="lineNum">     260</span>              :             aux_fespaces))</span>
+<span id="L261"><span class="lineNum">     261</span>              : {</span>
+<span id="L262"><span class="lineNum">     262</span> <span class="tlaGNC">          31 :   use_timer = true;</span></span>
+<span id="L263"><span class="lineNum">     263</span> <span class="tlaGNC">          31 : }</span></span>
+<span id="L264"><span class="lineNum">     264</span>              : </span>
+<span id="L265"><span class="lineNum">     265</span>              : template &lt;typename OperType&gt;</span>
+<span id="L266"><span class="lineNum">     266</span> <span class="tlaUNC tlaBgUNC">           0 : BaseKspSolver&lt;OperType&gt;::BaseKspSolver(const IoData &amp;iodata,</span></span>
+<span id="L267"><span class="lineNum">     267</span>              :                                        FiniteElementSpaceHierarchy &amp;fespaces,</span>
+<span id="L268"><span class="lineNum">     268</span>              :                                        FiniteElementSpaceHierarchy *aux_fespaces)</span>
+<span id="L269"><span class="lineNum">     269</span> <span class="tlaUNC">           0 :   : BaseKspSolver(iodata.solver.linear, GetPreconditionerMatrixSymmetry(iodata),</span></span>
+<span id="L270"><span class="lineNum">     270</span> <span class="tlaUNC">           0 :                   iodata.problem.verbose, fespaces, aux_fespaces)</span></span>
+<span id="L271"><span class="lineNum">     271</span>              : {</span>
+<span id="L272"><span class="lineNum">     272</span> <span class="tlaUNC">           0 : }</span></span>
+<span id="L273"><span class="lineNum">     273</span>              : </span>
+<span id="L274"><span class="lineNum">     274</span>              : template &lt;typename OperType&gt;</span>
+<span id="L275"><span class="lineNum">     275</span> <span class="tlaGNC tlaBgGNC">         344 : BaseKspSolver&lt;OperType&gt;::BaseKspSolver(std::unique_ptr&lt;IterativeSolver&lt;OperType&gt;&gt; &amp;&amp;ksp,</span></span>
+<span id="L276"><span class="lineNum">     276</span>              :                                        std::unique_ptr&lt;Solver&lt;OperType&gt;&gt; &amp;&amp;pc)</span>
+<span id="L277"><span class="lineNum">     277</span> <span class="tlaGNC">         344 :   : ksp(std::move(ksp)), pc(std::move(pc)), ksp_mult(0), ksp_mult_it(0), use_timer(false)</span></span>
+<span id="L278"><span class="lineNum">     278</span>              : {</span>
+<span id="L279"><span class="lineNum">     279</span> <span class="tlaGNC">         344 :   if (this-&gt;pc)</span></span>
+<span id="L280"><span class="lineNum">     280</span>              :   {</span>
+<span id="L281"><span class="lineNum">     281</span>              :     this-&gt;ksp-&gt;SetPreconditioner(*this-&gt;pc);</span>
+<span id="L282"><span class="lineNum">     282</span>              :   }</span>
+<span id="L283"><span class="lineNum">     283</span> <span class="tlaGNC">         313 : }</span></span>
+<span id="L284"><span class="lineNum">     284</span>              : </span>
+<span id="L285"><span class="lineNum">     285</span>              : template &lt;typename OperType&gt;</span>
+<span id="L286"><span class="lineNum">     286</span> <span class="tlaGNC">         313 : void BaseKspSolver&lt;OperType&gt;::SetOperators(const OperType &amp;op, const OperType &amp;pc_op)</span></span>
+<span id="L287"><span class="lineNum">     287</span>              : {</span>
+<span id="L288"><span class="lineNum">     288</span> <span class="tlaGNC">         313 :   BlockTimer bt(Timer::KSP_SETUP, use_timer);</span></span>
+<span id="L289"><span class="lineNum">     289</span> <span class="tlaGNC">         313 :   ksp-&gt;SetOperator(op);</span></span>
+<span id="L290"><span class="lineNum">     290</span> <span class="tlaGNC">         313 :   if (pc)</span></span>
+<span id="L291"><span class="lineNum">     291</span>              :   {</span>
+<span id="L292"><span class="lineNum">     292</span> <span class="tlaGNC">         313 :     const auto *mg_op = dynamic_cast&lt;const BaseMultigridOperator&lt;OperType&gt; *&gt;(&amp;pc_op);</span></span>
+<span id="L293"><span class="lineNum">     293</span> <span class="tlaGNC">         313 :     const auto *mg_pc = dynamic_cast&lt;const GeometricMultigridSolver&lt;OperType&gt; *&gt;(pc.get());</span></span>
+<span id="L294"><span class="lineNum">     294</span> <span class="tlaGNC">         313 :     if (mg_op &amp;&amp; !mg_pc)</span></span>
+<span id="L295"><span class="lineNum">     295</span>              :     {</span>
+<span id="L296"><span class="lineNum">     296</span> <span class="tlaUNC tlaBgUNC">           0 :       pc-&gt;SetOperator(mg_op-&gt;GetFinestOperator());</span></span>
+<span id="L297"><span class="lineNum">     297</span>              :     }</span>
+<span id="L298"><span class="lineNum">     298</span>              :     else</span>
+<span id="L299"><span class="lineNum">     299</span>              :     {</span>
+<span id="L300"><span class="lineNum">     300</span> <span class="tlaGNC tlaBgGNC">         313 :       pc-&gt;SetOperator(pc_op);</span></span>
+<span id="L301"><span class="lineNum">     301</span>              :     }</span>
+<span id="L302"><span class="lineNum">     302</span>              :   }</span>
+<span id="L303"><span class="lineNum">     303</span> <span class="tlaGNC">         313 : }</span></span>
+<span id="L304"><span class="lineNum">     304</span>              : </span>
+<span id="L305"><span class="lineNum">     305</span>              : template &lt;typename OperType&gt;</span>
+<span id="L306"><span class="lineNum">     306</span> <span class="tlaGNC">         469 : void BaseKspSolver&lt;OperType&gt;::Mult(const VecType &amp;x, VecType &amp;y) const</span></span>
+<span id="L307"><span class="lineNum">     307</span>              : {</span>
+<span id="L308"><span class="lineNum">     308</span> <span class="tlaGNC">         469 :   BlockTimer bt(Timer::KSP, use_timer);</span></span>
+<span id="L309"><span class="lineNum">     309</span> <span class="tlaGNC">         469 :   ksp-&gt;Mult(x, y);</span></span>
+<span id="L310"><span class="lineNum">     310</span>              :   if (!ksp-&gt;GetConverged())</span>
+<span id="L311"><span class="lineNum">     311</span>              :   {</span>
+<span id="L312"><span class="lineNum">     312</span> <span class="tlaUNC tlaBgUNC">           0 :     Mpi::Warning(</span></span>
+<span id="L313"><span class="lineNum">     313</span>              :         ksp-&gt;GetComm(),</span>
+<span id="L314"><span class="lineNum">     314</span>              :         &quot;Linear solver did not converge, norm(Ax-b)/norm(b) = {:.3e} (norm(b) = {:.3e})!\n&quot;,</span>
+<span id="L315"><span class="lineNum">     315</span> <span class="tlaUNC">           0 :         ksp-&gt;GetFinalRes() / ksp-&gt;GetInitialRes(), ksp-&gt;GetInitialRes());</span></span>
+<span id="L316"><span class="lineNum">     316</span>              :   }</span>
+<span id="L317"><span class="lineNum">     317</span> <span class="tlaGNC tlaBgGNC">         469 :   ksp_mult++;</span></span>
+<span id="L318"><span class="lineNum">     318</span> <span class="tlaGNC">         469 :   ksp_mult_it += ksp-&gt;GetNumIterations();</span></span>
+<span id="L319"><span class="lineNum">     319</span> <span class="tlaGNC">         469 : }</span></span>
+<span id="L320"><span class="lineNum">     320</span>              : </span>
+<span id="L321"><span class="lineNum">     321</span>              : template class BaseKspSolver&lt;Operator&gt;;</span>
+<span id="L322"><span class="lineNum">     322</span>              : template class BaseKspSolver&lt;ComplexOperator&gt;;</span>
+<span id="L323"><span class="lineNum">     323</span>              : </span>
+<span id="L324"><span class="lineNum">     324</span>              : }  // namespace palace</span>
         </pre>
               </td>
             </tr>

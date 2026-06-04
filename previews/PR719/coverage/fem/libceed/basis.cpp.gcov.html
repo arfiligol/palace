@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2026-05-15 18:39:30</td>
+            <td class="headerValue">2026-06-04 21:57:07</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntryHi">100.0&nbsp;%</td>
@@ -82,77 +82,77 @@
 <span id="L12"><span class="lineNum">      12</span>              : namespace</span>
 <span id="L13"><span class="lineNum">      13</span>              : {</span>
 <span id="L14"><span class="lineNum">      14</span>              : </span>
-<span id="L15"><span class="lineNum">      15</span> <span class="tlaGNC tlaBgGNC">       38639 : void InitTensorBasis(const mfem::FiniteElement &amp;fe, const mfem::IntegrationRule &amp;ir,</span></span>
+<span id="L15"><span class="lineNum">      15</span> <span class="tlaGNC tlaBgGNC">       38855 : void InitTensorBasis(const mfem::FiniteElement &amp;fe, const mfem::IntegrationRule &amp;ir,</span></span>
 <span id="L16"><span class="lineNum">      16</span>              :                      CeedInt num_comp, Ceed ceed, CeedBasis *basis)</span>
 <span id="L17"><span class="lineNum">      17</span>              : {</span>
 <span id="L18"><span class="lineNum">      18</span>              :   // The x-coordinates of the first `Q` points of the integration rule are the points of</span>
 <span id="L19"><span class="lineNum">      19</span>              :   // the corresponding 1D rule. We also scale the weights accordingly.</span>
-<span id="L20"><span class="lineNum">      20</span> <span class="tlaGNC">       38639 :   const mfem::DofToQuad &amp;maps = fe.GetDofToQuad(ir, mfem::DofToQuad::TENSOR);</span></span>
+<span id="L20"><span class="lineNum">      20</span> <span class="tlaGNC">       38855 :   const mfem::DofToQuad &amp;maps = fe.GetDofToQuad(ir, mfem::DofToQuad::TENSOR);</span></span>
 <span id="L21"><span class="lineNum">      21</span>              :   const int dim = fe.GetDim();</span>
-<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC">       38639 :   const int P = maps.ndof;</span></span>
-<span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC">       38639 :   const int Q = maps.nqpt;</span></span>
+<span id="L22"><span class="lineNum">      22</span> <span class="tlaGNC">       38855 :   const int P = maps.ndof;</span></span>
+<span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC">       38855 :   const int Q = maps.nqpt;</span></span>
 <span id="L24"><span class="lineNum">      24</span>              :   mfem::Vector qX(Q), qW(Q);</span>
 <span id="L25"><span class="lineNum">      25</span>              :   double w_sum = 0.0;</span>
-<span id="L26"><span class="lineNum">      26</span> <span class="tlaGNC">      166051 :   for (int i = 0; i &lt; Q; i++)</span></span>
+<span id="L26"><span class="lineNum">      26</span> <span class="tlaGNC">      166915 :   for (int i = 0; i &lt; Q; i++)</span></span>
 <span id="L27"><span class="lineNum">      27</span>              :   {</span>
 <span id="L28"><span class="lineNum">      28</span>              :     const mfem::IntegrationPoint &amp;ip = ir.IntPoint(i);</span>
-<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">      127412 :     qX(i) = ip.x;</span></span>
-<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">      127412 :     qW(i) = ip.weight;</span></span>
-<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">      127412 :     w_sum += ip.weight;</span></span>
+<span id="L29"><span class="lineNum">      29</span> <span class="tlaGNC">      128060 :     qX(i) = ip.x;</span></span>
+<span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">      128060 :     qW(i) = ip.weight;</span></span>
+<span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">      128060 :     w_sum += ip.weight;</span></span>
 <span id="L32"><span class="lineNum">      32</span>              :   }</span>
-<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">       38639 :   qW *= 1.0 / w_sum;</span></span>
+<span id="L33"><span class="lineNum">      33</span> <span class="tlaGNC">       38855 :   qW *= 1.0 / w_sum;</span></span>
 <span id="L34"><span class="lineNum">      34</span>              : </span>
-<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">       38639 :   PalaceCeedCall(ceed, CeedBasisCreateTensorH1(ceed, dim, num_comp, P, Q, maps.Bt.GetData(),</span></span>
+<span id="L35"><span class="lineNum">      35</span> <span class="tlaGNC">       38855 :   PalaceCeedCall(ceed, CeedBasisCreateTensorH1(ceed, dim, num_comp, P, Q, maps.Bt.GetData(),</span></span>
 <span id="L36"><span class="lineNum">      36</span>              :                                                maps.Gt.GetData(), qX.GetData(),</span>
 <span id="L37"><span class="lineNum">      37</span>              :                                                qW.GetData(), basis));</span>
-<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">       38639 : }</span></span>
+<span id="L38"><span class="lineNum">      38</span> <span class="tlaGNC">       38855 : }</span></span>
 <span id="L39"><span class="lineNum">      39</span>              : </span>
-<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">       40394 : void InitNonTensorBasis(const mfem::FiniteElement &amp;fe, const mfem::IntegrationRule &amp;ir,</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">       40790 : void InitNonTensorBasis(const mfem::FiniteElement &amp;fe, const mfem::IntegrationRule &amp;ir,</span></span>
 <span id="L41"><span class="lineNum">      41</span>              :                         CeedInt num_comp, Ceed ceed, CeedBasis *basis)</span>
 <span id="L42"><span class="lineNum">      42</span>              : {</span>
-<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">       40394 :   const mfem::DofToQuad &amp;maps = fe.GetDofToQuad(ir, mfem::DofToQuad::FULL);</span></span>
+<span id="L43"><span class="lineNum">      43</span> <span class="tlaGNC">       40790 :   const mfem::DofToQuad &amp;maps = fe.GetDofToQuad(ir, mfem::DofToQuad::FULL);</span></span>
 <span id="L44"><span class="lineNum">      44</span>              :   const int dim = fe.GetDim();</span>
-<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">       40394 :   const int P = maps.ndof;</span></span>
-<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC">       40394 :   const int Q = maps.nqpt;</span></span>
-<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">       40394 :   mfem::DenseMatrix qX(dim, Q);</span></span>
+<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">       40790 :   const int P = maps.ndof;</span></span>
+<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC">       40790 :   const int Q = maps.nqpt;</span></span>
+<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">       40790 :   mfem::DenseMatrix qX(dim, Q);</span></span>
 <span id="L48"><span class="lineNum">      48</span>              :   mfem::Vector qW(Q);</span>
-<span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC">      990405 :   for (int i = 0; i &lt; Q; i++)</span></span>
+<span id="L49"><span class="lineNum">      49</span> <span class="tlaGNC">      994569 :   for (int i = 0; i &lt; Q; i++)</span></span>
 <span id="L50"><span class="lineNum">      50</span>              :   {</span>
 <span id="L51"><span class="lineNum">      51</span>              :     const mfem::IntegrationPoint &amp;ip = ir.IntPoint(i);</span>
-<span id="L52"><span class="lineNum">      52</span> <span class="tlaGNC">      950011 :     qX(0, i) = ip.x;</span></span>
-<span id="L53"><span class="lineNum">      53</span> <span class="tlaGNC">      950011 :     if (dim &gt; 1)</span></span>
+<span id="L52"><span class="lineNum">      52</span> <span class="tlaGNC">      953779 :     qX(0, i) = ip.x;</span></span>
+<span id="L53"><span class="lineNum">      53</span> <span class="tlaGNC">      953779 :     if (dim &gt; 1)</span></span>
 <span id="L54"><span class="lineNum">      54</span>              :     {</span>
-<span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC">      948811 :       qX(1, i) = ip.y;</span></span>
+<span id="L55"><span class="lineNum">      55</span> <span class="tlaGNC">      952579 :       qX(1, i) = ip.y;</span></span>
 <span id="L56"><span class="lineNum">      56</span>              :     }</span>
-<span id="L57"><span class="lineNum">      57</span> <span class="tlaGNC">      948811 :     if (dim &gt; 2)</span></span>
+<span id="L57"><span class="lineNum">      57</span> <span class="tlaGNC">      952579 :     if (dim &gt; 2)</span></span>
 <span id="L58"><span class="lineNum">      58</span>              :     {</span>
-<span id="L59"><span class="lineNum">      59</span> <span class="tlaGNC">      741894 :       qX(2, i) = ip.z;</span></span>
+<span id="L59"><span class="lineNum">      59</span> <span class="tlaGNC">      743406 :       qX(2, i) = ip.z;</span></span>
 <span id="L60"><span class="lineNum">      60</span>              :     }</span>
-<span id="L61"><span class="lineNum">      61</span> <span class="tlaGNC">      950011 :     qW(i) = ip.weight;</span></span>
+<span id="L61"><span class="lineNum">      61</span> <span class="tlaGNC">      953779 :     qW(i) = ip.weight;</span></span>
 <span id="L62"><span class="lineNum">      62</span>              :   }</span>
 <span id="L63"><span class="lineNum">      63</span>              : </span>
-<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC">       40394 :   if (fe.GetMapType() == mfem::FiniteElement::H_DIV)</span></span>
+<span id="L64"><span class="lineNum">      64</span> <span class="tlaGNC">       40790 :   if (fe.GetMapType() == mfem::FiniteElement::H_DIV)</span></span>
 <span id="L65"><span class="lineNum">      65</span>              :   {</span>
 <span id="L66"><span class="lineNum">      66</span> <span class="tlaGNC">        4623 :     PalaceCeedCall(ceed,</span></span>
 <span id="L67"><span class="lineNum">      67</span>              :                    CeedBasisCreateHdiv(ceed, GetCeedTopology(fe.GetGeomType()), num_comp, P,</span>
 <span id="L68"><span class="lineNum">      68</span>              :                                        Q, maps.Bt.GetData(), maps.Gt.GetData(),</span>
 <span id="L69"><span class="lineNum">      69</span>              :                                        qX.GetData(), qW.GetData(), basis));</span>
 <span id="L70"><span class="lineNum">      70</span>              :   }</span>
-<span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC">       35771 :   else if (fe.GetMapType() == mfem::FiniteElement::H_CURL)</span></span>
+<span id="L71"><span class="lineNum">      71</span> <span class="tlaGNC">       36167 :   else if (fe.GetMapType() == mfem::FiniteElement::H_CURL)</span></span>
 <span id="L72"><span class="lineNum">      72</span>              :   {</span>
-<span id="L73"><span class="lineNum">      73</span> <span class="tlaGNC">        8470 :     PalaceCeedCall(ceed,</span></span>
+<span id="L73"><span class="lineNum">      73</span> <span class="tlaGNC">        8650 :     PalaceCeedCall(ceed,</span></span>
 <span id="L74"><span class="lineNum">      74</span>              :                    CeedBasisCreateHcurl(ceed, GetCeedTopology(fe.GetGeomType()), num_comp,</span>
 <span id="L75"><span class="lineNum">      75</span>              :                                         P, Q, maps.Bt.GetData(), maps.Gt.GetData(),</span>
 <span id="L76"><span class="lineNum">      76</span>              :                                         qX.GetData(), qW.GetData(), basis));</span>
 <span id="L77"><span class="lineNum">      77</span>              :   }</span>
 <span id="L78"><span class="lineNum">      78</span>              :   else</span>
 <span id="L79"><span class="lineNum">      79</span>              :   {</span>
-<span id="L80"><span class="lineNum">      80</span> <span class="tlaGNC">       27301 :     PalaceCeedCall(ceed,</span></span>
+<span id="L80"><span class="lineNum">      80</span> <span class="tlaGNC">       27517 :     PalaceCeedCall(ceed,</span></span>
 <span id="L81"><span class="lineNum">      81</span>              :                    CeedBasisCreateH1(ceed, GetCeedTopology(fe.GetGeomType()), num_comp, P,</span>
 <span id="L82"><span class="lineNum">      82</span>              :                                      Q, maps.Bt.GetData(), maps.Gt.GetData(), qX.GetData(),</span>
 <span id="L83"><span class="lineNum">      83</span>              :                                      qW.GetData(), basis));</span>
 <span id="L84"><span class="lineNum">      84</span>              :   }</span>
-<span id="L85"><span class="lineNum">      85</span> <span class="tlaGNC">       40394 : }</span></span>
+<span id="L85"><span class="lineNum">      85</span> <span class="tlaGNC">       40790 : }</span></span>
 <span id="L86"><span class="lineNum">      86</span>              : </span>
 <span id="L87"><span class="lineNum">      87</span>              : PalacePragmaDiagnosticPush</span>
 <span id="L88"><span class="lineNum">      88</span>              : PalacePragmaDiagnosticDisableUnused</span>
@@ -236,24 +236,24 @@
 <span id="L166"><span class="lineNum">     166</span>              : </span>
 <span id="L167"><span class="lineNum">     167</span>              : }  // namespace</span>
 <span id="L168"><span class="lineNum">     168</span>              : </span>
-<span id="L169"><span class="lineNum">     169</span> <span class="tlaGNC">       79033 : void InitBasis(const mfem::FiniteElement &amp;fe, const mfem::IntegrationRule &amp;ir,</span></span>
+<span id="L169"><span class="lineNum">     169</span> <span class="tlaGNC">       79645 : void InitBasis(const mfem::FiniteElement &amp;fe, const mfem::IntegrationRule &amp;ir,</span></span>
 <span id="L170"><span class="lineNum">     170</span>              :                CeedInt num_comp, Ceed ceed, CeedBasis *basis)</span>
 <span id="L171"><span class="lineNum">     171</span>              : {</span>
 <span id="L172"><span class="lineNum">     172</span>              :   if constexpr (false)</span>
 <span id="L173"><span class="lineNum">     173</span>              :   {</span>
 <span id="L174"><span class="lineNum">     174</span>              :     std::cout &lt;&lt; &quot;New basis (&quot; &lt;&lt; ceed &lt;&lt; &quot;, &quot; &lt;&lt; &amp;fe &lt;&lt; &quot;, &quot; &lt;&lt; &amp;ir &lt;&lt; &quot;)\n&quot;;</span>
 <span id="L175"><span class="lineNum">     175</span>              :   }</span>
-<span id="L176"><span class="lineNum">     176</span> <span class="tlaGNC">       79033 :   const bool tensor = dynamic_cast&lt;const mfem::TensorBasisElement *&gt;(&amp;fe) != nullptr;</span></span>
+<span id="L176"><span class="lineNum">     176</span> <span class="tlaGNC">       79645 :   const bool tensor = dynamic_cast&lt;const mfem::TensorBasisElement *&gt;(&amp;fe) != nullptr;</span></span>
 <span id="L177"><span class="lineNum">     177</span>              :   const bool vector = fe.GetRangeType() == mfem::FiniteElement::VECTOR;</span>
-<span id="L178"><span class="lineNum">     178</span> <span class="tlaGNC">       79033 :   if (tensor &amp;&amp; !vector)</span></span>
+<span id="L178"><span class="lineNum">     178</span> <span class="tlaGNC">       79645 :   if (tensor &amp;&amp; !vector)</span></span>
 <span id="L179"><span class="lineNum">     179</span>              :   {</span>
-<span id="L180"><span class="lineNum">     180</span> <span class="tlaGNC">       38639 :     InitTensorBasis(fe, ir, num_comp, ceed, basis);</span></span>
+<span id="L180"><span class="lineNum">     180</span> <span class="tlaGNC">       38855 :     InitTensorBasis(fe, ir, num_comp, ceed, basis);</span></span>
 <span id="L181"><span class="lineNum">     181</span>              :   }</span>
 <span id="L182"><span class="lineNum">     182</span>              :   else</span>
 <span id="L183"><span class="lineNum">     183</span>              :   {</span>
-<span id="L184"><span class="lineNum">     184</span> <span class="tlaGNC">       40394 :     InitNonTensorBasis(fe, ir, num_comp, ceed, basis);</span></span>
+<span id="L184"><span class="lineNum">     184</span> <span class="tlaGNC">       40790 :     InitNonTensorBasis(fe, ir, num_comp, ceed, basis);</span></span>
 <span id="L185"><span class="lineNum">     185</span>              :   }</span>
-<span id="L186"><span class="lineNum">     186</span> <span class="tlaGNC">       79033 : }</span></span>
+<span id="L186"><span class="lineNum">     186</span> <span class="tlaGNC">       79645 : }</span></span>
 <span id="L187"><span class="lineNum">     187</span>              : </span>
 <span id="L188"><span class="lineNum">     188</span> <span class="tlaGNC">        1342 : void InitInterpolatorBasis(const mfem::FiniteElement &amp;trial_fe,</span></span>
 <span id="L189"><span class="lineNum">     189</span>              :                            const mfem::FiniteElement &amp;test_fe, CeedInt trial_num_comp,</span>

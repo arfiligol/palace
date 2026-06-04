@@ -37,12 +37,12 @@
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2026-05-15 18:39:30</td>
+            <td class="headerValue">2026-06-04 21:57:07</td>
             <td></td>
             <td class="headerItem">Functions:</td>
-            <td class="headerCovTableEntryLo">10.0&nbsp;%</td>
+            <td class="headerCovTableEntryLo">20.0&nbsp;%</td>
             <td class="headerCovTableEntry">10</td>
-            <td class="headerCovTableEntry">1</td>
+            <td class="headerCovTableEntry">2</td>
           </tr>
           <tr>
             <td class="headerItem">Legend:</td>
@@ -103,11 +103,11 @@
 <span id="L33"><span class="lineNum">      33</span>              :   bool initial_guess;</span>
 <span id="L34"><span class="lineNum">      34</span>              : </span>
 <span id="L35"><span class="lineNum">      35</span>              : public:</span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC tlaBgGNC">         137 :   Solver(bool initial_guess = false) : OperType(), initial_guess(initial_guess) {}</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC tlaBgGNC">         753 :   Solver(bool initial_guess = false) : OperType(), initial_guess(initial_guess) {}</span></span>
 <span id="L37"><span class="lineNum">      37</span>              :   virtual ~Solver() = default;</span>
 <span id="L38"><span class="lineNum">      38</span>              : </span>
 <span id="L39"><span class="lineNum">      39</span>              :   // Configure whether or not to use an initial guess when applying the solver.</span>
-<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">          62 :   virtual void SetInitialGuess(bool guess) { initial_guess = guess; }</span></span>
+<span id="L40"><span class="lineNum">      40</span> <span class="tlaGNC">         370 :   virtual void SetInitialGuess(bool guess) { initial_guess = guess; }</span></span>
 <span id="L41"><span class="lineNum">      41</span>              : </span>
 <span id="L42"><span class="lineNum">      42</span>              :   // Set the operator associated with the solver, or update it if called repeatedly.</span>
 <span id="L43"><span class="lineNum">      43</span>              :   virtual void SetOperator(const OperType &amp;op) = 0;</span>

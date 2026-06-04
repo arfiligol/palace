@@ -31,18 +31,18 @@
             <td class="headerValue">Palace Coverage Report</td>
             <td></td>
             <td class="headerItem">Lines:</td>
-            <td class="headerCovTableEntryLo">43.5&nbsp;%</td>
+            <td class="headerCovTableEntryLo">46.7&nbsp;%</td>
             <td class="headerCovTableEntry">409</td>
-            <td class="headerCovTableEntry">178</td>
+            <td class="headerCovTableEntry">191</td>
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2026-05-15 18:39:30</td>
+            <td class="headerValue">2026-06-04 21:57:07</td>
             <td></td>
             <td class="headerItem">Functions:</td>
-            <td class="headerCovTableEntryLo">36.4&nbsp;%</td>
+            <td class="headerCovTableEntryLo">38.2&nbsp;%</td>
             <td class="headerCovTableEntry">55</td>
-            <td class="headerCovTableEntry">20</td>
+            <td class="headerCovTableEntry">21</td>
           </tr>
           <tr>
             <td class="headerItem">Legend:</td>
@@ -79,23 +79,23 @@
 <span id="L9"><span class="lineNum">       9</span>              : namespace palace</span>
 <span id="L10"><span class="lineNum">      10</span>              : {</span>
 <span id="L11"><span class="lineNum">      11</span>              : </span>
-<span id="L12"><span class="lineNum">      12</span> <span class="tlaGNC tlaBgGNC">         262 : ParOperator::ParOperator(std::unique_ptr&lt;Operator&gt; &amp;&amp;dA, const Operator *pA,</span></span>
+<span id="L12"><span class="lineNum">      12</span> <span class="tlaGNC tlaBgGNC">         570 : ParOperator::ParOperator(std::unique_ptr&lt;Operator&gt; &amp;&amp;dA, const Operator *pA,</span></span>
 <span id="L13"><span class="lineNum">      13</span>              :                          const FiniteElementSpace &amp;trial_fespace,</span>
-<span id="L14"><span class="lineNum">      14</span> <span class="tlaGNC">         262 :                          const FiniteElementSpace &amp;test_fespace, bool test_restrict)</span></span>
+<span id="L14"><span class="lineNum">      14</span> <span class="tlaGNC">         570 :                          const FiniteElementSpace &amp;test_fespace, bool test_restrict)</span></span>
 <span id="L15"><span class="lineNum">      15</span>              :   : Operator(test_fespace.GetTrueVSize(), trial_fespace.GetTrueVSize()),</span>
-<span id="L16"><span class="lineNum">      16</span> <span class="tlaGNC">         262 :     data_A(std::move(dA)), A((data_A != nullptr) ? data_A.get() : pA),</span></span>
-<span id="L17"><span class="lineNum">      17</span> <span class="tlaGNC">         262 :     trial_fespace(trial_fespace), test_fespace(test_fespace), use_R(test_restrict),</span></span>
-<span id="L18"><span class="lineNum">      18</span> <span class="tlaGNC">         413 :     diag_policy(DiagonalPolicy::DIAG_ONE), RAP(nullptr)</span></span>
+<span id="L16"><span class="lineNum">      16</span> <span class="tlaGNC">         570 :     data_A(std::move(dA)), A((data_A != nullptr) ? data_A.get() : pA),</span></span>
+<span id="L17"><span class="lineNum">      17</span> <span class="tlaGNC">         570 :     trial_fespace(trial_fespace), test_fespace(test_fespace), use_R(test_restrict),</span></span>
+<span id="L18"><span class="lineNum">      18</span> <span class="tlaGNC">        1029 :     diag_policy(DiagonalPolicy::DIAG_ONE), RAP(nullptr)</span></span>
 <span id="L19"><span class="lineNum">      19</span>              : {</span>
-<span id="L20"><span class="lineNum">      20</span> <span class="tlaGNC">         262 :   MFEM_VERIFY(A, &quot;Cannot construct ParOperator from an empty matrix!&quot;);</span></span>
-<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC">         262 : }</span></span>
+<span id="L20"><span class="lineNum">      20</span> <span class="tlaGNC">         570 :   MFEM_VERIFY(A, &quot;Cannot construct ParOperator from an empty matrix!&quot;);</span></span>
+<span id="L21"><span class="lineNum">      21</span> <span class="tlaGNC">         570 : }</span></span>
 <span id="L22"><span class="lineNum">      22</span>              : </span>
-<span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC">         151 : ParOperator::ParOperator(std::unique_ptr&lt;Operator&gt; &amp;&amp;A,</span></span>
+<span id="L23"><span class="lineNum">      23</span> <span class="tlaGNC">         459 : ParOperator::ParOperator(std::unique_ptr&lt;Operator&gt; &amp;&amp;A,</span></span>
 <span id="L24"><span class="lineNum">      24</span>              :                          const FiniteElementSpace &amp;trial_fespace,</span>
-<span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC">         151 :                          const FiniteElementSpace &amp;test_fespace, bool test_restrict)</span></span>
-<span id="L26"><span class="lineNum">      26</span> <span class="tlaGNC">         151 :   : ParOperator(std::move(A), nullptr, trial_fespace, test_fespace, test_restrict)</span></span>
+<span id="L25"><span class="lineNum">      25</span> <span class="tlaGNC">         459 :                          const FiniteElementSpace &amp;test_fespace, bool test_restrict)</span></span>
+<span id="L26"><span class="lineNum">      26</span> <span class="tlaGNC">         459 :   : ParOperator(std::move(A), nullptr, trial_fespace, test_fespace, test_restrict)</span></span>
 <span id="L27"><span class="lineNum">      27</span>              : {</span>
-<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC">         151 : }</span></span>
+<span id="L28"><span class="lineNum">      28</span> <span class="tlaGNC">         459 : }</span></span>
 <span id="L29"><span class="lineNum">      29</span>              : </span>
 <span id="L30"><span class="lineNum">      30</span> <span class="tlaGNC">         111 : ParOperator::ParOperator(const Operator &amp;A, const FiniteElementSpace &amp;trial_fespace,</span></span>
 <span id="L31"><span class="lineNum">      31</span> <span class="tlaGNC">         111 :                          const FiniteElementSpace &amp;test_fespace, bool test_restrict)</span></span>
@@ -103,18 +103,18 @@
 <span id="L33"><span class="lineNum">      33</span>              : {</span>
 <span id="L34"><span class="lineNum">      34</span> <span class="tlaGNC">         111 : }</span></span>
 <span id="L35"><span class="lineNum">      35</span>              : </span>
-<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">         124 : void ParOperator::SetEssentialTrueDofs(const mfem::Array&lt;int&gt; &amp;tdof_list,</span></span>
+<span id="L36"><span class="lineNum">      36</span> <span class="tlaGNC">         432 : void ParOperator::SetEssentialTrueDofs(const mfem::Array&lt;int&gt; &amp;tdof_list,</span></span>
 <span id="L37"><span class="lineNum">      37</span>              :                                        DiagonalPolicy policy)</span>
 <span id="L38"><span class="lineNum">      38</span>              : {</span>
-<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">         124 :   MFEM_VERIFY(policy == DiagonalPolicy::DIAG_ONE || policy == DiagonalPolicy::DIAG_ZERO,</span></span>
+<span id="L39"><span class="lineNum">      39</span> <span class="tlaGNC">         432 :   MFEM_VERIFY(policy == DiagonalPolicy::DIAG_ONE || policy == DiagonalPolicy::DIAG_ZERO,</span></span>
 <span id="L40"><span class="lineNum">      40</span>              :               &quot;Essential boundary condition true dof elimination for ParOperator supports &quot;</span>
 <span id="L41"><span class="lineNum">      41</span>              :               &quot;only DiagonalPolicy::DIAG_ONE or DiagonalPolicy::DIAG_ZERO!&quot;);</span>
-<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">         124 :   MFEM_VERIFY(height == width, &quot;Set essential true dofs for both test and trial spaces &quot;</span></span>
+<span id="L42"><span class="lineNum">      42</span> <span class="tlaGNC">         432 :   MFEM_VERIFY(height == width, &quot;Set essential true dofs for both test and trial spaces &quot;</span></span>
 <span id="L43"><span class="lineNum">      43</span>              :                                &quot;for rectangular ParOperator!&quot;);</span>
 <span id="L44"><span class="lineNum">      44</span>              :   tdof_list.Read();</span>
-<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">         124 :   dbc_tdof_list.MakeRef(tdof_list);</span></span>
-<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC">         124 :   diag_policy = policy;</span></span>
-<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">         124 : }</span></span>
+<span id="L45"><span class="lineNum">      45</span> <span class="tlaGNC">         432 :   dbc_tdof_list.MakeRef(tdof_list);</span></span>
+<span id="L46"><span class="lineNum">      46</span> <span class="tlaGNC">         432 :   diag_policy = policy;</span></span>
+<span id="L47"><span class="lineNum">      47</span> <span class="tlaGNC">         432 : }</span></span>
 <span id="L48"><span class="lineNum">      48</span>              : </span>
 <span id="L49"><span class="lineNum">      49</span> <span class="tlaUNC tlaBgUNC">           0 : Operator::DiagonalPolicy ParOperator::GetDiagonalPolicy() const</span></span>
 <span id="L50"><span class="lineNum">      50</span>              : {</span>
@@ -221,65 +221,65 @@
 <span id="L151"><span class="lineNum">     151</span>              :   return *RAP;</span>
 <span id="L152"><span class="lineNum">     152</span>              : }</span>
 <span id="L153"><span class="lineNum">     153</span>              : </span>
-<span id="L154"><span class="lineNum">     154</span> <span class="tlaUNC tlaBgUNC">           0 : void ParOperator::AssembleDiagonal(Vector &amp;diag) const</span></span>
+<span id="L154"><span class="lineNum">     154</span> <span class="tlaGNC">         308 : void ParOperator::AssembleDiagonal(Vector &amp;diag) const</span></span>
 <span id="L155"><span class="lineNum">     155</span>              : {</span>
-<span id="L156"><span class="lineNum">     156</span> <span class="tlaUNC">           0 :   diag.UseDevice(true);</span></span>
-<span id="L157"><span class="lineNum">     157</span> <span class="tlaUNC">           0 :   if (RAP)</span></span>
+<span id="L156"><span class="lineNum">     156</span> <span class="tlaGNC">         308 :   diag.UseDevice(true);</span></span>
+<span id="L157"><span class="lineNum">     157</span> <span class="tlaGNC">         308 :   if (RAP)</span></span>
 <span id="L158"><span class="lineNum">     158</span>              :   {</span>
-<span id="L159"><span class="lineNum">     159</span> <span class="tlaUNC">           0 :     RAP-&gt;AssembleDiagonal(diag);</span></span>
+<span id="L159"><span class="lineNum">     159</span> <span class="tlaUNC tlaBgUNC">           0 :     RAP-&gt;AssembleDiagonal(diag);</span></span>
 <span id="L160"><span class="lineNum">     160</span> <span class="tlaUNC">           0 :     return;</span></span>
 <span id="L161"><span class="lineNum">     161</span>              :   }</span>
 <span id="L162"><span class="lineNum">     162</span>              : </span>
 <span id="L163"><span class="lineNum">     163</span>              :   // For an AMR mesh, a convergent diagonal is assembled with |P|ᵀ dₗ, where |P| has</span>
 <span id="L164"><span class="lineNum">     164</span>              :   // entry-wise absolute values of the conforming prolongation operator.</span>
-<span id="L165"><span class="lineNum">     165</span> <span class="tlaUNC">           0 :   MFEM_VERIFY(&amp;trial_fespace == &amp;test_fespace,</span></span>
+<span id="L165"><span class="lineNum">     165</span> <span class="tlaGNC tlaBgGNC">         308 :   MFEM_VERIFY(&amp;trial_fespace == &amp;test_fespace,</span></span>
 <span id="L166"><span class="lineNum">     166</span>              :               &quot;Diagonal assembly is only available for square ParOperator!&quot;);</span>
 <span id="L167"><span class="lineNum">     167</span>              :   auto &amp;lx = trial_fespace.GetLVector&lt;Vector&gt;();</span>
-<span id="L168"><span class="lineNum">     168</span> <span class="tlaUNC">           0 :   A-&gt;AssembleDiagonal(lx);</span></span>
+<span id="L168"><span class="lineNum">     168</span> <span class="tlaGNC">         308 :   A-&gt;AssembleDiagonal(lx);</span></span>
 <span id="L169"><span class="lineNum">     169</span>              : </span>
 <span id="L170"><span class="lineNum">     170</span>              :   // Parallel assemble and eliminate essential true dofs.</span>
-<span id="L171"><span class="lineNum">     171</span> <span class="tlaUNC">           0 :   const Operator *P = test_fespace.GetProlongationMatrix();</span></span>
-<span id="L172"><span class="lineNum">     172</span> <span class="tlaUNC">           0 :   if (const auto *hP = dynamic_cast&lt;const mfem::HypreParMatrix *&gt;(P))</span></span>
+<span id="L171"><span class="lineNum">     171</span> <span class="tlaGNC">         308 :   const Operator *P = test_fespace.GetProlongationMatrix();</span></span>
+<span id="L172"><span class="lineNum">     172</span> <span class="tlaGNC">         308 :   if (const auto *hP = dynamic_cast&lt;const mfem::HypreParMatrix *&gt;(P))</span></span>
 <span id="L173"><span class="lineNum">     173</span>              :   {</span>
-<span id="L174"><span class="lineNum">     174</span> <span class="tlaUNC">           0 :     hP-&gt;AbsMultTranspose(1.0, lx, 0.0, diag);</span></span>
+<span id="L174"><span class="lineNum">     174</span> <span class="tlaGNC">          64 :     hP-&gt;AbsMultTranspose(1.0, lx, 0.0, diag);</span></span>
 <span id="L175"><span class="lineNum">     175</span>              :   }</span>
 <span id="L176"><span class="lineNum">     176</span>              :   else</span>
 <span id="L177"><span class="lineNum">     177</span>              :   {</span>
-<span id="L178"><span class="lineNum">     178</span> <span class="tlaUNC">           0 :     P-&gt;MultTranspose(lx, diag);</span></span>
+<span id="L178"><span class="lineNum">     178</span> <span class="tlaGNC">         244 :     P-&gt;MultTranspose(lx, diag);</span></span>
 <span id="L179"><span class="lineNum">     179</span>              :   }</span>
 <span id="L180"><span class="lineNum">     180</span>              : </span>
 <span id="L181"><span class="lineNum">     181</span>              :   // Eliminate essential true dofs.</span>
-<span id="L182"><span class="lineNum">     182</span> <span class="tlaUNC">           0 :   if (dbc_tdof_list.Size())</span></span>
+<span id="L182"><span class="lineNum">     182</span> <span class="tlaGNC">         308 :   if (dbc_tdof_list.Size())</span></span>
 <span id="L183"><span class="lineNum">     183</span>              :   {</span>
-<span id="L184"><span class="lineNum">     184</span> <span class="tlaUNC">           0 :     if (diag_policy == DiagonalPolicy::DIAG_ONE)</span></span>
+<span id="L184"><span class="lineNum">     184</span> <span class="tlaGNC">         308 :     if (diag_policy == DiagonalPolicy::DIAG_ONE)</span></span>
 <span id="L185"><span class="lineNum">     185</span>              :     {</span>
-<span id="L186"><span class="lineNum">     186</span> <span class="tlaUNC">           0 :       linalg::SetSubVector(diag, dbc_tdof_list, 1.0);</span></span>
+<span id="L186"><span class="lineNum">     186</span> <span class="tlaGNC">         308 :       linalg::SetSubVector(diag, dbc_tdof_list, 1.0);</span></span>
 <span id="L187"><span class="lineNum">     187</span>              :     }</span>
-<span id="L188"><span class="lineNum">     188</span> <span class="tlaUNC">           0 :     else if (diag_policy == DiagonalPolicy::DIAG_ZERO)</span></span>
+<span id="L188"><span class="lineNum">     188</span> <span class="tlaUNC tlaBgUNC">           0 :     else if (diag_policy == DiagonalPolicy::DIAG_ZERO)</span></span>
 <span id="L189"><span class="lineNum">     189</span>              :     {</span>
 <span id="L190"><span class="lineNum">     190</span> <span class="tlaUNC">           0 :       linalg::SetSubVector(diag, dbc_tdof_list, 0.0);</span></span>
 <span id="L191"><span class="lineNum">     191</span>              :     }</span>
 <span id="L192"><span class="lineNum">     192</span>              :   }</span>
 <span id="L193"><span class="lineNum">     193</span>              : }</span>
 <span id="L194"><span class="lineNum">     194</span>              : </span>
-<span id="L195"><span class="lineNum">     195</span> <span class="tlaGNC tlaBgGNC">       16670 : void ParOperator::Mult(const Vector &amp;x, Vector &amp;y) const</span></span>
+<span id="L195"><span class="lineNum">     195</span> <span class="tlaGNC tlaBgGNC">       21183 : void ParOperator::Mult(const Vector &amp;x, Vector &amp;y) const</span></span>
 <span id="L196"><span class="lineNum">     196</span>              : {</span>
 <span id="L197"><span class="lineNum">     197</span>              :   MFEM_ASSERT(x.Size() == width &amp;&amp; y.Size() == height,</span>
 <span id="L198"><span class="lineNum">     198</span>              :               &quot;Incompatible dimensions for ParOperator::Mult!&quot;);</span>
-<span id="L199"><span class="lineNum">     199</span> <span class="tlaGNC">       16670 :   if (RAP)</span></span>
+<span id="L199"><span class="lineNum">     199</span> <span class="tlaGNC">       21183 :   if (RAP)</span></span>
 <span id="L200"><span class="lineNum">     200</span>              :   {</span>
 <span id="L201"><span class="lineNum">     201</span> <span class="tlaUNC tlaBgUNC">           0 :     RAP-&gt;Mult(x, y);</span></span>
 <span id="L202"><span class="lineNum">     202</span> <span class="tlaUNC">           0 :     return;</span></span>
 <span id="L203"><span class="lineNum">     203</span>              :   }</span>
 <span id="L204"><span class="lineNum">     204</span>              : </span>
-<span id="L205"><span class="lineNum">     205</span> <span class="tlaGNC tlaBgGNC">       16670 :   auto &amp;lx = trial_fespace.GetLVector&lt;Vector&gt;();</span></span>
-<span id="L206"><span class="lineNum">     206</span> <span class="tlaGNC">       16670 :   auto &amp;ly = GetTestLVector();</span></span>
-<span id="L207"><span class="lineNum">     207</span> <span class="tlaGNC">       16670 :   if (dbc_tdof_list.Size())</span></span>
+<span id="L205"><span class="lineNum">     205</span> <span class="tlaGNC tlaBgGNC">       21183 :   auto &amp;lx = trial_fespace.GetLVector&lt;Vector&gt;();</span></span>
+<span id="L206"><span class="lineNum">     206</span> <span class="tlaGNC">       21183 :   auto &amp;ly = GetTestLVector();</span></span>
+<span id="L207"><span class="lineNum">     207</span> <span class="tlaGNC">       21183 :   if (dbc_tdof_list.Size())</span></span>
 <span id="L208"><span class="lineNum">     208</span>              :   {</span>
-<span id="L209"><span class="lineNum">     209</span> <span class="tlaGNC">       12562 :     auto &amp;tx = trial_fespace.GetTVector&lt;Vector&gt;();</span></span>
-<span id="L210"><span class="lineNum">     210</span> <span class="tlaGNC">       12562 :     tx = x;</span></span>
-<span id="L211"><span class="lineNum">     211</span> <span class="tlaGNC">       12562 :     linalg::SetSubVector(tx, dbc_tdof_list, 0.0);</span></span>
-<span id="L212"><span class="lineNum">     212</span> <span class="tlaGNC">       12562 :     trial_fespace.GetProlongationMatrix()-&gt;Mult(tx, lx);</span></span>
+<span id="L209"><span class="lineNum">     209</span> <span class="tlaGNC">       17075 :     auto &amp;tx = trial_fespace.GetTVector&lt;Vector&gt;();</span></span>
+<span id="L210"><span class="lineNum">     210</span> <span class="tlaGNC">       17075 :     tx = x;</span></span>
+<span id="L211"><span class="lineNum">     211</span> <span class="tlaGNC">       17075 :     linalg::SetSubVector(tx, dbc_tdof_list, 0.0);</span></span>
+<span id="L212"><span class="lineNum">     212</span> <span class="tlaGNC">       17075 :     trial_fespace.GetProlongationMatrix()-&gt;Mult(tx, lx);</span></span>
 <span id="L213"><span class="lineNum">     213</span>              :   }</span>
 <span id="L214"><span class="lineNum">     214</span>              :   else</span>
 <span id="L215"><span class="lineNum">     215</span>              :   {</span>
@@ -287,16 +287,16 @@
 <span id="L217"><span class="lineNum">     217</span>              :   }</span>
 <span id="L218"><span class="lineNum">     218</span>              : </span>
 <span id="L219"><span class="lineNum">     219</span>              :   // Apply the operator on the L-vector.</span>
-<span id="L220"><span class="lineNum">     220</span> <span class="tlaGNC">       16670 :   A-&gt;Mult(lx, ly);</span></span>
+<span id="L220"><span class="lineNum">     220</span> <span class="tlaGNC">       21183 :   A-&gt;Mult(lx, ly);</span></span>
 <span id="L221"><span class="lineNum">     221</span>              : </span>
-<span id="L222"><span class="lineNum">     222</span> <span class="tlaGNC">       16670 :   RestrictionMatrixMult(ly, y);</span></span>
-<span id="L223"><span class="lineNum">     223</span> <span class="tlaGNC">       16670 :   if (dbc_tdof_list.Size())</span></span>
+<span id="L222"><span class="lineNum">     222</span> <span class="tlaGNC">       21183 :   RestrictionMatrixMult(ly, y);</span></span>
+<span id="L223"><span class="lineNum">     223</span> <span class="tlaGNC">       21183 :   if (dbc_tdof_list.Size())</span></span>
 <span id="L224"><span class="lineNum">     224</span>              :   {</span>
-<span id="L225"><span class="lineNum">     225</span> <span class="tlaGNC">       12562 :     if (diag_policy == DiagonalPolicy::DIAG_ONE)</span></span>
+<span id="L225"><span class="lineNum">     225</span> <span class="tlaGNC">       17075 :     if (diag_policy == DiagonalPolicy::DIAG_ONE)</span></span>
 <span id="L226"><span class="lineNum">     226</span>              :     {</span>
-<span id="L227"><span class="lineNum">     227</span> <span class="tlaUNC tlaBgUNC">           0 :       linalg::SetSubVector(y, dbc_tdof_list, x);</span></span>
+<span id="L227"><span class="lineNum">     227</span> <span class="tlaGNC">        4513 :       linalg::SetSubVector(y, dbc_tdof_list, x);</span></span>
 <span id="L228"><span class="lineNum">     228</span>              :     }</span>
-<span id="L229"><span class="lineNum">     229</span> <span class="tlaGNC tlaBgGNC">       12562 :     else if (diag_policy == DiagonalPolicy::DIAG_ZERO)</span></span>
+<span id="L229"><span class="lineNum">     229</span> <span class="tlaGNC">       12562 :     else if (diag_policy == DiagonalPolicy::DIAG_ZERO)</span></span>
 <span id="L230"><span class="lineNum">     230</span>              :     {</span>
 <span id="L231"><span class="lineNum">     231</span> <span class="tlaGNC">       12562 :       linalg::SetSubVector(y, dbc_tdof_list, 0.0);</span></span>
 <span id="L232"><span class="lineNum">     232</span>              :     }</span>
@@ -430,17 +430,17 @@
 <span id="L360"><span class="lineNum">     360</span> <span class="tlaUNC">           0 :   y.Add(a, tx);</span></span>
 <span id="L361"><span class="lineNum">     361</span>              : }</span>
 <span id="L362"><span class="lineNum">     362</span>              : </span>
-<span id="L363"><span class="lineNum">     363</span> <span class="tlaGNC tlaBgGNC">       26372 : void ParOperator::RestrictionMatrixMult(const Vector &amp;ly, Vector &amp;ty) const</span></span>
+<span id="L363"><span class="lineNum">     363</span> <span class="tlaGNC tlaBgGNC">       30885 : void ParOperator::RestrictionMatrixMult(const Vector &amp;ly, Vector &amp;ty) const</span></span>
 <span id="L364"><span class="lineNum">     364</span>              : {</span>
-<span id="L365"><span class="lineNum">     365</span> <span class="tlaGNC">       26372 :   if (!use_R)</span></span>
+<span id="L365"><span class="lineNum">     365</span> <span class="tlaGNC">       30885 :   if (!use_R)</span></span>
 <span id="L366"><span class="lineNum">     366</span>              :   {</span>
-<span id="L367"><span class="lineNum">     367</span> <span class="tlaGNC">       26372 :     test_fespace.GetProlongationMatrix()-&gt;MultTranspose(ly, ty);</span></span>
+<span id="L367"><span class="lineNum">     367</span> <span class="tlaGNC">       30885 :     test_fespace.GetProlongationMatrix()-&gt;MultTranspose(ly, ty);</span></span>
 <span id="L368"><span class="lineNum">     368</span>              :   }</span>
 <span id="L369"><span class="lineNum">     369</span>              :   else</span>
 <span id="L370"><span class="lineNum">     370</span>              :   {</span>
 <span id="L371"><span class="lineNum">     371</span> <span class="tlaUNC tlaBgUNC">           0 :     test_fespace.GetRestrictionMatrix()-&gt;Mult(ly, ty);</span></span>
 <span id="L372"><span class="lineNum">     372</span>              :   }</span>
-<span id="L373"><span class="lineNum">     373</span> <span class="tlaGNC tlaBgGNC">       26372 : }</span></span>
+<span id="L373"><span class="lineNum">     373</span> <span class="tlaGNC tlaBgGNC">       30885 : }</span></span>
 <span id="L374"><span class="lineNum">     374</span>              : </span>
 <span id="L375"><span class="lineNum">     375</span> <span class="tlaUNC tlaBgUNC">           0 : void ParOperator::RestrictionMatrixMultTranspose(const Vector &amp;ty, Vector &amp;ly) const</span></span>
 <span id="L376"><span class="lineNum">     376</span>              : {</span>
@@ -454,10 +454,10 @@
 <span id="L384"><span class="lineNum">     384</span>              :   }</span>
 <span id="L385"><span class="lineNum">     385</span> <span class="tlaUNC">           0 : }</span></span>
 <span id="L386"><span class="lineNum">     386</span>              : </span>
-<span id="L387"><span class="lineNum">     387</span> <span class="tlaGNC tlaBgGNC">       26372 : Vector &amp;ParOperator::GetTestLVector() const</span></span>
+<span id="L387"><span class="lineNum">     387</span> <span class="tlaGNC tlaBgGNC">       30885 : Vector &amp;ParOperator::GetTestLVector() const</span></span>
 <span id="L388"><span class="lineNum">     388</span>              : {</span>
-<span id="L389"><span class="lineNum">     389</span> <span class="tlaGNC">       26372 :   return (&amp;trial_fespace == &amp;test_fespace) ? trial_fespace.GetLVector2&lt;Vector&gt;()</span></span>
-<span id="L390"><span class="lineNum">     390</span> <span class="tlaGNC">       26372 :                                            : test_fespace.GetLVector&lt;Vector&gt;();</span></span>
+<span id="L389"><span class="lineNum">     389</span> <span class="tlaGNC">       30885 :   return (&amp;trial_fespace == &amp;test_fespace) ? trial_fespace.GetLVector2&lt;Vector&gt;()</span></span>
+<span id="L390"><span class="lineNum">     390</span> <span class="tlaGNC">       30885 :                                            : test_fespace.GetLVector&lt;Vector&gt;();</span></span>
 <span id="L391"><span class="lineNum">     391</span>              : }</span>
 <span id="L392"><span class="lineNum">     392</span>              : </span>
 <span id="L393"><span class="lineNum">     393</span> <span class="tlaGNC">         102 : ComplexParOperator::ComplexParOperator(std::unique_ptr&lt;Operator&gt; &amp;&amp;dAr,</span></span>

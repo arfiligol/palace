@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2026-05-15 18:39:30</td>
+            <td class="headerValue">2026-06-04 21:57:07</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntryLo">37.1&nbsp;%</td>
@@ -884,19 +884,19 @@
 <span id="L814"><span class="lineNum">     814</span>              :   {</span>
 <span id="L815"><span class="lineNum">     815</span> <span class="tlaGNC">        1841 :   }</span></span>
 <span id="L816"><span class="lineNum">     816</span>              : </span>
-<span id="L817"><span class="lineNum">     817</span> <span class="tlaGNC">      198816 :   void Eval(mfem::Vector &amp;V, mfem::ElementTransformation &amp;T,</span></span>
+<span id="L817"><span class="lineNum">     817</span> <span class="tlaGNC">      303588 :   void Eval(mfem::Vector &amp;V, mfem::ElementTransformation &amp;T,</span></span>
 <span id="L818"><span class="lineNum">     818</span>              :             const mfem::IntegrationPoint &amp;ip) override</span>
 <span id="L819"><span class="lineNum">     819</span>              :   {</span>
-<span id="L820"><span class="lineNum">     820</span> <span class="tlaGNC">      198816 :     if (T.Attribute &gt; attr_marker.Size() || !attr_marker[T.Attribute - 1])</span></span>
+<span id="L820"><span class="lineNum">     820</span> <span class="tlaGNC">      303588 :     if (T.Attribute &gt; attr_marker.Size() || !attr_marker[T.Attribute - 1])</span></span>
 <span id="L821"><span class="lineNum">     821</span>              :     {</span>
-<span id="L822"><span class="lineNum">     822</span> <span class="tlaGNC">      170598 :       V.SetSize(this-&gt;vdim);</span></span>
-<span id="L823"><span class="lineNum">     823</span> <span class="tlaGNC">      170598 :       V = 0.0;</span></span>
+<span id="L822"><span class="lineNum">     822</span> <span class="tlaGNC">      277778 :       V.SetSize(this-&gt;vdim);</span></span>
+<span id="L823"><span class="lineNum">     823</span> <span class="tlaGNC">      277778 :       V = 0.0;</span></span>
 <span id="L824"><span class="lineNum">     824</span>              :     }</span>
 <span id="L825"><span class="lineNum">     825</span>              :     else</span>
 <span id="L826"><span class="lineNum">     826</span>              :     {</span>
 <span id="L827"><span class="lineNum">     827</span> <span class="tlaGNC">         324 :       Coefficient::Eval(V, T, ip);</span></span>
 <span id="L828"><span class="lineNum">     828</span>              :     }</span>
-<span id="L829"><span class="lineNum">     829</span> <span class="tlaGNC">      198816 :   }</span></span>
+<span id="L829"><span class="lineNum">     829</span> <span class="tlaGNC">      303588 :   }</span></span>
 <span id="L830"><span class="lineNum">     830</span>              : };</span>
 <span id="L831"><span class="lineNum">     831</span>              : </span>
 <span id="L832"><span class="lineNum">     832</span>              : template &lt;typename Coefficient&gt;</span>
@@ -977,19 +977,19 @@
 <span id="L907"><span class="lineNum">     907</span>              :   }</span>
 <span id="L908"><span class="lineNum">     908</span>              : </span>
 <span id="L909"><span class="lineNum">     909</span>              :   using mfem::VectorCoefficient::Eval;</span>
-<span id="L910"><span class="lineNum">     910</span> <span class="tlaGNC">       93396 :   void Eval(mfem::Vector &amp;V, mfem::ElementTransformation &amp;T,</span></span>
+<span id="L910"><span class="lineNum">     910</span> <span class="tlaGNC">      149944 :   void Eval(mfem::Vector &amp;V, mfem::ElementTransformation &amp;T,</span></span>
 <span id="L911"><span class="lineNum">     911</span>              :             const mfem::IntegrationPoint &amp;ip) override</span>
 <span id="L912"><span class="lineNum">     912</span>              :   {</span>
 <span id="L913"><span class="lineNum">     913</span>              :     double U_data[3];</span>
-<span id="L914"><span class="lineNum">     914</span> <span class="tlaGNC">       93396 :     mfem::Vector U(U_data, vdim);</span></span>
-<span id="L915"><span class="lineNum">     915</span> <span class="tlaGNC">       93396 :     V.SetSize(vdim);</span></span>
-<span id="L916"><span class="lineNum">     916</span> <span class="tlaGNC">       93396 :     V = 0.0;</span></span>
-<span id="L917"><span class="lineNum">     917</span> <span class="tlaGNC">      292212 :     for (auto &amp;[coeff, a] : c)</span></span>
+<span id="L914"><span class="lineNum">     914</span> <span class="tlaGNC">      149944 :     mfem::Vector U(U_data, vdim);</span></span>
+<span id="L915"><span class="lineNum">     915</span> <span class="tlaGNC">      149944 :     V.SetSize(vdim);</span></span>
+<span id="L916"><span class="lineNum">     916</span> <span class="tlaGNC">      149944 :     V = 0.0;</span></span>
+<span id="L917"><span class="lineNum">     917</span> <span class="tlaGNC">      453532 :     for (auto &amp;[coeff, a] : c)</span></span>
 <span id="L918"><span class="lineNum">     918</span>              :     {</span>
-<span id="L919"><span class="lineNum">     919</span> <span class="tlaGNC">      198816 :       coeff-&gt;Eval(U, T, ip);</span></span>
-<span id="L920"><span class="lineNum">     920</span> <span class="tlaGNC">      198816 :       V.Add(a, U);</span></span>
+<span id="L919"><span class="lineNum">     919</span> <span class="tlaGNC">      303588 :       coeff-&gt;Eval(U, T, ip);</span></span>
+<span id="L920"><span class="lineNum">     920</span> <span class="tlaGNC">      303588 :       V.Add(a, U);</span></span>
 <span id="L921"><span class="lineNum">     921</span>              :     }</span>
-<span id="L922"><span class="lineNum">     922</span> <span class="tlaGNC">       93396 :   }</span></span>
+<span id="L922"><span class="lineNum">     922</span> <span class="tlaGNC">      149944 :   }</span></span>
 <span id="L923"><span class="lineNum">     923</span>              : };</span>
 <span id="L924"><span class="lineNum">     924</span>              : </span>
 <span id="L925"><span class="lineNum">     925</span>              : class SumMatrixCoefficient : public mfem::MatrixCoefficient</span>

@@ -31,17 +31,17 @@
             <td class="headerValue">Palace Coverage Report</td>
             <td></td>
             <td class="headerItem">Lines:</td>
-            <td class="headerCovTableEntryLo">55.0&nbsp;%</td>
-            <td class="headerCovTableEntry">802</td>
+            <td class="headerCovTableEntryLo">57.4&nbsp;%</td>
+            <td class="headerCovTableEntry">768</td>
             <td class="headerCovTableEntry">441</td>
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2026-05-15 18:39:30</td>
+            <td class="headerValue">2026-06-04 21:57:07</td>
             <td></td>
             <td class="headerItem">Functions:</td>
-            <td class="headerCovTableEntryLo">49.0&nbsp;%</td>
-            <td class="headerCovTableEntry">149</td>
+            <td class="headerCovTableEntryLo">53.3&nbsp;%</td>
+            <td class="headerCovTableEntry">137</td>
             <td class="headerCovTableEntry">73</td>
           </tr>
           <tr>
@@ -1722,337 +1722,268 @@
 <span id="L1652"><span class="lineNum">    1652</span>              :     -&gt; std::enable_if_t&lt;U == ProblemType::BOUNDARYMODE, double&gt;</span>
 <span id="L1653"><span class="lineNum">    1653</span>              : {</span>
 <span id="L1654"><span class="lineNum">    1654</span> <span class="tlaUNC">           0 :   BlockTimer bt0(Timer::POSTPRO);</span></span>
-<span id="L1655"><span class="lineNum">    1655</span> <span class="tlaUNC">           0 :   SetEGridFunction(et);</span></span>
-<span id="L1656"><span class="lineNum">    1656</span>              : </span>
-<span id="L1657"><span class="lineNum">    1657</span>              :   // Set the normal (out-of-plane) E component on H1 space.</span>
-<span id="L1658"><span class="lineNum">    1658</span> <span class="tlaUNC">           0 :   En-&gt;Real().SetFromTrueDofs(en.Real());</span></span>
-<span id="L1659"><span class="lineNum">    1659</span> <span class="tlaUNC">           0 :   En-&gt;Imag().SetFromTrueDofs(en.Imag());</span></span>
-<span id="L1660"><span class="lineNum">    1660</span> <span class="tlaUNC">           0 :   En-&gt;Real().ExchangeFaceNbrData();</span></span>
-<span id="L1661"><span class="lineNum">    1661</span> <span class="tlaUNC">           0 :   En-&gt;Imag().ExchangeFaceNbrData();</span></span>
-<span id="L1662"><span class="lineNum">    1662</span>              : </span>
-<span id="L1663"><span class="lineNum">    1663</span>              :   // Compute Bz = curl_t(Et) / (iω) as a scalar (Hz) on the L2 curl space.</span>
-<span id="L1664"><span class="lineNum">    1664</span>              :   // B_r = curl(Et_i) / ω,  B_i = -curl(Et_r) / ω  (from 1/(iω) = -i/ω).</span>
-<span id="L1665"><span class="lineNum">    1665</span>              :   {</span>
-<span id="L1666"><span class="lineNum">    1666</span> <span class="tlaUNC">           0 :     auto &amp;nd_fs = fem_op-&gt;GetNDSpace();</span></span>
-<span id="L1667"><span class="lineNum">    1667</span>              :     auto &amp;l2_fs = fem_op-&gt;GetCurlSpace();</span>
-<span id="L1668"><span class="lineNum">    1668</span> <span class="tlaUNC">           0 :     const auto &amp;Curl = l2_fs.GetDiscreteInterpolator(nd_fs);</span></span>
-<span id="L1669"><span class="lineNum">    1669</span>              : </span>
-<span id="L1670"><span class="lineNum">    1670</span>              :     const int nd_sz = nd_fs.GetTrueVSize();</span>
-<span id="L1671"><span class="lineNum">    1671</span>              :     const int l2_sz = l2_fs.GetTrueVSize();</span>
-<span id="L1672"><span class="lineNum">    1672</span> <span class="tlaUNC">           0 :     ComplexVector b(l2_sz);</span></span>
-<span id="L1673"><span class="lineNum">    1673</span>              : </span>
-<span id="L1674"><span class="lineNum">    1674</span>              :     // Get Et true DOFs.</span>
-<span id="L1675"><span class="lineNum">    1675</span>              :     Vector etr(nd_sz), eti(nd_sz);</span>
-<span id="L1676"><span class="lineNum">    1676</span> <span class="tlaUNC">           0 :     E-&gt;Real().GetTrueDofs(etr);</span></span>
-<span id="L1677"><span class="lineNum">    1677</span> <span class="tlaUNC">           0 :     E-&gt;Imag().GetTrueDofs(eti);</span></span>
+<span id="L1655"><span class="lineNum">    1655</span>              : </span>
+<span id="L1656"><span class="lineNum">    1656</span>              :   // Poynting power for impedance postprocessing. After the driver's power normalization</span>
+<span id="L1657"><span class="lineNum">    1657</span>              :   // |P| ≈ 1, but phase matters for the Z0 = V*conj(V) / (2P) formula.</span>
+<span id="L1658"><span class="lineNum">    1658</span> <span class="tlaUNC">           0 :   const std::complex&lt;double&gt; P = fem_op-&gt;ComputePoyntingPower(omega, kn, et, en);</span></span>
+<span id="L1659"><span class="lineNum">    1659</span>              : </span>
+<span id="L1660"><span class="lineNum">    1660</span> <span class="tlaUNC">           0 :   SetEGridFunction(et);</span></span>
+<span id="L1661"><span class="lineNum">    1661</span>              : </span>
+<span id="L1662"><span class="lineNum">    1662</span>              :   // Set the normal (out-of-plane) E component on H1 space.</span>
+<span id="L1663"><span class="lineNum">    1663</span> <span class="tlaUNC">           0 :   En-&gt;Real().SetFromTrueDofs(en.Real());</span></span>
+<span id="L1664"><span class="lineNum">    1664</span> <span class="tlaUNC">           0 :   En-&gt;Imag().SetFromTrueDofs(en.Imag());</span></span>
+<span id="L1665"><span class="lineNum">    1665</span> <span class="tlaUNC">           0 :   En-&gt;Real().ExchangeFaceNbrData();</span></span>
+<span id="L1666"><span class="lineNum">    1666</span> <span class="tlaUNC">           0 :   En-&gt;Imag().ExchangeFaceNbrData();</span></span>
+<span id="L1667"><span class="lineNum">    1667</span>              : </span>
+<span id="L1668"><span class="lineNum">    1668</span>              :   // Compute Bz = curl_t(Et) / (iω) as a scalar (Hz) on the L2 curl space.</span>
+<span id="L1669"><span class="lineNum">    1669</span>              :   // B_r = curl(Et_i) / ω,  B_i = -curl(Et_r) / ω  (from 1/(iω) = -i/ω).</span>
+<span id="L1670"><span class="lineNum">    1670</span>              :   {</span>
+<span id="L1671"><span class="lineNum">    1671</span> <span class="tlaUNC">           0 :     auto &amp;nd_fs = fem_op-&gt;GetNDSpace();</span></span>
+<span id="L1672"><span class="lineNum">    1672</span>              :     auto &amp;l2_fs = fem_op-&gt;GetCurlSpace();</span>
+<span id="L1673"><span class="lineNum">    1673</span> <span class="tlaUNC">           0 :     const auto &amp;Curl = l2_fs.GetDiscreteInterpolator(nd_fs);</span></span>
+<span id="L1674"><span class="lineNum">    1674</span>              : </span>
+<span id="L1675"><span class="lineNum">    1675</span>              :     const int nd_sz = nd_fs.GetTrueVSize();</span>
+<span id="L1676"><span class="lineNum">    1676</span>              :     const int l2_sz = l2_fs.GetTrueVSize();</span>
+<span id="L1677"><span class="lineNum">    1677</span> <span class="tlaUNC">           0 :     ComplexVector b(l2_sz);</span></span>
 <span id="L1678"><span class="lineNum">    1678</span>              : </span>
-<span id="L1679"><span class="lineNum">    1679</span>              :     // Apply curl: curl(Et_r) and curl(Et_i).</span>
-<span id="L1680"><span class="lineNum">    1680</span>              :     Vector curl_etr(l2_sz), curl_eti(l2_sz);</span>
-<span id="L1681"><span class="lineNum">    1681</span> <span class="tlaUNC">           0 :     Curl.Mult(etr, curl_etr);</span></span>
-<span id="L1682"><span class="lineNum">    1682</span> <span class="tlaUNC">           0 :     Curl.Mult(eti, curl_eti);</span></span>
+<span id="L1679"><span class="lineNum">    1679</span>              :     // Get Et true DOFs.</span>
+<span id="L1680"><span class="lineNum">    1680</span>              :     Vector etr(nd_sz), eti(nd_sz);</span>
+<span id="L1681"><span class="lineNum">    1681</span> <span class="tlaUNC">           0 :     E-&gt;Real().GetTrueDofs(etr);</span></span>
+<span id="L1682"><span class="lineNum">    1682</span> <span class="tlaUNC">           0 :     E-&gt;Imag().GetTrueDofs(eti);</span></span>
 <span id="L1683"><span class="lineNum">    1683</span>              : </span>
-<span id="L1684"><span class="lineNum">    1684</span>              :     // B = curl(Et) / (iω) = curl(Et) × (-i/ω)</span>
-<span id="L1685"><span class="lineNum">    1685</span>              :     // B_r = curl(Et_i) / ω,  B_i = -curl(Et_r) / ω</span>
-<span id="L1686"><span class="lineNum">    1686</span> <span class="tlaUNC">           0 :     b.Real() = curl_eti;</span></span>
-<span id="L1687"><span class="lineNum">    1687</span> <span class="tlaUNC">           0 :     b.Real() *= 1.0 / omega;</span></span>
-<span id="L1688"><span class="lineNum">    1688</span> <span class="tlaUNC">           0 :     b.Imag() = curl_etr;</span></span>
-<span id="L1689"><span class="lineNum">    1689</span> <span class="tlaUNC">           0 :     b.Imag() *= -1.0 / omega;</span></span>
-<span id="L1690"><span class="lineNum">    1690</span>              : </span>
-<span id="L1691"><span class="lineNum">    1691</span> <span class="tlaUNC">           0 :     SetBGridFunction(b);</span></span>
-<span id="L1692"><span class="lineNum">    1692</span>              :   }</span>
-<span id="L1693"><span class="lineNum">    1693</span>              : </span>
-<span id="L1694"><span class="lineNum">    1694</span>              :   // Compute full in-plane B: Bt = -(kn/omega)(z_hat x Et) + (1/(i*omega))(grad_t(Ez) x</span>
-<span id="L1695"><span class="lineNum">    1695</span>              :   // z_hat) This is the dominant B component for a propagating mode. Project onto ND space.</span>
-<span id="L1696"><span class="lineNum">    1696</span>              :   {</span>
-<span id="L1697"><span class="lineNum">    1697</span>              :     ModeInPlaneBCoefficient bt_real_coeff(E-&gt;Real(), E-&gt;Imag(), En-&gt;Real(), En-&gt;Imag(),</span>
-<span id="L1698"><span class="lineNum">    1698</span>              :                                           kn.real(), kn.imag(), omega, true);</span>
-<span id="L1699"><span class="lineNum">    1699</span>              :     ModeInPlaneBCoefficient bt_imag_coeff(E-&gt;Real(), E-&gt;Imag(), En-&gt;Real(), En-&gt;Imag(),</span>
-<span id="L1700"><span class="lineNum">    1700</span>              :                                           kn.real(), kn.imag(), omega, false);</span>
-<span id="L1701"><span class="lineNum">    1701</span> <span class="tlaUNC">           0 :     Bt_inplane-&gt;Real().ProjectCoefficient(bt_real_coeff);</span></span>
-<span id="L1702"><span class="lineNum">    1702</span> <span class="tlaUNC">           0 :     Bt_inplane-&gt;Imag().ProjectCoefficient(bt_imag_coeff);</span></span>
-<span id="L1703"><span class="lineNum">    1703</span> <span class="tlaUNC">           0 :     Bt_inplane-&gt;Real().ExchangeFaceNbrData();</span></span>
-<span id="L1704"><span class="lineNum">    1704</span> <span class="tlaUNC">           0 :     Bt_inplane-&gt;Imag().ExchangeFaceNbrData();</span></span>
-<span id="L1705"><span class="lineNum">    1705</span>              :   }</span>
-<span id="L1706"><span class="lineNum">    1706</span>              : </span>
-<span id="L1707"><span class="lineNum">    1707</span>              :   // Create Sn coefficient for boundary mode Poynting visualization.</span>
-<span id="L1708"><span class="lineNum">    1708</span>              :   // Sn = Re{Ex Hy* - Ey Hx*}: z-directed power density on the cross-section.</span>
-<span id="L1709"><span class="lineNum">    1709</span> <span class="tlaUNC">           0 :   if (Bt_inplane &amp;&amp; !Sn)</span></span>
-<span id="L1710"><span class="lineNum">    1710</span>              :   {</span>
-<span id="L1711"><span class="lineNum">    1711</span>              :     Sn = std::make_unique&lt;ModeSnCoefficient&gt;(E-&gt;Real(), E-&gt;Imag(), Bt_inplane-&gt;Real(),</span>
-<span id="L1712"><span class="lineNum">    1712</span> <span class="tlaUNC">           0 :                                              Bt_inplane-&gt;Imag(), fem_op-&gt;GetMaterialOp());</span></span>
-<span id="L1713"><span class="lineNum">    1713</span>              :   }</span>
-<span id="L1714"><span class="lineNum">    1714</span>              : </span>
-<span id="L1715"><span class="lineNum">    1715</span> <span class="tlaUNC">           0 :   measurement_cache = {};</span></span>
-<span id="L1716"><span class="lineNum">    1716</span> <span class="tlaUNC">           0 :   measurement_cache.error_abs = error_abs;</span></span>
-<span id="L1717"><span class="lineNum">    1717</span> <span class="tlaUNC">           0 :   measurement_cache.error_bkwd = error_bkwd;</span></span>
-<span id="L1718"><span class="lineNum">    1718</span>              : </span>
-<span id="L1719"><span class="lineNum">    1719</span>              :   // Store nondimensional mode data (dimensionalized in Measurement::Dimensionalize).</span>
-<span id="L1720"><span class="lineNum">    1720</span>              :   std::complex&lt;double&gt; n_eff = kn / omega;</span>
-<span id="L1721"><span class="lineNum">    1721</span> <span class="tlaUNC">           0 :   measurement_cache.mode_data.kn = kn;</span></span>
-<span id="L1722"><span class="lineNum">    1722</span> <span class="tlaUNC">           0 :   measurement_cache.mode_data.n_eff = n_eff;</span></span>
+<span id="L1684"><span class="lineNum">    1684</span>              :     // Apply curl: curl(Et_r) and curl(Et_i).</span>
+<span id="L1685"><span class="lineNum">    1685</span>              :     Vector curl_etr(l2_sz), curl_eti(l2_sz);</span>
+<span id="L1686"><span class="lineNum">    1686</span> <span class="tlaUNC">           0 :     Curl.Mult(etr, curl_etr);</span></span>
+<span id="L1687"><span class="lineNum">    1687</span> <span class="tlaUNC">           0 :     Curl.Mult(eti, curl_eti);</span></span>
+<span id="L1688"><span class="lineNum">    1688</span>              : </span>
+<span id="L1689"><span class="lineNum">    1689</span>              :     // B = curl(Et) / (iω) = curl(Et) × (-i/ω)</span>
+<span id="L1690"><span class="lineNum">    1690</span>              :     // B_r = curl(Et_i) / ω,  B_i = -curl(Et_r) / ω</span>
+<span id="L1691"><span class="lineNum">    1691</span> <span class="tlaUNC">           0 :     b.Real() = curl_eti;</span></span>
+<span id="L1692"><span class="lineNum">    1692</span> <span class="tlaUNC">           0 :     b.Real() *= 1.0 / omega;</span></span>
+<span id="L1693"><span class="lineNum">    1693</span> <span class="tlaUNC">           0 :     b.Imag() = curl_etr;</span></span>
+<span id="L1694"><span class="lineNum">    1694</span> <span class="tlaUNC">           0 :     b.Imag() *= -1.0 / omega;</span></span>
+<span id="L1695"><span class="lineNum">    1695</span>              : </span>
+<span id="L1696"><span class="lineNum">    1696</span> <span class="tlaUNC">           0 :     SetBGridFunction(b);</span></span>
+<span id="L1697"><span class="lineNum">    1697</span>              :   }</span>
+<span id="L1698"><span class="lineNum">    1698</span>              : </span>
+<span id="L1699"><span class="lineNum">    1699</span>              :   // Compute full in-plane B: Bt = -(kn/omega)(z_hat x Et) + (1/(i*omega))(grad_t(Ez) x</span>
+<span id="L1700"><span class="lineNum">    1700</span>              :   // z_hat) This is the dominant B component for a propagating mode. Project onto ND space.</span>
+<span id="L1701"><span class="lineNum">    1701</span>              :   {</span>
+<span id="L1702"><span class="lineNum">    1702</span>              :     ModeInPlaneBCoefficient bt_real_coeff(E-&gt;Real(), E-&gt;Imag(), En-&gt;Real(), En-&gt;Imag(),</span>
+<span id="L1703"><span class="lineNum">    1703</span>              :                                           kn.real(), kn.imag(), omega, true);</span>
+<span id="L1704"><span class="lineNum">    1704</span>              :     ModeInPlaneBCoefficient bt_imag_coeff(E-&gt;Real(), E-&gt;Imag(), En-&gt;Real(), En-&gt;Imag(),</span>
+<span id="L1705"><span class="lineNum">    1705</span>              :                                           kn.real(), kn.imag(), omega, false);</span>
+<span id="L1706"><span class="lineNum">    1706</span> <span class="tlaUNC">           0 :     Bt_inplane-&gt;Real().ProjectCoefficient(bt_real_coeff);</span></span>
+<span id="L1707"><span class="lineNum">    1707</span> <span class="tlaUNC">           0 :     Bt_inplane-&gt;Imag().ProjectCoefficient(bt_imag_coeff);</span></span>
+<span id="L1708"><span class="lineNum">    1708</span> <span class="tlaUNC">           0 :     Bt_inplane-&gt;Real().ExchangeFaceNbrData();</span></span>
+<span id="L1709"><span class="lineNum">    1709</span> <span class="tlaUNC">           0 :     Bt_inplane-&gt;Imag().ExchangeFaceNbrData();</span></span>
+<span id="L1710"><span class="lineNum">    1710</span>              :   }</span>
+<span id="L1711"><span class="lineNum">    1711</span>              : </span>
+<span id="L1712"><span class="lineNum">    1712</span>              :   // Create Sn coefficient for boundary mode Poynting visualization.</span>
+<span id="L1713"><span class="lineNum">    1713</span>              :   // Sn = Re{Ex Hy* - Ey Hx*}: z-directed power density on the cross-section.</span>
+<span id="L1714"><span class="lineNum">    1714</span> <span class="tlaUNC">           0 :   if (Bt_inplane &amp;&amp; !Sn)</span></span>
+<span id="L1715"><span class="lineNum">    1715</span>              :   {</span>
+<span id="L1716"><span class="lineNum">    1716</span>              :     Sn = std::make_unique&lt;ModeSnCoefficient&gt;(E-&gt;Real(), E-&gt;Imag(), Bt_inplane-&gt;Real(),</span>
+<span id="L1717"><span class="lineNum">    1717</span> <span class="tlaUNC">           0 :                                              Bt_inplane-&gt;Imag(), fem_op-&gt;GetMaterialOp());</span></span>
+<span id="L1718"><span class="lineNum">    1718</span>              :   }</span>
+<span id="L1719"><span class="lineNum">    1719</span>              : </span>
+<span id="L1720"><span class="lineNum">    1720</span> <span class="tlaUNC">           0 :   measurement_cache = {};</span></span>
+<span id="L1721"><span class="lineNum">    1721</span> <span class="tlaUNC">           0 :   measurement_cache.error_abs = error_abs;</span></span>
+<span id="L1722"><span class="lineNum">    1722</span> <span class="tlaUNC">           0 :   measurement_cache.error_bkwd = error_bkwd;</span></span>
 <span id="L1723"><span class="lineNum">    1723</span>              : </span>
-<span id="L1724"><span class="lineNum">    1724</span>              :   // Helper: compute voltage V = ∫ E · dl via coordinate path or boundary attributes.</span>
-<span id="L1725"><span class="lineNum">    1725</span> <span class="tlaUNC">           0 :   auto ComputeVoltage = [this](const std::vector&lt;mfem::Vector&gt; &amp;path, bool has_coords,</span></span>
-<span id="L1726"><span class="lineNum">    1726</span>              :                                mfem::Array&lt;int&gt; marker, int quad_order,</span>
-<span id="L1727"><span class="lineNum">    1727</span>              :                                const GridFunction &amp;field) -&gt; std::complex&lt;double&gt;</span>
-<span id="L1728"><span class="lineNum">    1728</span>              :   {</span>
-<span id="L1729"><span class="lineNum">    1729</span> <span class="tlaUNC">           0 :     std::complex&lt;double&gt; V(0.0, 0.0);</span></span>
-<span id="L1730"><span class="lineNum">    1730</span> <span class="tlaUNC">           0 :     if (has_coords)</span></span>
-<span id="L1731"><span class="lineNum">    1731</span>              :     {</span>
-<span id="L1732"><span class="lineNum">    1732</span> <span class="tlaUNC">           0 :       for (std::size_t k = 0; k + 1 &lt; path.size(); k++)</span></span>
-<span id="L1733"><span class="lineNum">    1733</span>              :       {</span>
-<span id="L1734"><span class="lineNum">    1734</span> <span class="tlaUNC">           0 :         V.real(V.real() +</span></span>
-<span id="L1735"><span class="lineNum">    1735</span> <span class="tlaUNC">           0 :                fem::ComputeLineIntegral(path[k], path[k + 1], field.Real(), quad_order));</span></span>
-<span id="L1736"><span class="lineNum">    1736</span> <span class="tlaUNC">           0 :         V.imag(V.imag() +</span></span>
-<span id="L1737"><span class="lineNum">    1737</span> <span class="tlaUNC">           0 :                fem::ComputeLineIntegral(path[k], path[k + 1], field.Imag(), quad_order));</span></span>
-<span id="L1738"><span class="lineNum">    1738</span>              :       }</span>
-<span id="L1739"><span class="lineNum">    1739</span>              :     }</span>
-<span id="L1740"><span class="lineNum">    1740</span> <span class="tlaUNC">           0 :     else if (marker.Size() &gt; 0)</span></span>
-<span id="L1741"><span class="lineNum">    1741</span>              :     {</span>
-<span id="L1742"><span class="lineNum">    1742</span> <span class="tlaUNC">           0 :       auto &amp;nd_fespace = fem_op-&gt;GetNDSpace();</span></span>
-<span id="L1743"><span class="lineNum">    1743</span>              :       const int nd_size = nd_fespace.GetTrueVSize();</span>
-<span id="L1744"><span class="lineNum">    1744</span>              :       mfem::ConstantCoefficient one(1.0);</span>
-<span id="L1745"><span class="lineNum">    1745</span>              :       mfem::ParLinearForm v_lf(&amp;nd_fespace.Get());</span>
-<span id="L1746"><span class="lineNum">    1746</span> <span class="tlaUNC">           0 :       v_lf.AddBoundaryIntegrator(new mfem::VectorFEBoundaryFluxLFIntegrator(one), marker);</span></span>
-<span id="L1747"><span class="lineNum">    1747</span> <span class="tlaUNC">           0 :       v_lf.UseFastAssembly(false);</span></span>
-<span id="L1748"><span class="lineNum">    1748</span> <span class="tlaUNC">           0 :       v_lf.Assemble();</span></span>
-<span id="L1749"><span class="lineNum">    1749</span>              :       Vector v_lf_tdof(nd_size);</span>
-<span id="L1750"><span class="lineNum">    1750</span> <span class="tlaUNC">           0 :       v_lf.ParallelAssemble(v_lf_tdof);</span></span>
-<span id="L1751"><span class="lineNum">    1751</span>              :       Vector fr(nd_size), fi(nd_size);</span>
-<span id="L1752"><span class="lineNum">    1752</span> <span class="tlaUNC">           0 :       field.Real().GetTrueDofs(fr);</span></span>
-<span id="L1753"><span class="lineNum">    1753</span> <span class="tlaUNC">           0 :       field.Imag().GetTrueDofs(fi);</span></span>
-<span id="L1754"><span class="lineNum">    1754</span> <span class="tlaUNC">           0 :       V.real(linalg::Dot(nd_fespace.GetComm(), v_lf_tdof, fr));</span></span>
-<span id="L1755"><span class="lineNum">    1755</span> <span class="tlaUNC">           0 :       V.imag(linalg::Dot(nd_fespace.GetComm(), v_lf_tdof, fi));</span></span>
-<span id="L1756"><span class="lineNum">    1756</span>              :     }</span>
-<span id="L1757"><span class="lineNum">    1757</span> <span class="tlaUNC">           0 :     return V;</span></span>
-<span id="L1758"><span class="lineNum">    1758</span>              :   };</span>
-<span id="L1759"><span class="lineNum">    1759</span>              : </span>
-<span id="L1760"><span class="lineNum">    1760</span>              :   // Helper: compute current I = ∮ H · t dl via coordinate path or boundary attributes.</span>
-<span id="L1761"><span class="lineNum">    1761</span> <span class="tlaUNC">           0 :   auto ComputeCurrent = [this](const std::vector&lt;mfem::Vector&gt; &amp;path, bool has_path,</span></span>
-<span id="L1762"><span class="lineNum">    1762</span>              :                                mfem::Array&lt;int&gt; marker, int quad_order,</span>
-<span id="L1763"><span class="lineNum">    1763</span>              :                                const GridFunction &amp;field) -&gt; std::complex&lt;double&gt;</span>
-<span id="L1764"><span class="lineNum">    1764</span>              :   {</span>
-<span id="L1765"><span class="lineNum">    1765</span> <span class="tlaUNC">           0 :     std::complex&lt;double&gt; I(0.0, 0.0);</span></span>
-<span id="L1766"><span class="lineNum">    1766</span> <span class="tlaUNC">           0 :     if (has_path)</span></span>
-<span id="L1767"><span class="lineNum">    1767</span>              :     {</span>
-<span id="L1768"><span class="lineNum">    1768</span> <span class="tlaUNC">           0 :       for (std::size_t k = 0; k &lt; path.size(); k++)</span></span>
-<span id="L1769"><span class="lineNum">    1769</span>              :       {</span>
-<span id="L1770"><span class="lineNum">    1770</span>              :         const auto &amp;pk = path[k];</span>
-<span id="L1771"><span class="lineNum">    1771</span> <span class="tlaUNC">           0 :         const auto &amp;pk1 = path[(k + 1) % path.size()];</span></span>
-<span id="L1772"><span class="lineNum">    1772</span> <span class="tlaUNC">           0 :         I.real(I.real() + fem::ComputeLineIntegral(pk, pk1, field.Real(), quad_order));</span></span>
-<span id="L1773"><span class="lineNum">    1773</span> <span class="tlaUNC">           0 :         I.imag(I.imag() + fem::ComputeLineIntegral(pk, pk1, field.Imag(), quad_order));</span></span>
-<span id="L1774"><span class="lineNum">    1774</span>              :       }</span>
-<span id="L1775"><span class="lineNum">    1775</span>              :     }</span>
-<span id="L1776"><span class="lineNum">    1776</span> <span class="tlaUNC">           0 :     else if (marker.Size() &gt; 0)</span></span>
-<span id="L1777"><span class="lineNum">    1777</span>              :     {</span>
-<span id="L1778"><span class="lineNum">    1778</span> <span class="tlaUNC">           0 :       auto &amp;nd_fespace = fem_op-&gt;GetNDSpace();</span></span>
-<span id="L1779"><span class="lineNum">    1779</span>              :       const int nd_size = nd_fespace.GetTrueVSize();</span>
-<span id="L1780"><span class="lineNum">    1780</span>              :       mfem::ConstantCoefficient one(1.0);</span>
-<span id="L1781"><span class="lineNum">    1781</span>              :       mfem::ParLinearForm i_lf(&amp;nd_fespace.Get());</span>
-<span id="L1782"><span class="lineNum">    1782</span> <span class="tlaUNC">           0 :       i_lf.AddBoundaryIntegrator(new mfem::VectorFEBoundaryFluxLFIntegrator(one), marker);</span></span>
-<span id="L1783"><span class="lineNum">    1783</span> <span class="tlaUNC">           0 :       i_lf.UseFastAssembly(false);</span></span>
-<span id="L1784"><span class="lineNum">    1784</span> <span class="tlaUNC">           0 :       i_lf.Assemble();</span></span>
-<span id="L1785"><span class="lineNum">    1785</span>              :       Vector i_lf_tdof(nd_size);</span>
-<span id="L1786"><span class="lineNum">    1786</span> <span class="tlaUNC">           0 :       i_lf.ParallelAssemble(i_lf_tdof);</span></span>
-<span id="L1787"><span class="lineNum">    1787</span>              :       Vector fr(nd_size), fi(nd_size);</span>
-<span id="L1788"><span class="lineNum">    1788</span> <span class="tlaUNC">           0 :       field.Real().GetTrueDofs(fr);</span></span>
-<span id="L1789"><span class="lineNum">    1789</span> <span class="tlaUNC">           0 :       field.Imag().GetTrueDofs(fi);</span></span>
-<span id="L1790"><span class="lineNum">    1790</span> <span class="tlaUNC">           0 :       I.real(linalg::Dot(nd_fespace.GetComm(), i_lf_tdof, fr));</span></span>
-<span id="L1791"><span class="lineNum">    1791</span> <span class="tlaUNC">           0 :       I.imag(linalg::Dot(nd_fespace.GetComm(), i_lf_tdof, fi));</span></span>
-<span id="L1792"><span class="lineNum">    1792</span>              :     }</span>
-<span id="L1793"><span class="lineNum">    1793</span> <span class="tlaUNC">           0 :     return I;</span></span>
-<span id="L1794"><span class="lineNum">    1794</span>              :   };</span>
-<span id="L1795"><span class="lineNum">    1795</span>              : </span>
-<span id="L1796"><span class="lineNum">    1796</span>              :   // Compute Poynting power P = (1/2) Re{kn*/ω} (et^H Btt et) — shared by all impedance</span>
-<span id="L1797"><span class="lineNum">    1797</span>              :   // entries.</span>
-<span id="L1798"><span class="lineNum">    1798</span>              :   std::complex&lt;double&gt; P(0.0, 0.0);</span>
-<span id="L1799"><span class="lineNum">    1799</span> <span class="tlaUNC">           0 :   const auto *Btt = fem_op-&gt;GetBtt();</span></span>
-<span id="L1800"><span class="lineNum">    1800</span> <span class="tlaUNC">           0 :   const auto *Atnr = fem_op-&gt;GetAtnr();</span></span>
-<span id="L1801"><span class="lineNum">    1801</span> <span class="tlaUNC">           0 :   const auto *Atni = fem_op-&gt;GetAtni();</span></span>
-<span id="L1802"><span class="lineNum">    1802</span> <span class="tlaUNC">           0 :   if (Btt != nullptr &amp;&amp; !impedance_postpro.empty())</span></span>
-<span id="L1803"><span class="lineNum">    1803</span>              :   {</span>
-<span id="L1804"><span class="lineNum">    1804</span> <span class="tlaUNC">           0 :     auto &amp;nd_fespace = fem_op-&gt;GetNDSpace();</span></span>
-<span id="L1805"><span class="lineNum">    1805</span>              :     const int nd_size = nd_fespace.GetTrueVSize();</span>
-<span id="L1806"><span class="lineNum">    1806</span> <span class="tlaUNC">           0 :     ComplexVector et_tdof(nd_size);</span></span>
-<span id="L1807"><span class="lineNum">    1807</span> <span class="tlaUNC">           0 :     et_tdof.UseDevice(true);</span></span>
-<span id="L1808"><span class="lineNum">    1808</span> <span class="tlaUNC">           0 :     E-&gt;Real().GetTrueDofs(et_tdof.Real());</span></span>
-<span id="L1809"><span class="lineNum">    1809</span> <span class="tlaUNC">           0 :     E-&gt;Imag().GetTrueDofs(et_tdof.Imag());</span></span>
-<span id="L1810"><span class="lineNum">    1810</span>              :     P = 0.5 * std::conj(kn) / omega *</span>
-<span id="L1811"><span class="lineNum">    1811</span> <span class="tlaUNC">           0 :         linalg::Dot(nd_fespace.GetComm(), et_tdof, *Btt, et_tdof);</span></span>
-<span id="L1812"><span class="lineNum">    1812</span>              : </span>
-<span id="L1813"><span class="lineNum">    1813</span>              :     // Cross-term: -Im{et^H Atn En} / (2ω). At this point En is physical (back-transformed).</span>
-<span id="L1814"><span class="lineNum">    1814</span> <span class="tlaUNC">           0 :     if (Atnr != nullptr &amp;&amp; En)</span></span>
-<span id="L1815"><span class="lineNum">    1815</span>              :     {</span>
-<span id="L1816"><span class="lineNum">    1816</span> <span class="tlaUNC">           0 :       auto &amp;h1_fespace = fem_op-&gt;GetH1Space();</span></span>
-<span id="L1817"><span class="lineNum">    1817</span>              :       const int h1_size = h1_fespace.GetTrueVSize();</span>
-<span id="L1818"><span class="lineNum">    1818</span> <span class="tlaUNC">           0 :       ComplexVector en_tdof(h1_size);</span></span>
-<span id="L1819"><span class="lineNum">    1819</span> <span class="tlaUNC">           0 :       en_tdof.UseDevice(true);</span></span>
-<span id="L1820"><span class="lineNum">    1820</span> <span class="tlaUNC">           0 :       En-&gt;Real().GetTrueDofs(en_tdof.Real());</span></span>
-<span id="L1821"><span class="lineNum">    1821</span> <span class="tlaUNC">           0 :       En-&gt;Imag().GetTrueDofs(en_tdof.Imag());</span></span>
-<span id="L1822"><span class="lineNum">    1822</span> <span class="tlaUNC">           0 :       ComplexWrapperOperator Atn(Atnr, Atni);</span></span>
-<span id="L1823"><span class="lineNum">    1823</span> <span class="tlaUNC">           0 :       auto etH_Atn_En = linalg::Dot(nd_fespace.GetComm(), en_tdof, Atn, et_tdof);</span></span>
-<span id="L1824"><span class="lineNum">    1824</span>              :       // For physical En: P_cross = (1/2) Re{-i/ω × conj(et^H Atn En)}</span>
-<span id="L1825"><span class="lineNum">    1825</span>              :       //                          = -Im{et^H Atn En} / (2ω)</span>
-<span id="L1826"><span class="lineNum">    1826</span> <span class="tlaUNC">           0 :       P += std::complex&lt;double&gt;(-etH_Atn_En.imag(), etH_Atn_En.real()) / (2.0 * omega);</span></span>
-<span id="L1827"><span class="lineNum">    1827</span> <span class="tlaUNC">           0 :     }</span></span>
-<span id="L1828"><span class="lineNum">    1828</span>              :   }</span>
-<span id="L1829"><span class="lineNum">    1829</span>              : </span>
-<span id="L1830"><span class="lineNum">    1830</span>              :   // Compute impedance for each configured entry.</span>
-<span id="L1831"><span class="lineNum">    1831</span> <span class="tlaUNC">           0 :   for (const auto &amp;[idx, cfg] : impedance_postpro)</span></span>
-<span id="L1832"><span class="lineNum">    1832</span>              :   {</span>
-<span id="L1833"><span class="lineNum">    1833</span> <span class="tlaUNC">           0 :     auto V = ComputeVoltage(cfg.voltage_path, cfg.has_voltage_coordinates,</span></span>
-<span id="L1834"><span class="lineNum">    1834</span> <span class="tlaUNC">           0 :                             cfg.voltage_marker, cfg.n_samples, *E);</span></span>
-<span id="L1835"><span class="lineNum">    1835</span> <span class="tlaUNC">           0 :     auto &amp;result = measurement_cache.mode_data.impedance[idx];</span></span>
-<span id="L1836"><span class="lineNum">    1836</span>              : </span>
-<span id="L1837"><span class="lineNum">    1837</span>              :     // Power-voltage impedance: Z_PV = |V|^2 / (2P).</span>
-<span id="L1838"><span class="lineNum">    1838</span> <span class="tlaUNC">           0 :     if (std::abs(P) &gt; 1e-30)</span></span>
-<span id="L1839"><span class="lineNum">    1839</span>              :     {</span>
-<span id="L1840"><span class="lineNum">    1840</span>              :       std::complex&lt;double&gt; Z0_nondim = (V * std::conj(V)) / (2.0 * P);</span>
-<span id="L1841"><span class="lineNum">    1841</span> <span class="tlaUNC">           0 :       result.Z0 = Z0_nondim.real();</span></span>
-<span id="L1842"><span class="lineNum">    1842</span> <span class="tlaUNC">           0 :       result.has_impedance = true;</span></span>
-<span id="L1843"><span class="lineNum">    1843</span>              :     }</span>
-<span id="L1844"><span class="lineNum">    1844</span>              : </span>
-<span id="L1845"><span class="lineNum">    1845</span>              :     // V/I impedance: Z_VI = |V| / |I|.</span>
-<span id="L1846"><span class="lineNum">    1846</span> <span class="tlaUNC">           0 :     auto I = ComputeCurrent(cfg.current_path, cfg.has_current_path, cfg.current_marker,</span></span>
-<span id="L1847"><span class="lineNum">    1847</span> <span class="tlaUNC">           0 :                             cfg.n_samples, *Bt_inplane);</span></span>
-<span id="L1848"><span class="lineNum">    1848</span> <span class="tlaUNC">           0 :     if (std::abs(I) &gt; 1e-30)</span></span>
-<span id="L1849"><span class="lineNum">    1849</span>              :     {</span>
-<span id="L1850"><span class="lineNum">    1850</span> <span class="tlaUNC">           0 :       result.Z_VI = std::abs(V) / std::abs(I);</span></span>
-<span id="L1851"><span class="lineNum">    1851</span> <span class="tlaUNC">           0 :       result.has_vi_impedance = true;</span></span>
-<span id="L1852"><span class="lineNum">    1852</span>              :     }</span>
-<span id="L1853"><span class="lineNum">    1853</span>              :   }</span>
-<span id="L1854"><span class="lineNum">    1854</span>              : </span>
-<span id="L1855"><span class="lineNum">    1855</span>              :   // Compute voltage for each configured voltage-only entry.</span>
-<span id="L1856"><span class="lineNum">    1856</span> <span class="tlaUNC">           0 :   for (const auto &amp;[idx, cfg] : voltage_postpro)</span></span>
-<span id="L1857"><span class="lineNum">    1857</span>              :   {</span>
-<span id="L1858"><span class="lineNum">    1858</span> <span class="tlaUNC">           0 :     auto V = ComputeVoltage(cfg.voltage_path, cfg.has_coordinates, cfg.voltage_marker,</span></span>
-<span id="L1859"><span class="lineNum">    1859</span> <span class="tlaUNC">           0 :                             cfg.n_samples, *E);</span></span>
-<span id="L1860"><span class="lineNum">    1860</span> <span class="tlaUNC">           0 :     measurement_cache.mode_data.voltage[idx] = {V};</span></span>
-<span id="L1861"><span class="lineNum">    1861</span>              :   }</span>
-<span id="L1862"><span class="lineNum">    1862</span>              : </span>
-<span id="L1863"><span class="lineNum">    1863</span>              :   // Compute electric field energy via the domain post operator.</span>
-<span id="L1864"><span class="lineNum">    1864</span> <span class="tlaUNC">           0 :   MeasureAllImpl();</span></span>
-<span id="L1865"><span class="lineNum">    1865</span>              : </span>
-<span id="L1866"><span class="lineNum">    1866</span>              :   // Pretty-print mode summary using Table (matches eigenmode solver style).</span>
-<span id="L1867"><span class="lineNum">    1867</span> <span class="tlaUNC">           0 :   if (Mpi::Root(fem_op-&gt;GetComm()))</span></span>
-<span id="L1868"><span class="lineNum">    1868</span>              :   {</span>
-<span id="L1869"><span class="lineNum">    1869</span> <span class="tlaUNC">           0 :     Table table;</span></span>
-<span id="L1870"><span class="lineNum">    1870</span> <span class="tlaUNC">           0 :     int idx_pad = 1 + static_cast&lt;int&gt;(std::log10(std::max(num_conv, 1)));</span></span>
-<span id="L1871"><span class="lineNum">    1871</span> <span class="tlaUNC">           0 :     table.col_options = {6, 6};</span></span>
-<span id="L1872"><span class="lineNum">    1872</span> <span class="tlaUNC">           0 :     table.insert(Column(&quot;m&quot;, &quot;m&quot;, idx_pad, {}, {}, &quot;&quot;) &lt;&lt; (step + 1));</span></span>
-<span id="L1873"><span class="lineNum">    1873</span> <span class="tlaUNC">           0 :     const double kc = 1.0 / units.Dimensionalize&lt;Units::ValueType::LENGTH&gt;(1.0);</span></span>
-<span id="L1874"><span class="lineNum">    1874</span> <span class="tlaUNC">           0 :     table.insert(Column(&quot;kn_re&quot;, &quot;Re{kn} (1/m)&quot;) &lt;&lt; kn.real() * kc);</span></span>
-<span id="L1875"><span class="lineNum">    1875</span> <span class="tlaUNC">           0 :     table.insert(Column(&quot;kn_im&quot;, &quot;Im{kn} (1/m)&quot;) &lt;&lt; kn.imag() * kc);</span></span>
-<span id="L1876"><span class="lineNum">    1876</span> <span class="tlaUNC">           0 :     table.insert(Column(&quot;neff_re&quot;, &quot;Re{n_eff}&quot;) &lt;&lt; n_eff.real());</span></span>
-<span id="L1877"><span class="lineNum">    1877</span> <span class="tlaUNC">           0 :     table.insert(Column(&quot;neff_im&quot;, &quot;Im{n_eff}&quot;) &lt;&lt; n_eff.imag());</span></span>
-<span id="L1878"><span class="lineNum">    1878</span> <span class="tlaUNC">           0 :     table.insert(Column(&quot;err_back&quot;, &quot;Error (Bkwd.)&quot;) &lt;&lt; error_bkwd);</span></span>
-<span id="L1879"><span class="lineNum">    1879</span> <span class="tlaUNC">           0 :     table.insert(Column(&quot;err_abs&quot;, &quot;Error (Abs.)&quot;) &lt;&lt; error_abs);</span></span>
-<span id="L1880"><span class="lineNum">    1880</span> <span class="tlaUNC">           0 :     table[0].print_as_int = true;</span></span>
-<span id="L1881"><span class="lineNum">    1881</span> <span class="tlaUNC">           0 :     Mpi::Print(&quot;{}&quot;, (step == 0) ? table.format_table() : table.format_row(0));</span></span>
-<span id="L1882"><span class="lineNum">    1882</span> <span class="tlaUNC">           0 :   }</span></span>
-<span id="L1883"><span class="lineNum">    1883</span>              : </span>
-<span id="L1884"><span class="lineNum">    1884</span> <span class="tlaUNC">           0 :   int print_idx = step + 1;</span></span>
-<span id="L1885"><span class="lineNum">    1885</span> <span class="tlaUNC">           0 :   post_op_csv.PrintAllCSVData(*this, measurement_cache, print_idx, step);</span></span>
-<span id="L1886"><span class="lineNum">    1886</span> <span class="tlaUNC">           0 :   if (ShouldWriteParaviewFields(step))</span></span>
-<span id="L1887"><span class="lineNum">    1887</span>              :   {</span>
-<span id="L1888"><span class="lineNum">    1888</span> <span class="tlaUNC">           0 :     WriteParaviewFields(step, print_idx);</span></span>
-<span id="L1889"><span class="lineNum">    1889</span> <span class="tlaUNC">           0 :     Mpi::Print(&quot; Wrote mode {:d} to disk (Paraview)\n&quot;, print_idx);</span></span>
-<span id="L1890"><span class="lineNum">    1890</span>              :   }</span>
-<span id="L1891"><span class="lineNum">    1891</span> <span class="tlaUNC">           0 :   if (ShouldWriteGridFunctionFields(step))</span></span>
-<span id="L1892"><span class="lineNum">    1892</span>              :   {</span>
-<span id="L1893"><span class="lineNum">    1893</span> <span class="tlaUNC">           0 :     WriteMFEMGridFunctions(step, print_idx);</span></span>
-<span id="L1894"><span class="lineNum">    1894</span> <span class="tlaUNC">           0 :     Mpi::Print(&quot; Wrote mode {:d} to disk (grid function)\n&quot;, print_idx);</span></span>
-<span id="L1895"><span class="lineNum">    1895</span>              :   }</span>
-<span id="L1896"><span class="lineNum">    1896</span> <span class="tlaUNC">           0 :   return measurement_cache.domain_E_field_energy_all;</span></span>
-<span id="L1897"><span class="lineNum">    1897</span> <span class="tlaUNC">           0 : }</span></span>
-<span id="L1898"><span class="lineNum">    1898</span>              : </span>
-<span id="L1899"><span class="lineNum">    1899</span>              : template &lt;ProblemType solver_t&gt;</span>
-<span id="L1900"><span class="lineNum">    1900</span> <span class="tlaUNC">           0 : void PostOperator&lt;solver_t&gt;::ProjectImpedancePaths(const mfem::Vector &amp;centroid,</span></span>
-<span id="L1901"><span class="lineNum">    1901</span>              :                                                    const mfem::Vector &amp;e1,</span>
-<span id="L1902"><span class="lineNum">    1902</span>              :                                                    const mfem::Vector &amp;e2)</span>
-<span id="L1903"><span class="lineNum">    1903</span>              : {</span>
-<span id="L1904"><span class="lineNum">    1904</span> <span class="tlaUNC">           0 :   for (auto &amp;[idx, cfg] : impedance_postpro)</span></span>
-<span id="L1905"><span class="lineNum">    1905</span>              :   {</span>
-<span id="L1906"><span class="lineNum">    1906</span> <span class="tlaUNC">           0 :     for (auto &amp;p : cfg.voltage_path)</span></span>
-<span id="L1907"><span class="lineNum">    1907</span>              :     {</span>
-<span id="L1908"><span class="lineNum">    1908</span> <span class="tlaUNC">           0 :       if (p.Size() == 3)</span></span>
-<span id="L1909"><span class="lineNum">    1909</span>              :       {</span>
-<span id="L1910"><span class="lineNum">    1910</span> <span class="tlaUNC">           0 :         p = mesh::Project3Dto2D(p, centroid, e1, e2);</span></span>
-<span id="L1911"><span class="lineNum">    1911</span>              :       }</span>
-<span id="L1912"><span class="lineNum">    1912</span>              :     }</span>
-<span id="L1913"><span class="lineNum">    1913</span> <span class="tlaUNC">           0 :     for (auto &amp;p : cfg.current_path)</span></span>
-<span id="L1914"><span class="lineNum">    1914</span>              :     {</span>
-<span id="L1915"><span class="lineNum">    1915</span> <span class="tlaUNC">           0 :       if (p.Size() == 3)</span></span>
-<span id="L1916"><span class="lineNum">    1916</span>              :       {</span>
-<span id="L1917"><span class="lineNum">    1917</span> <span class="tlaUNC">           0 :         p = mesh::Project3Dto2D(p, centroid, e1, e2);</span></span>
-<span id="L1918"><span class="lineNum">    1918</span>              :       }</span>
-<span id="L1919"><span class="lineNum">    1919</span>              :     }</span>
-<span id="L1920"><span class="lineNum">    1920</span>              :   }</span>
-<span id="L1921"><span class="lineNum">    1921</span> <span class="tlaUNC">           0 : }</span></span>
-<span id="L1922"><span class="lineNum">    1922</span>              : </span>
-<span id="L1923"><span class="lineNum">    1923</span>              : template &lt;ProblemType solver_t&gt;</span>
-<span id="L1924"><span class="lineNum">    1924</span> <span class="tlaUNC">           0 : void PostOperator&lt;solver_t&gt;::ProjectVoltagePaths(const mfem::Vector &amp;centroid,</span></span>
-<span id="L1925"><span class="lineNum">    1925</span>              :                                                  const mfem::Vector &amp;e1,</span>
-<span id="L1926"><span class="lineNum">    1926</span>              :                                                  const mfem::Vector &amp;e2)</span>
-<span id="L1927"><span class="lineNum">    1927</span>              : {</span>
-<span id="L1928"><span class="lineNum">    1928</span> <span class="tlaUNC">           0 :   for (auto &amp;[idx, cfg] : voltage_postpro)</span></span>
-<span id="L1929"><span class="lineNum">    1929</span>              :   {</span>
-<span id="L1930"><span class="lineNum">    1930</span> <span class="tlaUNC">           0 :     for (auto &amp;p : cfg.voltage_path)</span></span>
-<span id="L1931"><span class="lineNum">    1931</span>              :     {</span>
-<span id="L1932"><span class="lineNum">    1932</span> <span class="tlaUNC">           0 :       if (p.Size() == 3)</span></span>
-<span id="L1933"><span class="lineNum">    1933</span>              :       {</span>
-<span id="L1934"><span class="lineNum">    1934</span> <span class="tlaUNC">           0 :         p = mesh::Project3Dto2D(p, centroid, e1, e2);</span></span>
-<span id="L1935"><span class="lineNum">    1935</span>              :       }</span>
-<span id="L1936"><span class="lineNum">    1936</span>              :     }</span>
-<span id="L1937"><span class="lineNum">    1937</span>              :   }</span>
-<span id="L1938"><span class="lineNum">    1938</span> <span class="tlaUNC">           0 : }</span></span>
-<span id="L1939"><span class="lineNum">    1939</span>              : </span>
-<span id="L1940"><span class="lineNum">    1940</span>              : // Explicit template instantiation.</span>
-<span id="L1941"><span class="lineNum">    1941</span>              : </span>
-<span id="L1942"><span class="lineNum">    1942</span>              : template class PostOperator&lt;ProblemType::DRIVEN&gt;;</span>
-<span id="L1943"><span class="lineNum">    1943</span>              : template class PostOperator&lt;ProblemType::EIGENMODE&gt;;</span>
-<span id="L1944"><span class="lineNum">    1944</span>              : template class PostOperator&lt;ProblemType::ELECTROSTATIC&gt;;</span>
-<span id="L1945"><span class="lineNum">    1945</span>              : template class PostOperator&lt;ProblemType::MAGNETOSTATIC&gt;;</span>
-<span id="L1946"><span class="lineNum">    1946</span>              : template class PostOperator&lt;ProblemType::TRANSIENT&gt;;</span>
-<span id="L1947"><span class="lineNum">    1947</span>              : template class PostOperator&lt;ProblemType::BOUNDARYMODE&gt;;</span>
-<span id="L1948"><span class="lineNum">    1948</span>              : </span>
-<span id="L1949"><span class="lineNum">    1949</span>              : // Function explicit instantiation.</span>
-<span id="L1950"><span class="lineNum">    1950</span>              : // TODO(C++20): with requires, we won't need a second template.</span>
-<span id="L1951"><span class="lineNum">    1951</span>              : </span>
-<span id="L1952"><span class="lineNum">    1952</span>              : template auto PostOperator&lt;ProblemType::DRIVEN&gt;::MeasureAndPrintAll&lt;ProblemType::DRIVEN&gt;(</span>
-<span id="L1953"><span class="lineNum">    1953</span>              :     int ex_idx, int step, const ComplexVector &amp;e, const ComplexVector &amp;b,</span>
-<span id="L1954"><span class="lineNum">    1954</span>              :     std::complex&lt;double&gt; omega) -&gt; double;</span>
-<span id="L1955"><span class="lineNum">    1955</span>              : </span>
-<span id="L1956"><span class="lineNum">    1956</span>              : template auto</span>
-<span id="L1957"><span class="lineNum">    1957</span>              : PostOperator&lt;ProblemType::EIGENMODE&gt;::MeasureAndPrintAll&lt;ProblemType::EIGENMODE&gt;(</span>
-<span id="L1958"><span class="lineNum">    1958</span>              :     int step, const ComplexVector &amp;e, const ComplexVector &amp;b, std::complex&lt;double&gt; omega,</span>
-<span id="L1959"><span class="lineNum">    1959</span>              :     double error_abs, double error_bkwd, int num_conv) -&gt; double;</span>
-<span id="L1960"><span class="lineNum">    1960</span>              : </span>
-<span id="L1961"><span class="lineNum">    1961</span>              : template auto</span>
-<span id="L1962"><span class="lineNum">    1962</span>              : PostOperator&lt;ProblemType::ELECTROSTATIC&gt;::MeasureAndPrintAll&lt;ProblemType::ELECTROSTATIC&gt;(</span>
-<span id="L1963"><span class="lineNum">    1963</span>              :     int step, const Vector &amp;v, const Vector &amp;e, int idx) -&gt; double;</span>
-<span id="L1964"><span class="lineNum">    1964</span>              : </span>
-<span id="L1965"><span class="lineNum">    1965</span>              : template auto</span>
-<span id="L1966"><span class="lineNum">    1966</span>              : PostOperator&lt;ProblemType::MAGNETOSTATIC&gt;::MeasureAndPrintAll&lt;ProblemType::MAGNETOSTATIC&gt;(</span>
-<span id="L1967"><span class="lineNum">    1967</span>              :     int step, const Vector &amp;a, const Vector &amp;b, int idx) -&gt; double;</span>
-<span id="L1968"><span class="lineNum">    1968</span>              : </span>
-<span id="L1969"><span class="lineNum">    1969</span>              : template auto</span>
-<span id="L1970"><span class="lineNum">    1970</span>              : PostOperator&lt;ProblemType::TRANSIENT&gt;::MeasureAndPrintAll&lt;ProblemType::TRANSIENT&gt;(</span>
-<span id="L1971"><span class="lineNum">    1971</span>              :     int step, const Vector &amp;e, const Vector &amp;b, double t, double J_coef) -&gt; double;</span>
-<span id="L1972"><span class="lineNum">    1972</span>              : </span>
-<span id="L1973"><span class="lineNum">    1973</span>              : template auto</span>
-<span id="L1974"><span class="lineNum">    1974</span>              : PostOperator&lt;ProblemType::BOUNDARYMODE&gt;::MeasureAndPrintAll&lt;ProblemType::BOUNDARYMODE&gt;(</span>
-<span id="L1975"><span class="lineNum">    1975</span>              :     int step, const ComplexVector &amp;et, const ComplexVector &amp;en, std::complex&lt;double&gt; kn,</span>
-<span id="L1976"><span class="lineNum">    1976</span>              :     double omega, double error_abs, double error_bkwd, int num_conv) -&gt; double;</span>
-<span id="L1977"><span class="lineNum">    1977</span>              : </span>
-<span id="L1978"><span class="lineNum">    1978</span>              : template auto</span>
-<span id="L1979"><span class="lineNum">    1979</span>              : PostOperator&lt;ProblemType::DRIVEN&gt;::MeasureDomainFieldEnergyOnly&lt;ProblemType::DRIVEN&gt;(</span>
-<span id="L1980"><span class="lineNum">    1980</span>              :     const ComplexVector &amp;e, const ComplexVector &amp;b) -&gt; double;</span>
-<span id="L1981"><span class="lineNum">    1981</span>              : </span>
-<span id="L1982"><span class="lineNum">    1982</span>              : template auto</span>
-<span id="L1983"><span class="lineNum">    1983</span>              : PostOperator&lt;ProblemType::DRIVEN&gt;::InitializeParaviewDataCollection(int ex_idx) -&gt; void;</span>
-<span id="L1984"><span class="lineNum">    1984</span>              : </span>
-<span id="L1985"><span class="lineNum">    1985</span>              : }  // namespace palace</span>
+<span id="L1724"><span class="lineNum">    1724</span>              :   // Store nondimensional mode data (dimensionalized in Measurement::Dimensionalize).</span>
+<span id="L1725"><span class="lineNum">    1725</span>              :   std::complex&lt;double&gt; n_eff = kn / omega;</span>
+<span id="L1726"><span class="lineNum">    1726</span> <span class="tlaUNC">           0 :   measurement_cache.mode_data.kn = kn;</span></span>
+<span id="L1727"><span class="lineNum">    1727</span> <span class="tlaUNC">           0 :   measurement_cache.mode_data.n_eff = n_eff;</span></span>
+<span id="L1728"><span class="lineNum">    1728</span>              : </span>
+<span id="L1729"><span class="lineNum">    1729</span>              :   // Helper: compute voltage V = ∫ E · dl via coordinate path or boundary attributes.</span>
+<span id="L1730"><span class="lineNum">    1730</span> <span class="tlaUNC">           0 :   auto ComputeVoltage = [this](const std::vector&lt;mfem::Vector&gt; &amp;path, bool has_coords,</span></span>
+<span id="L1731"><span class="lineNum">    1731</span>              :                                mfem::Array&lt;int&gt; marker, int quad_order,</span>
+<span id="L1732"><span class="lineNum">    1732</span>              :                                const GridFunction &amp;field) -&gt; std::complex&lt;double&gt;</span>
+<span id="L1733"><span class="lineNum">    1733</span>              :   {</span>
+<span id="L1734"><span class="lineNum">    1734</span> <span class="tlaUNC">           0 :     std::complex&lt;double&gt; V(0.0, 0.0);</span></span>
+<span id="L1735"><span class="lineNum">    1735</span> <span class="tlaUNC">           0 :     if (has_coords)</span></span>
+<span id="L1736"><span class="lineNum">    1736</span>              :     {</span>
+<span id="L1737"><span class="lineNum">    1737</span> <span class="tlaUNC">           0 :       for (std::size_t k = 0; k + 1 &lt; path.size(); k++)</span></span>
+<span id="L1738"><span class="lineNum">    1738</span>              :       {</span>
+<span id="L1739"><span class="lineNum">    1739</span> <span class="tlaUNC">           0 :         V.real(V.real() +</span></span>
+<span id="L1740"><span class="lineNum">    1740</span> <span class="tlaUNC">           0 :                fem::ComputeLineIntegral(path[k], path[k + 1], field.Real(), quad_order));</span></span>
+<span id="L1741"><span class="lineNum">    1741</span> <span class="tlaUNC">           0 :         V.imag(V.imag() +</span></span>
+<span id="L1742"><span class="lineNum">    1742</span> <span class="tlaUNC">           0 :                fem::ComputeLineIntegral(path[k], path[k + 1], field.Imag(), quad_order));</span></span>
+<span id="L1743"><span class="lineNum">    1743</span>              :       }</span>
+<span id="L1744"><span class="lineNum">    1744</span>              :     }</span>
+<span id="L1745"><span class="lineNum">    1745</span> <span class="tlaUNC">           0 :     else if (marker.Size() &gt; 0)</span></span>
+<span id="L1746"><span class="lineNum">    1746</span>              :     {</span>
+<span id="L1747"><span class="lineNum">    1747</span> <span class="tlaUNC">           0 :       auto &amp;nd_fespace = fem_op-&gt;GetNDSpace();</span></span>
+<span id="L1748"><span class="lineNum">    1748</span>              :       const int nd_size = nd_fespace.GetTrueVSize();</span>
+<span id="L1749"><span class="lineNum">    1749</span>              :       mfem::ConstantCoefficient one(1.0);</span>
+<span id="L1750"><span class="lineNum">    1750</span>              :       mfem::ParLinearForm v_lf(&amp;nd_fespace.Get());</span>
+<span id="L1751"><span class="lineNum">    1751</span> <span class="tlaUNC">           0 :       v_lf.AddBoundaryIntegrator(new mfem::VectorFEBoundaryFluxLFIntegrator(one), marker);</span></span>
+<span id="L1752"><span class="lineNum">    1752</span> <span class="tlaUNC">           0 :       v_lf.UseFastAssembly(false);</span></span>
+<span id="L1753"><span class="lineNum">    1753</span> <span class="tlaUNC">           0 :       v_lf.Assemble();</span></span>
+<span id="L1754"><span class="lineNum">    1754</span>              :       Vector v_lf_tdof(nd_size);</span>
+<span id="L1755"><span class="lineNum">    1755</span> <span class="tlaUNC">           0 :       v_lf.ParallelAssemble(v_lf_tdof);</span></span>
+<span id="L1756"><span class="lineNum">    1756</span>              :       Vector fr(nd_size), fi(nd_size);</span>
+<span id="L1757"><span class="lineNum">    1757</span> <span class="tlaUNC">           0 :       field.Real().GetTrueDofs(fr);</span></span>
+<span id="L1758"><span class="lineNum">    1758</span> <span class="tlaUNC">           0 :       field.Imag().GetTrueDofs(fi);</span></span>
+<span id="L1759"><span class="lineNum">    1759</span> <span class="tlaUNC">           0 :       V.real(linalg::Dot(nd_fespace.GetComm(), v_lf_tdof, fr));</span></span>
+<span id="L1760"><span class="lineNum">    1760</span> <span class="tlaUNC">           0 :       V.imag(linalg::Dot(nd_fespace.GetComm(), v_lf_tdof, fi));</span></span>
+<span id="L1761"><span class="lineNum">    1761</span>              :     }</span>
+<span id="L1762"><span class="lineNum">    1762</span> <span class="tlaUNC">           0 :     return V;</span></span>
+<span id="L1763"><span class="lineNum">    1763</span>              :   };</span>
+<span id="L1764"><span class="lineNum">    1764</span>              : </span>
+<span id="L1765"><span class="lineNum">    1765</span>              :   // Helper: compute current I = ∮ H · t dl via coordinate path or boundary attributes.</span>
+<span id="L1766"><span class="lineNum">    1766</span> <span class="tlaUNC">           0 :   auto ComputeCurrent = [this](const std::vector&lt;mfem::Vector&gt; &amp;path, bool has_path,</span></span>
+<span id="L1767"><span class="lineNum">    1767</span>              :                                mfem::Array&lt;int&gt; marker, int quad_order,</span>
+<span id="L1768"><span class="lineNum">    1768</span>              :                                const GridFunction &amp;field) -&gt; std::complex&lt;double&gt;</span>
+<span id="L1769"><span class="lineNum">    1769</span>              :   {</span>
+<span id="L1770"><span class="lineNum">    1770</span> <span class="tlaUNC">           0 :     std::complex&lt;double&gt; I(0.0, 0.0);</span></span>
+<span id="L1771"><span class="lineNum">    1771</span> <span class="tlaUNC">           0 :     if (has_path)</span></span>
+<span id="L1772"><span class="lineNum">    1772</span>              :     {</span>
+<span id="L1773"><span class="lineNum">    1773</span> <span class="tlaUNC">           0 :       for (std::size_t k = 0; k &lt; path.size(); k++)</span></span>
+<span id="L1774"><span class="lineNum">    1774</span>              :       {</span>
+<span id="L1775"><span class="lineNum">    1775</span>              :         const auto &amp;pk = path[k];</span>
+<span id="L1776"><span class="lineNum">    1776</span> <span class="tlaUNC">           0 :         const auto &amp;pk1 = path[(k + 1) % path.size()];</span></span>
+<span id="L1777"><span class="lineNum">    1777</span> <span class="tlaUNC">           0 :         I.real(I.real() + fem::ComputeLineIntegral(pk, pk1, field.Real(), quad_order));</span></span>
+<span id="L1778"><span class="lineNum">    1778</span> <span class="tlaUNC">           0 :         I.imag(I.imag() + fem::ComputeLineIntegral(pk, pk1, field.Imag(), quad_order));</span></span>
+<span id="L1779"><span class="lineNum">    1779</span>              :       }</span>
+<span id="L1780"><span class="lineNum">    1780</span>              :     }</span>
+<span id="L1781"><span class="lineNum">    1781</span> <span class="tlaUNC">           0 :     else if (marker.Size() &gt; 0)</span></span>
+<span id="L1782"><span class="lineNum">    1782</span>              :     {</span>
+<span id="L1783"><span class="lineNum">    1783</span> <span class="tlaUNC">           0 :       auto &amp;nd_fespace = fem_op-&gt;GetNDSpace();</span></span>
+<span id="L1784"><span class="lineNum">    1784</span>              :       const int nd_size = nd_fespace.GetTrueVSize();</span>
+<span id="L1785"><span class="lineNum">    1785</span>              :       mfem::ConstantCoefficient one(1.0);</span>
+<span id="L1786"><span class="lineNum">    1786</span>              :       mfem::ParLinearForm i_lf(&amp;nd_fespace.Get());</span>
+<span id="L1787"><span class="lineNum">    1787</span> <span class="tlaUNC">           0 :       i_lf.AddBoundaryIntegrator(new mfem::VectorFEBoundaryFluxLFIntegrator(one), marker);</span></span>
+<span id="L1788"><span class="lineNum">    1788</span> <span class="tlaUNC">           0 :       i_lf.UseFastAssembly(false);</span></span>
+<span id="L1789"><span class="lineNum">    1789</span> <span class="tlaUNC">           0 :       i_lf.Assemble();</span></span>
+<span id="L1790"><span class="lineNum">    1790</span>              :       Vector i_lf_tdof(nd_size);</span>
+<span id="L1791"><span class="lineNum">    1791</span> <span class="tlaUNC">           0 :       i_lf.ParallelAssemble(i_lf_tdof);</span></span>
+<span id="L1792"><span class="lineNum">    1792</span>              :       Vector fr(nd_size), fi(nd_size);</span>
+<span id="L1793"><span class="lineNum">    1793</span> <span class="tlaUNC">           0 :       field.Real().GetTrueDofs(fr);</span></span>
+<span id="L1794"><span class="lineNum">    1794</span> <span class="tlaUNC">           0 :       field.Imag().GetTrueDofs(fi);</span></span>
+<span id="L1795"><span class="lineNum">    1795</span> <span class="tlaUNC">           0 :       I.real(linalg::Dot(nd_fespace.GetComm(), i_lf_tdof, fr));</span></span>
+<span id="L1796"><span class="lineNum">    1796</span> <span class="tlaUNC">           0 :       I.imag(linalg::Dot(nd_fespace.GetComm(), i_lf_tdof, fi));</span></span>
+<span id="L1797"><span class="lineNum">    1797</span>              :     }</span>
+<span id="L1798"><span class="lineNum">    1798</span> <span class="tlaUNC">           0 :     return I;</span></span>
+<span id="L1799"><span class="lineNum">    1799</span>              :   };</span>
+<span id="L1800"><span class="lineNum">    1800</span>              : </span>
+<span id="L1801"><span class="lineNum">    1801</span>              :   // Compute impedance for each configured entry. P is the Poynting power of the</span>
+<span id="L1802"><span class="lineNum">    1802</span>              :   // power-normalized mode (|P| ≈ 1), computed by the caller on the mode eigensolver.</span>
+<span id="L1803"><span class="lineNum">    1803</span> <span class="tlaUNC">           0 :   for (const auto &amp;[idx, cfg] : impedance_postpro)</span></span>
+<span id="L1804"><span class="lineNum">    1804</span>              :   {</span>
+<span id="L1805"><span class="lineNum">    1805</span> <span class="tlaUNC">           0 :     auto V = ComputeVoltage(cfg.voltage_path, cfg.has_voltage_coordinates,</span></span>
+<span id="L1806"><span class="lineNum">    1806</span> <span class="tlaUNC">           0 :                             cfg.voltage_marker, cfg.n_samples, *E);</span></span>
+<span id="L1807"><span class="lineNum">    1807</span> <span class="tlaUNC">           0 :     auto &amp;result = measurement_cache.mode_data.impedance[idx];</span></span>
+<span id="L1808"><span class="lineNum">    1808</span>              : </span>
+<span id="L1809"><span class="lineNum">    1809</span>              :     // Power-voltage impedance: Z_PV = |V|^2 / (2P).</span>
+<span id="L1810"><span class="lineNum">    1810</span> <span class="tlaUNC">           0 :     if (std::abs(P) &gt; 1e-30)</span></span>
+<span id="L1811"><span class="lineNum">    1811</span>              :     {</span>
+<span id="L1812"><span class="lineNum">    1812</span>              :       std::complex&lt;double&gt; Z0_nondim = (V * std::conj(V)) / (2.0 * P);</span>
+<span id="L1813"><span class="lineNum">    1813</span> <span class="tlaUNC">           0 :       result.Z0 = Z0_nondim.real();</span></span>
+<span id="L1814"><span class="lineNum">    1814</span> <span class="tlaUNC">           0 :       result.has_impedance = true;</span></span>
+<span id="L1815"><span class="lineNum">    1815</span>              :     }</span>
+<span id="L1816"><span class="lineNum">    1816</span>              : </span>
+<span id="L1817"><span class="lineNum">    1817</span>              :     // V/I impedance: Z_VI = |V| / |I|.</span>
+<span id="L1818"><span class="lineNum">    1818</span> <span class="tlaUNC">           0 :     auto I = ComputeCurrent(cfg.current_path, cfg.has_current_path, cfg.current_marker,</span></span>
+<span id="L1819"><span class="lineNum">    1819</span> <span class="tlaUNC">           0 :                             cfg.n_samples, *Bt_inplane);</span></span>
+<span id="L1820"><span class="lineNum">    1820</span> <span class="tlaUNC">           0 :     if (std::abs(I) &gt; 1e-30)</span></span>
+<span id="L1821"><span class="lineNum">    1821</span>              :     {</span>
+<span id="L1822"><span class="lineNum">    1822</span> <span class="tlaUNC">           0 :       result.Z_VI = std::abs(V) / std::abs(I);</span></span>
+<span id="L1823"><span class="lineNum">    1823</span> <span class="tlaUNC">           0 :       result.has_vi_impedance = true;</span></span>
+<span id="L1824"><span class="lineNum">    1824</span>              :     }</span>
+<span id="L1825"><span class="lineNum">    1825</span>              :   }</span>
+<span id="L1826"><span class="lineNum">    1826</span>              : </span>
+<span id="L1827"><span class="lineNum">    1827</span>              :   // Compute voltage for each configured voltage-only entry.</span>
+<span id="L1828"><span class="lineNum">    1828</span> <span class="tlaUNC">           0 :   for (const auto &amp;[idx, cfg] : voltage_postpro)</span></span>
+<span id="L1829"><span class="lineNum">    1829</span>              :   {</span>
+<span id="L1830"><span class="lineNum">    1830</span> <span class="tlaUNC">           0 :     auto V = ComputeVoltage(cfg.voltage_path, cfg.has_coordinates, cfg.voltage_marker,</span></span>
+<span id="L1831"><span class="lineNum">    1831</span> <span class="tlaUNC">           0 :                             cfg.n_samples, *E);</span></span>
+<span id="L1832"><span class="lineNum">    1832</span> <span class="tlaUNC">           0 :     measurement_cache.mode_data.voltage[idx] = {V};</span></span>
+<span id="L1833"><span class="lineNum">    1833</span>              :   }</span>
+<span id="L1834"><span class="lineNum">    1834</span>              : </span>
+<span id="L1835"><span class="lineNum">    1835</span>              :   // Compute electric field energy via the domain post operator.</span>
+<span id="L1836"><span class="lineNum">    1836</span> <span class="tlaUNC">           0 :   MeasureAllImpl();</span></span>
+<span id="L1837"><span class="lineNum">    1837</span>              : </span>
+<span id="L1838"><span class="lineNum">    1838</span>              :   // Pretty-print mode summary using Table (matches eigenmode solver style).</span>
+<span id="L1839"><span class="lineNum">    1839</span> <span class="tlaUNC">           0 :   if (Mpi::Root(fem_op-&gt;GetComm()))</span></span>
+<span id="L1840"><span class="lineNum">    1840</span>              :   {</span>
+<span id="L1841"><span class="lineNum">    1841</span> <span class="tlaUNC">           0 :     Table table;</span></span>
+<span id="L1842"><span class="lineNum">    1842</span> <span class="tlaUNC">           0 :     int idx_pad = 1 + static_cast&lt;int&gt;(std::log10(std::max(num_conv, 1)));</span></span>
+<span id="L1843"><span class="lineNum">    1843</span> <span class="tlaUNC">           0 :     table.col_options = {6, 6};</span></span>
+<span id="L1844"><span class="lineNum">    1844</span> <span class="tlaUNC">           0 :     table.insert(Column(&quot;m&quot;, &quot;m&quot;, idx_pad, {}, {}, &quot;&quot;) &lt;&lt; (step + 1));</span></span>
+<span id="L1845"><span class="lineNum">    1845</span> <span class="tlaUNC">           0 :     const double kc = 1.0 / units.Dimensionalize&lt;Units::ValueType::LENGTH&gt;(1.0);</span></span>
+<span id="L1846"><span class="lineNum">    1846</span> <span class="tlaUNC">           0 :     table.insert(Column(&quot;kn_re&quot;, &quot;Re{kn} (1/m)&quot;) &lt;&lt; kn.real() * kc);</span></span>
+<span id="L1847"><span class="lineNum">    1847</span> <span class="tlaUNC">           0 :     table.insert(Column(&quot;kn_im&quot;, &quot;Im{kn} (1/m)&quot;) &lt;&lt; kn.imag() * kc);</span></span>
+<span id="L1848"><span class="lineNum">    1848</span> <span class="tlaUNC">           0 :     table.insert(Column(&quot;neff_re&quot;, &quot;Re{n_eff}&quot;) &lt;&lt; n_eff.real());</span></span>
+<span id="L1849"><span class="lineNum">    1849</span> <span class="tlaUNC">           0 :     table.insert(Column(&quot;neff_im&quot;, &quot;Im{n_eff}&quot;) &lt;&lt; n_eff.imag());</span></span>
+<span id="L1850"><span class="lineNum">    1850</span> <span class="tlaUNC">           0 :     table.insert(Column(&quot;err_back&quot;, &quot;Error (Bkwd.)&quot;) &lt;&lt; error_bkwd);</span></span>
+<span id="L1851"><span class="lineNum">    1851</span> <span class="tlaUNC">           0 :     table.insert(Column(&quot;err_abs&quot;, &quot;Error (Abs.)&quot;) &lt;&lt; error_abs);</span></span>
+<span id="L1852"><span class="lineNum">    1852</span> <span class="tlaUNC">           0 :     table[0].print_as_int = true;</span></span>
+<span id="L1853"><span class="lineNum">    1853</span> <span class="tlaUNC">           0 :     Mpi::Print(&quot;{}&quot;, (step == 0) ? table.format_table() : table.format_row(0));</span></span>
+<span id="L1854"><span class="lineNum">    1854</span> <span class="tlaUNC">           0 :   }</span></span>
+<span id="L1855"><span class="lineNum">    1855</span>              : </span>
+<span id="L1856"><span class="lineNum">    1856</span> <span class="tlaUNC">           0 :   int print_idx = step + 1;</span></span>
+<span id="L1857"><span class="lineNum">    1857</span> <span class="tlaUNC">           0 :   post_op_csv.PrintAllCSVData(*this, measurement_cache, print_idx, step);</span></span>
+<span id="L1858"><span class="lineNum">    1858</span> <span class="tlaUNC">           0 :   if (ShouldWriteParaviewFields(step))</span></span>
+<span id="L1859"><span class="lineNum">    1859</span>              :   {</span>
+<span id="L1860"><span class="lineNum">    1860</span> <span class="tlaUNC">           0 :     WriteParaviewFields(step, print_idx);</span></span>
+<span id="L1861"><span class="lineNum">    1861</span> <span class="tlaUNC">           0 :     Mpi::Print(&quot; Wrote mode {:d} to disk (Paraview)\n&quot;, print_idx);</span></span>
+<span id="L1862"><span class="lineNum">    1862</span>              :   }</span>
+<span id="L1863"><span class="lineNum">    1863</span> <span class="tlaUNC">           0 :   if (ShouldWriteGridFunctionFields(step))</span></span>
+<span id="L1864"><span class="lineNum">    1864</span>              :   {</span>
+<span id="L1865"><span class="lineNum">    1865</span> <span class="tlaUNC">           0 :     WriteMFEMGridFunctions(step, print_idx);</span></span>
+<span id="L1866"><span class="lineNum">    1866</span> <span class="tlaUNC">           0 :     Mpi::Print(&quot; Wrote mode {:d} to disk (grid function)\n&quot;, print_idx);</span></span>
+<span id="L1867"><span class="lineNum">    1867</span>              :   }</span>
+<span id="L1868"><span class="lineNum">    1868</span> <span class="tlaUNC">           0 :   return measurement_cache.domain_E_field_energy_all;</span></span>
+<span id="L1869"><span class="lineNum">    1869</span> <span class="tlaUNC">           0 : }</span></span>
+<span id="L1870"><span class="lineNum">    1870</span>              : </span>
+<span id="L1871"><span class="lineNum">    1871</span>              : // Explicit template instantiation.</span>
+<span id="L1872"><span class="lineNum">    1872</span>              : </span>
+<span id="L1873"><span class="lineNum">    1873</span>              : template class PostOperator&lt;ProblemType::DRIVEN&gt;;</span>
+<span id="L1874"><span class="lineNum">    1874</span>              : template class PostOperator&lt;ProblemType::EIGENMODE&gt;;</span>
+<span id="L1875"><span class="lineNum">    1875</span>              : template class PostOperator&lt;ProblemType::ELECTROSTATIC&gt;;</span>
+<span id="L1876"><span class="lineNum">    1876</span>              : template class PostOperator&lt;ProblemType::MAGNETOSTATIC&gt;;</span>
+<span id="L1877"><span class="lineNum">    1877</span>              : template class PostOperator&lt;ProblemType::TRANSIENT&gt;;</span>
+<span id="L1878"><span class="lineNum">    1878</span>              : template class PostOperator&lt;ProblemType::BOUNDARYMODE&gt;;</span>
+<span id="L1879"><span class="lineNum">    1879</span>              : </span>
+<span id="L1880"><span class="lineNum">    1880</span>              : // Function explicit instantiation.</span>
+<span id="L1881"><span class="lineNum">    1881</span>              : // TODO(C++20): with requires, we won't need a second template.</span>
+<span id="L1882"><span class="lineNum">    1882</span>              : </span>
+<span id="L1883"><span class="lineNum">    1883</span>              : template auto PostOperator&lt;ProblemType::DRIVEN&gt;::MeasureAndPrintAll&lt;ProblemType::DRIVEN&gt;(</span>
+<span id="L1884"><span class="lineNum">    1884</span>              :     int ex_idx, int step, const ComplexVector &amp;e, const ComplexVector &amp;b,</span>
+<span id="L1885"><span class="lineNum">    1885</span>              :     std::complex&lt;double&gt; omega) -&gt; double;</span>
+<span id="L1886"><span class="lineNum">    1886</span>              : </span>
+<span id="L1887"><span class="lineNum">    1887</span>              : template auto</span>
+<span id="L1888"><span class="lineNum">    1888</span>              : PostOperator&lt;ProblemType::EIGENMODE&gt;::MeasureAndPrintAll&lt;ProblemType::EIGENMODE&gt;(</span>
+<span id="L1889"><span class="lineNum">    1889</span>              :     int step, const ComplexVector &amp;e, const ComplexVector &amp;b, std::complex&lt;double&gt; omega,</span>
+<span id="L1890"><span class="lineNum">    1890</span>              :     double error_abs, double error_bkwd, int num_conv) -&gt; double;</span>
+<span id="L1891"><span class="lineNum">    1891</span>              : </span>
+<span id="L1892"><span class="lineNum">    1892</span>              : template auto</span>
+<span id="L1893"><span class="lineNum">    1893</span>              : PostOperator&lt;ProblemType::ELECTROSTATIC&gt;::MeasureAndPrintAll&lt;ProblemType::ELECTROSTATIC&gt;(</span>
+<span id="L1894"><span class="lineNum">    1894</span>              :     int step, const Vector &amp;v, const Vector &amp;e, int idx) -&gt; double;</span>
+<span id="L1895"><span class="lineNum">    1895</span>              : </span>
+<span id="L1896"><span class="lineNum">    1896</span>              : template auto</span>
+<span id="L1897"><span class="lineNum">    1897</span>              : PostOperator&lt;ProblemType::MAGNETOSTATIC&gt;::MeasureAndPrintAll&lt;ProblemType::MAGNETOSTATIC&gt;(</span>
+<span id="L1898"><span class="lineNum">    1898</span>              :     int step, const Vector &amp;a, const Vector &amp;b, int idx) -&gt; double;</span>
+<span id="L1899"><span class="lineNum">    1899</span>              : </span>
+<span id="L1900"><span class="lineNum">    1900</span>              : template auto</span>
+<span id="L1901"><span class="lineNum">    1901</span>              : PostOperator&lt;ProblemType::TRANSIENT&gt;::MeasureAndPrintAll&lt;ProblemType::TRANSIENT&gt;(</span>
+<span id="L1902"><span class="lineNum">    1902</span>              :     int step, const Vector &amp;e, const Vector &amp;b, double t, double J_coef) -&gt; double;</span>
+<span id="L1903"><span class="lineNum">    1903</span>              : </span>
+<span id="L1904"><span class="lineNum">    1904</span>              : template auto</span>
+<span id="L1905"><span class="lineNum">    1905</span>              : PostOperator&lt;ProblemType::BOUNDARYMODE&gt;::MeasureAndPrintAll&lt;ProblemType::BOUNDARYMODE&gt;(</span>
+<span id="L1906"><span class="lineNum">    1906</span>              :     int step, const ComplexVector &amp;et, const ComplexVector &amp;en, std::complex&lt;double&gt; kn,</span>
+<span id="L1907"><span class="lineNum">    1907</span>              :     double omega, double error_abs, double error_bkwd, int num_conv) -&gt; double;</span>
+<span id="L1908"><span class="lineNum">    1908</span>              : </span>
+<span id="L1909"><span class="lineNum">    1909</span>              : template auto</span>
+<span id="L1910"><span class="lineNum">    1910</span>              : PostOperator&lt;ProblemType::DRIVEN&gt;::MeasureDomainFieldEnergyOnly&lt;ProblemType::DRIVEN&gt;(</span>
+<span id="L1911"><span class="lineNum">    1911</span>              :     const ComplexVector &amp;e, const ComplexVector &amp;b) -&gt; double;</span>
+<span id="L1912"><span class="lineNum">    1912</span>              : </span>
+<span id="L1913"><span class="lineNum">    1913</span>              : template auto</span>
+<span id="L1914"><span class="lineNum">    1914</span>              : PostOperator&lt;ProblemType::DRIVEN&gt;::InitializeParaviewDataCollection(int ex_idx) -&gt; void;</span>
+<span id="L1915"><span class="lineNum">    1915</span>              : </span>
+<span id="L1916"><span class="lineNum">    1916</span>              : }  // namespace palace</span>
         </pre>
               </td>
             </tr>

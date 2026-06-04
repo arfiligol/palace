@@ -31,18 +31,18 @@
             <td class="headerValue">Palace Coverage Report</td>
             <td></td>
             <td class="headerItem">Lines:</td>
-            <td class="headerCovTableEntryLo">33.2&nbsp;%</td>
+            <td class="headerCovTableEntryLo">42.9&nbsp;%</td>
             <td class="headerCovTableEntry">394</td>
-            <td class="headerCovTableEntry">131</td>
+            <td class="headerCovTableEntry">169</td>
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2026-05-15 18:39:30</td>
+            <td class="headerValue">2026-06-04 21:57:07</td>
             <td></td>
             <td class="headerItem">Functions:</td>
-            <td class="headerCovTableEntryLo">37.0&nbsp;%</td>
+            <td class="headerCovTableEntryLo">48.1&nbsp;%</td>
             <td class="headerCovTableEntry">27</td>
-            <td class="headerCovTableEntry">10</td>
+            <td class="headerCovTableEntry">13</td>
           </tr>
           <tr>
             <td class="headerItem">Legend:</td>
@@ -311,13 +311,13 @@
 <span id="L241"><span class="lineNum">     241</span> <span class="tlaGNC">        6478 : }</span></span>
 <span id="L242"><span class="lineNum">     242</span>              : </span>
 <span id="L243"><span class="lineNum">     243</span>              : template &lt;typename OperType, typename VecType&gt;</span>
-<span id="L244"><span class="lineNum">     244</span> <span class="tlaGNC">         835 : inline void ApplyB(const Solver&lt;OperType&gt; *B, const VecType &amp;x, VecType &amp;y,</span></span>
+<span id="L244"><span class="lineNum">     244</span> <span class="tlaGNC">        5656 : inline void ApplyB(const Solver&lt;OperType&gt; *B, const VecType &amp;x, VecType &amp;y,</span></span>
 <span id="L245"><span class="lineNum">     245</span>              :                    bool use_timer = true)</span>
 <span id="L246"><span class="lineNum">     246</span>              : {</span>
-<span id="L247"><span class="lineNum">     247</span> <span class="tlaGNC">         835 :   BlockTimer bt(Timer::KSP_PRECONDITIONER, use_timer);</span></span>
+<span id="L247"><span class="lineNum">     247</span> <span class="tlaGNC">        5656 :   BlockTimer bt(Timer::KSP_PRECONDITIONER, use_timer);</span></span>
 <span id="L248"><span class="lineNum">     248</span>              :   MFEM_ASSERT(B, &quot;Missing preconditioner in ApplyB!&quot;);</span>
-<span id="L249"><span class="lineNum">     249</span> <span class="tlaGNC">         835 :   B-&gt;Mult(x, y);</span></span>
-<span id="L250"><span class="lineNum">     250</span> <span class="tlaGNC">         835 : }</span></span>
+<span id="L249"><span class="lineNum">     249</span> <span class="tlaGNC">        5656 :   B-&gt;Mult(x, y);</span></span>
+<span id="L250"><span class="lineNum">     250</span> <span class="tlaGNC">        5656 : }</span></span>
 <span id="L251"><span class="lineNum">     251</span>              : </span>
 <span id="L252"><span class="lineNum">     252</span>              : template &lt;typename OperType, typename VecType&gt;</span>
 <span id="L253"><span class="lineNum">     253</span> <span class="tlaGNC">         161 : inline void InitialResidual(PreconditionerSide side, const OperType *A,</span></span>
@@ -397,11 +397,11 @@
 <span id="L327"><span class="lineNum">     327</span>              : }  // namespace</span>
 <span id="L328"><span class="lineNum">     328</span>              : </span>
 <span id="L329"><span class="lineNum">     329</span>              : template &lt;typename OperType&gt;</span>
-<span id="L330"><span class="lineNum">     330</span> <span class="tlaGNC">          36 : IterativeSolver&lt;OperType&gt;::IterativeSolver(MPI_Comm comm, int print)</span></span>
-<span id="L331"><span class="lineNum">     331</span> <span class="tlaGNC">          36 :   : Solver&lt;OperType&gt;(), comm(comm), A(nullptr), B(nullptr)</span></span>
+<span id="L330"><span class="lineNum">     330</span> <span class="tlaGNC">         344 : IterativeSolver&lt;OperType&gt;::IterativeSolver(MPI_Comm comm, int print)</span></span>
+<span id="L331"><span class="lineNum">     331</span> <span class="tlaGNC">         344 :   : Solver&lt;OperType&gt;(), comm(comm), A(nullptr), B(nullptr)</span></span>
 <span id="L332"><span class="lineNum">     332</span>              : {</span>
 <span id="L333"><span class="lineNum">     333</span>              :   print_opts.Warnings();</span>
-<span id="L334"><span class="lineNum">     334</span> <span class="tlaGNC">          36 :   if (print &gt; 0)</span></span>
+<span id="L334"><span class="lineNum">     334</span> <span class="tlaGNC">         344 :   if (print &gt; 0)</span></span>
 <span id="L335"><span class="lineNum">     335</span>              :   {</span>
 <span id="L336"><span class="lineNum">     336</span>              :     print_opts.Summary();</span>
 <span id="L337"><span class="lineNum">     337</span> <span class="tlaGNC">          31 :     if (print &gt; 1)</span></span>
@@ -413,61 +413,61 @@
 <span id="L343"><span class="lineNum">     343</span>              :       }</span>
 <span id="L344"><span class="lineNum">     344</span>              :     }</span>
 <span id="L345"><span class="lineNum">     345</span>              :   }</span>
-<span id="L346"><span class="lineNum">     346</span> <span class="tlaGNC">          36 :   int_width = 3;</span></span>
-<span id="L347"><span class="lineNum">     347</span> <span class="tlaGNC">          36 :   tab_width = 0;</span></span>
+<span id="L346"><span class="lineNum">     346</span> <span class="tlaGNC">         344 :   int_width = 3;</span></span>
+<span id="L347"><span class="lineNum">     347</span> <span class="tlaGNC">         344 :   tab_width = 0;</span></span>
 <span id="L348"><span class="lineNum">     348</span>              : </span>
-<span id="L349"><span class="lineNum">     349</span> <span class="tlaGNC">          36 :   rel_tol = abs_tol = 0.0;</span></span>
-<span id="L350"><span class="lineNum">     350</span> <span class="tlaGNC">          36 :   max_it = 100;</span></span>
+<span id="L349"><span class="lineNum">     349</span> <span class="tlaGNC">         344 :   rel_tol = abs_tol = 0.0;</span></span>
+<span id="L350"><span class="lineNum">     350</span> <span class="tlaGNC">         344 :   max_it = 100;</span></span>
 <span id="L351"><span class="lineNum">     351</span>              : </span>
-<span id="L352"><span class="lineNum">     352</span> <span class="tlaGNC">          36 :   converged = false;</span></span>
-<span id="L353"><span class="lineNum">     353</span> <span class="tlaGNC">          36 :   initial_res = 1.0;</span></span>
-<span id="L354"><span class="lineNum">     354</span> <span class="tlaGNC">          36 :   final_res = 0.0;</span></span>
-<span id="L355"><span class="lineNum">     355</span> <span class="tlaGNC">          36 :   final_it = 0;</span></span>
+<span id="L352"><span class="lineNum">     352</span> <span class="tlaGNC">         344 :   converged = false;</span></span>
+<span id="L353"><span class="lineNum">     353</span> <span class="tlaGNC">         344 :   initial_res = 1.0;</span></span>
+<span id="L354"><span class="lineNum">     354</span> <span class="tlaGNC">         344 :   final_res = 0.0;</span></span>
+<span id="L355"><span class="lineNum">     355</span> <span class="tlaGNC">         344 :   final_it = 0;</span></span>
 <span id="L356"><span class="lineNum">     356</span>              : </span>
-<span id="L357"><span class="lineNum">     357</span> <span class="tlaGNC">          36 :   use_timer = false;</span></span>
-<span id="L358"><span class="lineNum">     358</span> <span class="tlaGNC">          36 : }</span></span>
+<span id="L357"><span class="lineNum">     357</span> <span class="tlaGNC">         344 :   use_timer = false;</span></span>
+<span id="L358"><span class="lineNum">     358</span> <span class="tlaGNC">         344 : }</span></span>
 <span id="L359"><span class="lineNum">     359</span>              : </span>
 <span id="L360"><span class="lineNum">     360</span>              : template &lt;typename OperType&gt;</span>
-<span id="L361"><span class="lineNum">     361</span> <span class="tlaUNC tlaBgUNC">           0 : void CgSolver&lt;OperType&gt;::Mult(const VecType &amp;b, VecType &amp;x) const</span></span>
+<span id="L361"><span class="lineNum">     361</span> <span class="tlaGNC">         308 : void CgSolver&lt;OperType&gt;::Mult(const VecType &amp;b, VecType &amp;x) const</span></span>
 <span id="L362"><span class="lineNum">     362</span>              : {</span>
 <span id="L363"><span class="lineNum">     363</span>              :   // Set up workspace.</span>
 <span id="L364"><span class="lineNum">     364</span>              :   ScalarType beta, beta_prev = 0.0, alpha, denom;</span>
 <span id="L365"><span class="lineNum">     365</span>              :   RealType res, eps;</span>
-<span id="L366"><span class="lineNum">     366</span> <span class="tlaUNC">           0 :   MFEM_VERIFY(A, &quot;Operator must be set for CgSolver::Mult!&quot;);</span></span>
+<span id="L366"><span class="lineNum">     366</span> <span class="tlaGNC">         308 :   MFEM_VERIFY(A, &quot;Operator must be set for CgSolver::Mult!&quot;);</span></span>
 <span id="L367"><span class="lineNum">     367</span>              :   MFEM_ASSERT(A-&gt;Width() == x.Size() &amp;&amp; A-&gt;Height() == b.Size(),</span>
 <span id="L368"><span class="lineNum">     368</span>              :               &quot;Size mismatch for CgSolver::Mult!&quot;);</span>
-<span id="L369"><span class="lineNum">     369</span> <span class="tlaUNC">           0 :   r.SetSize(A-&gt;Height());</span></span>
-<span id="L370"><span class="lineNum">     370</span> <span class="tlaUNC">           0 :   z.SetSize(A-&gt;Height());</span></span>
-<span id="L371"><span class="lineNum">     371</span> <span class="tlaUNC">           0 :   p.SetSize(A-&gt;Height());</span></span>
-<span id="L372"><span class="lineNum">     372</span> <span class="tlaUNC">           0 :   r.UseDevice(true);</span></span>
+<span id="L369"><span class="lineNum">     369</span> <span class="tlaGNC">         308 :   r.SetSize(A-&gt;Height());</span></span>
+<span id="L370"><span class="lineNum">     370</span> <span class="tlaGNC">         308 :   z.SetSize(A-&gt;Height());</span></span>
+<span id="L371"><span class="lineNum">     371</span> <span class="tlaGNC">         308 :   p.SetSize(A-&gt;Height());</span></span>
+<span id="L372"><span class="lineNum">     372</span> <span class="tlaUNC tlaBgUNC">           0 :   r.UseDevice(true);</span></span>
 <span id="L373"><span class="lineNum">     373</span> <span class="tlaUNC">           0 :   z.UseDevice(true);</span></span>
 <span id="L374"><span class="lineNum">     374</span> <span class="tlaUNC">           0 :   p.UseDevice(true);</span></span>
 <span id="L375"><span class="lineNum">     375</span>              : </span>
 <span id="L376"><span class="lineNum">     376</span>              :   // Initialize.</span>
-<span id="L377"><span class="lineNum">     377</span> <span class="tlaUNC">           0 :   if (this-&gt;initial_guess)</span></span>
+<span id="L377"><span class="lineNum">     377</span> <span class="tlaGNC tlaBgGNC">         308 :   if (this-&gt;initial_guess)</span></span>
 <span id="L378"><span class="lineNum">     378</span>              :   {</span>
-<span id="L379"><span class="lineNum">     379</span> <span class="tlaUNC">           0 :     A-&gt;Mult(x, r);</span></span>
+<span id="L379"><span class="lineNum">     379</span> <span class="tlaUNC tlaBgUNC">           0 :     A-&gt;Mult(x, r);</span></span>
 <span id="L380"><span class="lineNum">     380</span> <span class="tlaUNC">           0 :     linalg::AXPBY(1.0, b, -1.0, r);</span></span>
 <span id="L381"><span class="lineNum">     381</span>              :   }</span>
 <span id="L382"><span class="lineNum">     382</span>              :   else</span>
 <span id="L383"><span class="lineNum">     383</span>              :   {</span>
-<span id="L384"><span class="lineNum">     384</span> <span class="tlaUNC">           0 :     r = b;</span></span>
-<span id="L385"><span class="lineNum">     385</span> <span class="tlaUNC">           0 :     x = 0.0;</span></span>
+<span id="L384"><span class="lineNum">     384</span> <span class="tlaGNC tlaBgGNC">         308 :     r = b;</span></span>
+<span id="L385"><span class="lineNum">     385</span> <span class="tlaGNC">         308 :     x = 0.0;</span></span>
 <span id="L386"><span class="lineNum">     386</span>              :   }</span>
-<span id="L387"><span class="lineNum">     387</span> <span class="tlaUNC">           0 :   if (B)</span></span>
+<span id="L387"><span class="lineNum">     387</span> <span class="tlaGNC">         308 :   if (B)</span></span>
 <span id="L388"><span class="lineNum">     388</span>              :   {</span>
-<span id="L389"><span class="lineNum">     389</span> <span class="tlaUNC">           0 :     ApplyB(B, r, z, this-&gt;use_timer);</span></span>
+<span id="L389"><span class="lineNum">     389</span> <span class="tlaGNC">         308 :     ApplyB(B, r, z, this-&gt;use_timer);</span></span>
 <span id="L390"><span class="lineNum">     390</span>              :   }</span>
 <span id="L391"><span class="lineNum">     391</span>              :   else</span>
 <span id="L392"><span class="lineNum">     392</span>              :   {</span>
-<span id="L393"><span class="lineNum">     393</span> <span class="tlaUNC">           0 :     z = r;</span></span>
+<span id="L393"><span class="lineNum">     393</span> <span class="tlaUNC tlaBgUNC">           0 :     z = r;</span></span>
 <span id="L394"><span class="lineNum">     394</span>              :   }</span>
-<span id="L395"><span class="lineNum">     395</span> <span class="tlaUNC">           0 :   beta = linalg::Dot(comm, z, r);</span></span>
+<span id="L395"><span class="lineNum">     395</span> <span class="tlaGNC tlaBgGNC">         308 :   beta = linalg::Dot(comm, z, r);</span></span>
 <span id="L396"><span class="lineNum">     396</span>              :   CheckDot(beta, &quot;PCG preconditioner is not positive definite: (Br, r) = &quot;);</span>
-<span id="L397"><span class="lineNum">     397</span> <span class="tlaUNC">           0 :   res = std::sqrt(std::abs(beta));</span></span>
-<span id="L398"><span class="lineNum">     398</span> <span class="tlaUNC">           0 :   if (this-&gt;initial_guess)</span></span>
+<span id="L397"><span class="lineNum">     397</span> <span class="tlaGNC">         308 :   res = std::sqrt(std::abs(beta));</span></span>
+<span id="L398"><span class="lineNum">     398</span> <span class="tlaGNC">         308 :   if (this-&gt;initial_guess)</span></span>
 <span id="L399"><span class="lineNum">     399</span>              :   {</span>
-<span id="L400"><span class="lineNum">     400</span> <span class="tlaUNC">           0 :     ScalarType beta_rhs;</span></span>
+<span id="L400"><span class="lineNum">     400</span> <span class="tlaUNC tlaBgUNC">           0 :     ScalarType beta_rhs;</span></span>
 <span id="L401"><span class="lineNum">     401</span> <span class="tlaUNC">           0 :     if (B)</span></span>
 <span id="L402"><span class="lineNum">     402</span>              :     {</span>
 <span id="L403"><span class="lineNum">     403</span> <span class="tlaUNC">           0 :       ApplyB(B, b, p, this-&gt;use_timer);</span></span>
@@ -482,64 +482,64 @@
 <span id="L412"><span class="lineNum">     412</span>              :   }</span>
 <span id="L413"><span class="lineNum">     413</span>              :   else</span>
 <span id="L414"><span class="lineNum">     414</span>              :   {</span>
-<span id="L415"><span class="lineNum">     415</span> <span class="tlaUNC">           0 :     initial_res = res;</span></span>
+<span id="L415"><span class="lineNum">     415</span> <span class="tlaGNC tlaBgGNC">         308 :     initial_res = res;</span></span>
 <span id="L416"><span class="lineNum">     416</span>              :   }</span>
-<span id="L417"><span class="lineNum">     417</span> <span class="tlaUNC">           0 :   eps = std::max(rel_tol * initial_res, abs_tol);</span></span>
-<span id="L418"><span class="lineNum">     418</span> <span class="tlaUNC">           0 :   converged = (res &lt; eps);</span></span>
+<span id="L417"><span class="lineNum">     417</span> <span class="tlaGNC">         308 :   eps = std::max(rel_tol * initial_res, abs_tol);</span></span>
+<span id="L418"><span class="lineNum">     418</span> <span class="tlaGNC">         308 :   converged = (res &lt; eps);</span></span>
 <span id="L419"><span class="lineNum">     419</span>              : </span>
 <span id="L420"><span class="lineNum">     420</span>              :   // Begin iterations.</span>
-<span id="L421"><span class="lineNum">     421</span> <span class="tlaUNC">           0 :   int it = 0;</span></span>
-<span id="L422"><span class="lineNum">     422</span> <span class="tlaUNC">           0 :   if (print_opts.iterations)</span></span>
+<span id="L421"><span class="lineNum">     421</span> <span class="tlaGNC">         308 :   int it = 0;</span></span>
+<span id="L422"><span class="lineNum">     422</span> <span class="tlaGNC">         308 :   if (print_opts.iterations)</span></span>
 <span id="L423"><span class="lineNum">     423</span>              :   {</span>
-<span id="L424"><span class="lineNum">     424</span> <span class="tlaUNC">           0 :     Mpi::Print(comm, &quot;{}Residual norms for PCG solve\n&quot;,</span></span>
+<span id="L424"><span class="lineNum">     424</span> <span class="tlaUNC tlaBgUNC">           0 :     Mpi::Print(comm, &quot;{}Residual norms for PCG solve\n&quot;,</span></span>
 <span id="L425"><span class="lineNum">     425</span> <span class="tlaUNC">           0 :                std::string(tab_width + int_width - 1, ' '));</span></span>
 <span id="L426"><span class="lineNum">     426</span>              :   }</span>
-<span id="L427"><span class="lineNum">     427</span> <span class="tlaUNC">           0 :   for (; it &lt; max_it &amp;&amp; !converged; it++)</span></span>
+<span id="L427"><span class="lineNum">     427</span> <span class="tlaGNC tlaBgGNC">        4821 :   for (; it &lt; max_it &amp;&amp; !converged; it++)</span></span>
 <span id="L428"><span class="lineNum">     428</span>              :   {</span>
-<span id="L429"><span class="lineNum">     429</span> <span class="tlaUNC">           0 :     if (print_opts.iterations)</span></span>
+<span id="L429"><span class="lineNum">     429</span> <span class="tlaGNC">        4513 :     if (print_opts.iterations)</span></span>
 <span id="L430"><span class="lineNum">     430</span>              :     {</span>
-<span id="L431"><span class="lineNum">     431</span> <span class="tlaUNC">           0 :       Mpi::Print(comm, &quot;{}{:{}d} KSP residual norm ||r||_B = {:.6e}\n&quot;,</span></span>
+<span id="L431"><span class="lineNum">     431</span> <span class="tlaUNC tlaBgUNC">           0 :       Mpi::Print(comm, &quot;{}{:{}d} KSP residual norm ||r||_B = {:.6e}\n&quot;,</span></span>
 <span id="L432"><span class="lineNum">     432</span> <span class="tlaUNC">           0 :                  std::string(tab_width, ' '), it, int_width, res);</span></span>
 <span id="L433"><span class="lineNum">     433</span>              :     }</span>
-<span id="L434"><span class="lineNum">     434</span> <span class="tlaUNC">           0 :     if (!it)</span></span>
+<span id="L434"><span class="lineNum">     434</span> <span class="tlaGNC tlaBgGNC">        4513 :     if (!it)</span></span>
 <span id="L435"><span class="lineNum">     435</span>              :     {</span>
-<span id="L436"><span class="lineNum">     436</span> <span class="tlaUNC">           0 :       p = z;</span></span>
+<span id="L436"><span class="lineNum">     436</span> <span class="tlaGNC">         308 :       p = z;</span></span>
 <span id="L437"><span class="lineNum">     437</span>              :     }</span>
 <span id="L438"><span class="lineNum">     438</span>              :     else</span>
 <span id="L439"><span class="lineNum">     439</span>              :     {</span>
-<span id="L440"><span class="lineNum">     440</span> <span class="tlaUNC">           0 :       linalg::AXPBY(ScalarType(1.0), z, beta / beta_prev, p);</span></span>
+<span id="L440"><span class="lineNum">     440</span> <span class="tlaGNC">        4205 :       linalg::AXPBY(ScalarType(1.0), z, beta / beta_prev, p);</span></span>
 <span id="L441"><span class="lineNum">     441</span>              :     }</span>
 <span id="L442"><span class="lineNum">     442</span>              : </span>
-<span id="L443"><span class="lineNum">     443</span> <span class="tlaUNC">           0 :     A-&gt;Mult(p, z);</span></span>
-<span id="L444"><span class="lineNum">     444</span> <span class="tlaUNC">           0 :     denom = linalg::Dot(comm, z, p);</span></span>
+<span id="L443"><span class="lineNum">     443</span> <span class="tlaGNC">        4513 :     A-&gt;Mult(p, z);</span></span>
+<span id="L444"><span class="lineNum">     444</span> <span class="tlaGNC">        4513 :     denom = linalg::Dot(comm, z, p);</span></span>
 <span id="L445"><span class="lineNum">     445</span>              :     CheckDot(denom, &quot;PCG operator is not positive definite: (Ap, p) = &quot;);</span>
-<span id="L446"><span class="lineNum">     446</span> <span class="tlaUNC">           0 :     alpha = beta / denom;</span></span>
+<span id="L446"><span class="lineNum">     446</span> <span class="tlaGNC">        4513 :     alpha = beta / denom;</span></span>
 <span id="L447"><span class="lineNum">     447</span>              : </span>
-<span id="L448"><span class="lineNum">     448</span> <span class="tlaUNC">           0 :     x.Add(alpha, p);</span></span>
-<span id="L449"><span class="lineNum">     449</span> <span class="tlaUNC">           0 :     r.Add(-alpha, z);</span></span>
+<span id="L448"><span class="lineNum">     448</span> <span class="tlaGNC">        4513 :     x.Add(alpha, p);</span></span>
+<span id="L449"><span class="lineNum">     449</span> <span class="tlaGNC">        4513 :     r.Add(-alpha, z);</span></span>
 <span id="L450"><span class="lineNum">     450</span>              : </span>
 <span id="L451"><span class="lineNum">     451</span>              :     beta_prev = beta;</span>
-<span id="L452"><span class="lineNum">     452</span> <span class="tlaUNC">           0 :     if (B)</span></span>
+<span id="L452"><span class="lineNum">     452</span> <span class="tlaGNC">        4513 :     if (B)</span></span>
 <span id="L453"><span class="lineNum">     453</span>              :     {</span>
-<span id="L454"><span class="lineNum">     454</span> <span class="tlaUNC">           0 :       ApplyB(B, r, z, this-&gt;use_timer);</span></span>
+<span id="L454"><span class="lineNum">     454</span> <span class="tlaGNC">        4513 :       ApplyB(B, r, z, this-&gt;use_timer);</span></span>
 <span id="L455"><span class="lineNum">     455</span>              :     }</span>
 <span id="L456"><span class="lineNum">     456</span>              :     else</span>
 <span id="L457"><span class="lineNum">     457</span>              :     {</span>
-<span id="L458"><span class="lineNum">     458</span> <span class="tlaUNC">           0 :       z = r;</span></span>
+<span id="L458"><span class="lineNum">     458</span> <span class="tlaUNC tlaBgUNC">           0 :       z = r;</span></span>
 <span id="L459"><span class="lineNum">     459</span>              :     }</span>
-<span id="L460"><span class="lineNum">     460</span> <span class="tlaUNC">           0 :     beta = linalg::Dot(comm, z, r);</span></span>
+<span id="L460"><span class="lineNum">     460</span> <span class="tlaGNC tlaBgGNC">        4513 :     beta = linalg::Dot(comm, z, r);</span></span>
 <span id="L461"><span class="lineNum">     461</span>              :     CheckDot(beta, &quot;PCG preconditioner is not positive definite: (Br, r) = &quot;);</span>
-<span id="L462"><span class="lineNum">     462</span> <span class="tlaUNC">           0 :     res = std::sqrt(std::abs(beta));</span></span>
-<span id="L463"><span class="lineNum">     463</span> <span class="tlaUNC">           0 :     converged = (res &lt; eps);</span></span>
+<span id="L462"><span class="lineNum">     462</span> <span class="tlaGNC">        4513 :     res = std::sqrt(std::abs(beta));</span></span>
+<span id="L463"><span class="lineNum">     463</span> <span class="tlaGNC">        4513 :     converged = (res &lt; eps);</span></span>
 <span id="L464"><span class="lineNum">     464</span>              :   }</span>
-<span id="L465"><span class="lineNum">     465</span> <span class="tlaUNC">           0 :   if (print_opts.iterations)</span></span>
+<span id="L465"><span class="lineNum">     465</span> <span class="tlaGNC">         308 :   if (print_opts.iterations)</span></span>
 <span id="L466"><span class="lineNum">     466</span>              :   {</span>
-<span id="L467"><span class="lineNum">     467</span> <span class="tlaUNC">           0 :     Mpi::Print(comm, &quot;{}{:{}d} KSP residual norm ||r||_B = {:.6e}\n&quot;,</span></span>
+<span id="L467"><span class="lineNum">     467</span> <span class="tlaUNC tlaBgUNC">           0 :     Mpi::Print(comm, &quot;{}{:{}d} KSP residual norm ||r||_B = {:.6e}\n&quot;,</span></span>
 <span id="L468"><span class="lineNum">     468</span> <span class="tlaUNC">           0 :                std::string(tab_width, ' '), it, int_width, res);</span></span>
 <span id="L469"><span class="lineNum">     469</span>              :   }</span>
-<span id="L470"><span class="lineNum">     470</span> <span class="tlaUNC">           0 :   if (print_opts.summary || (print_opts.warnings &amp;&amp; eps &gt; 0.0 &amp;&amp; !converged))</span></span>
+<span id="L470"><span class="lineNum">     470</span> <span class="tlaGNC tlaBgGNC">         308 :   if (print_opts.summary || (print_opts.warnings &amp;&amp; eps &gt; 0.0 &amp;&amp; !converged))</span></span>
 <span id="L471"><span class="lineNum">     471</span>              :   {</span>
-<span id="L472"><span class="lineNum">     472</span> <span class="tlaUNC">           0 :     Mpi::Print(comm, &quot;{}PCG solver {} in {:d} iteration{}&quot;, std::string(tab_width, ' '),</span></span>
+<span id="L472"><span class="lineNum">     472</span> <span class="tlaUNC tlaBgUNC">           0 :     Mpi::Print(comm, &quot;{}PCG solver {} in {:d} iteration{}&quot;, std::string(tab_width, ' '),</span></span>
 <span id="L473"><span class="lineNum">     473</span> <span class="tlaUNC">           0 :                converged ? &quot;converged&quot; : &quot;did NOT converge&quot;, it, (it == 1) ? &quot;&quot; : &quot;s&quot;);</span></span>
 <span id="L474"><span class="lineNum">     474</span> <span class="tlaUNC">           0 :     if (it &gt; 0)</span></span>
 <span id="L475"><span class="lineNum">     475</span>              :     {</span>
@@ -551,12 +551,12 @@
 <span id="L481"><span class="lineNum">     481</span> <span class="tlaUNC">           0 :       Mpi::Print(comm, &quot;\n&quot;);</span></span>
 <span id="L482"><span class="lineNum">     482</span>              :     }</span>
 <span id="L483"><span class="lineNum">     483</span>              :   }</span>
-<span id="L484"><span class="lineNum">     484</span> <span class="tlaUNC">           0 :   final_res = res;</span></span>
-<span id="L485"><span class="lineNum">     485</span> <span class="tlaUNC">           0 :   final_it = it;</span></span>
-<span id="L486"><span class="lineNum">     486</span> <span class="tlaUNC">           0 : }</span></span>
+<span id="L484"><span class="lineNum">     484</span> <span class="tlaGNC tlaBgGNC">         308 :   final_res = res;</span></span>
+<span id="L485"><span class="lineNum">     485</span> <span class="tlaGNC">         308 :   final_it = it;</span></span>
+<span id="L486"><span class="lineNum">     486</span> <span class="tlaGNC">         308 : }</span></span>
 <span id="L487"><span class="lineNum">     487</span>              : </span>
 <span id="L488"><span class="lineNum">     488</span>              : template &lt;typename OperType&gt;</span>
-<span id="L489"><span class="lineNum">     489</span> <span class="tlaGNC tlaBgGNC">         161 : void GmresSolver&lt;OperType&gt;::Initialize() const</span></span>
+<span id="L489"><span class="lineNum">     489</span> <span class="tlaGNC">         161 : void GmresSolver&lt;OperType&gt;::Initialize() const</span></span>
 <span id="L490"><span class="lineNum">     490</span>              : {</span>
 <span id="L491"><span class="lineNum">     491</span> <span class="tlaGNC">         161 :   if (!V.empty())</span></span>
 <span id="L492"><span class="lineNum">     492</span>              :   {</span>
