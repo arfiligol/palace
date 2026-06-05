@@ -1303,6 +1303,7 @@ EigenSolverData::EigenSolverData(const json &eigenmode)
   }
   nleigs_singularities_per_cut =
       eigenmode.value("NLEIGSSingularitiesPerCut", nleigs_singularities_per_cut);
+  nleigs_rk_shifts = eigenmode.value("NLEIGSRKShifts", nleigs_rk_shifts);
 
   target_upper = (target_upper < 0) ? 3 * target : target_upper;  // default = 3 * target
   MFEM_VERIFY(target_upper > target, "config[\"Eigenmode\"][\"TargetUpper\"] must be "
