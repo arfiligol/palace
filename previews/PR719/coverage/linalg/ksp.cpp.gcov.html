@@ -37,7 +37,7 @@
           </tr>
           <tr>
             <td class="headerItem">Test Date:</td>
-            <td class="headerValue">2026-06-04 21:57:07</td>
+            <td class="headerValue">2026-06-05 13:36:01</td>
             <td></td>
             <td class="headerItem">Functions:</td>
             <td class="headerCovTableEntryLo">48.0&nbsp;%</td>
@@ -322,76 +322,75 @@
 <span id="L252"><span class="lineNum">     252</span>              :                                        MatrixSymmetry pc_mat_sym, int verbose,</span>
 <span id="L253"><span class="lineNum">     253</span>              :                                        FiniteElementSpaceHierarchy &amp;fespaces,</span>
 <span id="L254"><span class="lineNum">     254</span>              :                                        FiniteElementSpaceHierarchy *aux_fespaces)</span>
-<span id="L255"><span class="lineNum">     255</span>              :   : BaseKspSolver(</span>
-<span id="L256"><span class="lineNum">     256</span> <span class="tlaGNC">          31 :         ConfigureKrylovSolver&lt;OperType&gt;(linear, verbose,</span></span>
-<span id="L257"><span class="lineNum">     257</span>              :                                         fespaces.GetFinestFESpace().GetComm()),</span>
-<span id="L258"><span class="lineNum">     258</span> <span class="tlaGNC">          31 :         ConfigurePreconditionerSolver&lt;OperType&gt;(</span></span>
-<span id="L259"><span class="lineNum">     259</span>              :             linear, pc_mat_sym, verbose, fespaces.GetFinestFESpace().GetComm(), fespaces,</span>
-<span id="L260"><span class="lineNum">     260</span>              :             aux_fespaces))</span>
-<span id="L261"><span class="lineNum">     261</span>              : {</span>
-<span id="L262"><span class="lineNum">     262</span> <span class="tlaGNC">          31 :   use_timer = true;</span></span>
-<span id="L263"><span class="lineNum">     263</span> <span class="tlaGNC">          31 : }</span></span>
-<span id="L264"><span class="lineNum">     264</span>              : </span>
-<span id="L265"><span class="lineNum">     265</span>              : template &lt;typename OperType&gt;</span>
-<span id="L266"><span class="lineNum">     266</span> <span class="tlaUNC tlaBgUNC">           0 : BaseKspSolver&lt;OperType&gt;::BaseKspSolver(const IoData &amp;iodata,</span></span>
-<span id="L267"><span class="lineNum">     267</span>              :                                        FiniteElementSpaceHierarchy &amp;fespaces,</span>
-<span id="L268"><span class="lineNum">     268</span>              :                                        FiniteElementSpaceHierarchy *aux_fespaces)</span>
-<span id="L269"><span class="lineNum">     269</span> <span class="tlaUNC">           0 :   : BaseKspSolver(iodata.solver.linear, GetPreconditionerMatrixSymmetry(iodata),</span></span>
-<span id="L270"><span class="lineNum">     270</span> <span class="tlaUNC">           0 :                   iodata.problem.verbose, fespaces, aux_fespaces)</span></span>
-<span id="L271"><span class="lineNum">     271</span>              : {</span>
-<span id="L272"><span class="lineNum">     272</span> <span class="tlaUNC">           0 : }</span></span>
-<span id="L273"><span class="lineNum">     273</span>              : </span>
-<span id="L274"><span class="lineNum">     274</span>              : template &lt;typename OperType&gt;</span>
-<span id="L275"><span class="lineNum">     275</span> <span class="tlaGNC tlaBgGNC">         344 : BaseKspSolver&lt;OperType&gt;::BaseKspSolver(std::unique_ptr&lt;IterativeSolver&lt;OperType&gt;&gt; &amp;&amp;ksp,</span></span>
-<span id="L276"><span class="lineNum">     276</span>              :                                        std::unique_ptr&lt;Solver&lt;OperType&gt;&gt; &amp;&amp;pc)</span>
-<span id="L277"><span class="lineNum">     277</span> <span class="tlaGNC">         344 :   : ksp(std::move(ksp)), pc(std::move(pc)), ksp_mult(0), ksp_mult_it(0), use_timer(false)</span></span>
-<span id="L278"><span class="lineNum">     278</span>              : {</span>
-<span id="L279"><span class="lineNum">     279</span> <span class="tlaGNC">         344 :   if (this-&gt;pc)</span></span>
-<span id="L280"><span class="lineNum">     280</span>              :   {</span>
-<span id="L281"><span class="lineNum">     281</span>              :     this-&gt;ksp-&gt;SetPreconditioner(*this-&gt;pc);</span>
-<span id="L282"><span class="lineNum">     282</span>              :   }</span>
-<span id="L283"><span class="lineNum">     283</span> <span class="tlaGNC">         313 : }</span></span>
-<span id="L284"><span class="lineNum">     284</span>              : </span>
-<span id="L285"><span class="lineNum">     285</span>              : template &lt;typename OperType&gt;</span>
-<span id="L286"><span class="lineNum">     286</span> <span class="tlaGNC">         313 : void BaseKspSolver&lt;OperType&gt;::SetOperators(const OperType &amp;op, const OperType &amp;pc_op)</span></span>
-<span id="L287"><span class="lineNum">     287</span>              : {</span>
-<span id="L288"><span class="lineNum">     288</span> <span class="tlaGNC">         313 :   BlockTimer bt(Timer::KSP_SETUP, use_timer);</span></span>
-<span id="L289"><span class="lineNum">     289</span> <span class="tlaGNC">         313 :   ksp-&gt;SetOperator(op);</span></span>
-<span id="L290"><span class="lineNum">     290</span> <span class="tlaGNC">         313 :   if (pc)</span></span>
-<span id="L291"><span class="lineNum">     291</span>              :   {</span>
-<span id="L292"><span class="lineNum">     292</span> <span class="tlaGNC">         313 :     const auto *mg_op = dynamic_cast&lt;const BaseMultigridOperator&lt;OperType&gt; *&gt;(&amp;pc_op);</span></span>
-<span id="L293"><span class="lineNum">     293</span> <span class="tlaGNC">         313 :     const auto *mg_pc = dynamic_cast&lt;const GeometricMultigridSolver&lt;OperType&gt; *&gt;(pc.get());</span></span>
-<span id="L294"><span class="lineNum">     294</span> <span class="tlaGNC">         313 :     if (mg_op &amp;&amp; !mg_pc)</span></span>
-<span id="L295"><span class="lineNum">     295</span>              :     {</span>
-<span id="L296"><span class="lineNum">     296</span> <span class="tlaUNC tlaBgUNC">           0 :       pc-&gt;SetOperator(mg_op-&gt;GetFinestOperator());</span></span>
-<span id="L297"><span class="lineNum">     297</span>              :     }</span>
-<span id="L298"><span class="lineNum">     298</span>              :     else</span>
-<span id="L299"><span class="lineNum">     299</span>              :     {</span>
-<span id="L300"><span class="lineNum">     300</span> <span class="tlaGNC tlaBgGNC">         313 :       pc-&gt;SetOperator(pc_op);</span></span>
-<span id="L301"><span class="lineNum">     301</span>              :     }</span>
-<span id="L302"><span class="lineNum">     302</span>              :   }</span>
-<span id="L303"><span class="lineNum">     303</span> <span class="tlaGNC">         313 : }</span></span>
-<span id="L304"><span class="lineNum">     304</span>              : </span>
-<span id="L305"><span class="lineNum">     305</span>              : template &lt;typename OperType&gt;</span>
-<span id="L306"><span class="lineNum">     306</span> <span class="tlaGNC">         469 : void BaseKspSolver&lt;OperType&gt;::Mult(const VecType &amp;x, VecType &amp;y) const</span></span>
-<span id="L307"><span class="lineNum">     307</span>              : {</span>
-<span id="L308"><span class="lineNum">     308</span> <span class="tlaGNC">         469 :   BlockTimer bt(Timer::KSP, use_timer);</span></span>
-<span id="L309"><span class="lineNum">     309</span> <span class="tlaGNC">         469 :   ksp-&gt;Mult(x, y);</span></span>
-<span id="L310"><span class="lineNum">     310</span>              :   if (!ksp-&gt;GetConverged())</span>
-<span id="L311"><span class="lineNum">     311</span>              :   {</span>
-<span id="L312"><span class="lineNum">     312</span> <span class="tlaUNC tlaBgUNC">           0 :     Mpi::Warning(</span></span>
-<span id="L313"><span class="lineNum">     313</span>              :         ksp-&gt;GetComm(),</span>
-<span id="L314"><span class="lineNum">     314</span>              :         &quot;Linear solver did not converge, norm(Ax-b)/norm(b) = {:.3e} (norm(b) = {:.3e})!\n&quot;,</span>
-<span id="L315"><span class="lineNum">     315</span> <span class="tlaUNC">           0 :         ksp-&gt;GetFinalRes() / ksp-&gt;GetInitialRes(), ksp-&gt;GetInitialRes());</span></span>
-<span id="L316"><span class="lineNum">     316</span>              :   }</span>
-<span id="L317"><span class="lineNum">     317</span> <span class="tlaGNC tlaBgGNC">         469 :   ksp_mult++;</span></span>
-<span id="L318"><span class="lineNum">     318</span> <span class="tlaGNC">         469 :   ksp_mult_it += ksp-&gt;GetNumIterations();</span></span>
-<span id="L319"><span class="lineNum">     319</span> <span class="tlaGNC">         469 : }</span></span>
-<span id="L320"><span class="lineNum">     320</span>              : </span>
-<span id="L321"><span class="lineNum">     321</span>              : template class BaseKspSolver&lt;Operator&gt;;</span>
-<span id="L322"><span class="lineNum">     322</span>              : template class BaseKspSolver&lt;ComplexOperator&gt;;</span>
-<span id="L323"><span class="lineNum">     323</span>              : </span>
-<span id="L324"><span class="lineNum">     324</span>              : }  // namespace palace</span>
+<span id="L255"><span class="lineNum">     255</span> <span class="tlaGNC">          31 :   : BaseKspSolver(ConfigureKrylovSolver&lt;OperType&gt;(linear, verbose,</span></span>
+<span id="L256"><span class="lineNum">     256</span>              :                                                   fespaces.GetFinestFESpace().GetComm()),</span>
+<span id="L257"><span class="lineNum">     257</span> <span class="tlaGNC">          31 :                   ConfigurePreconditionerSolver&lt;OperType&gt;(</span></span>
+<span id="L258"><span class="lineNum">     258</span>              :                       linear, pc_mat_sym, verbose, fespaces.GetFinestFESpace().GetComm(),</span>
+<span id="L259"><span class="lineNum">     259</span>              :                       fespaces, aux_fespaces))</span>
+<span id="L260"><span class="lineNum">     260</span>              : {</span>
+<span id="L261"><span class="lineNum">     261</span> <span class="tlaGNC">          31 :   use_timer = true;</span></span>
+<span id="L262"><span class="lineNum">     262</span> <span class="tlaGNC">          31 : }</span></span>
+<span id="L263"><span class="lineNum">     263</span>              : </span>
+<span id="L264"><span class="lineNum">     264</span>              : template &lt;typename OperType&gt;</span>
+<span id="L265"><span class="lineNum">     265</span> <span class="tlaUNC tlaBgUNC">           0 : BaseKspSolver&lt;OperType&gt;::BaseKspSolver(const IoData &amp;iodata,</span></span>
+<span id="L266"><span class="lineNum">     266</span>              :                                        FiniteElementSpaceHierarchy &amp;fespaces,</span>
+<span id="L267"><span class="lineNum">     267</span>              :                                        FiniteElementSpaceHierarchy *aux_fespaces)</span>
+<span id="L268"><span class="lineNum">     268</span> <span class="tlaUNC">           0 :   : BaseKspSolver(iodata.solver.linear, GetPreconditionerMatrixSymmetry(iodata),</span></span>
+<span id="L269"><span class="lineNum">     269</span> <span class="tlaUNC">           0 :                   iodata.problem.verbose, fespaces, aux_fespaces)</span></span>
+<span id="L270"><span class="lineNum">     270</span>              : {</span>
+<span id="L271"><span class="lineNum">     271</span> <span class="tlaUNC">           0 : }</span></span>
+<span id="L272"><span class="lineNum">     272</span>              : </span>
+<span id="L273"><span class="lineNum">     273</span>              : template &lt;typename OperType&gt;</span>
+<span id="L274"><span class="lineNum">     274</span> <span class="tlaGNC tlaBgGNC">         344 : BaseKspSolver&lt;OperType&gt;::BaseKspSolver(std::unique_ptr&lt;IterativeSolver&lt;OperType&gt;&gt; &amp;&amp;ksp,</span></span>
+<span id="L275"><span class="lineNum">     275</span>              :                                        std::unique_ptr&lt;Solver&lt;OperType&gt;&gt; &amp;&amp;pc)</span>
+<span id="L276"><span class="lineNum">     276</span> <span class="tlaGNC">         344 :   : ksp(std::move(ksp)), pc(std::move(pc)), ksp_mult(0), ksp_mult_it(0), use_timer(false)</span></span>
+<span id="L277"><span class="lineNum">     277</span>              : {</span>
+<span id="L278"><span class="lineNum">     278</span> <span class="tlaGNC">         344 :   if (this-&gt;pc)</span></span>
+<span id="L279"><span class="lineNum">     279</span>              :   {</span>
+<span id="L280"><span class="lineNum">     280</span>              :     this-&gt;ksp-&gt;SetPreconditioner(*this-&gt;pc);</span>
+<span id="L281"><span class="lineNum">     281</span>              :   }</span>
+<span id="L282"><span class="lineNum">     282</span> <span class="tlaGNC">         313 : }</span></span>
+<span id="L283"><span class="lineNum">     283</span>              : </span>
+<span id="L284"><span class="lineNum">     284</span>              : template &lt;typename OperType&gt;</span>
+<span id="L285"><span class="lineNum">     285</span> <span class="tlaGNC">         313 : void BaseKspSolver&lt;OperType&gt;::SetOperators(const OperType &amp;op, const OperType &amp;pc_op)</span></span>
+<span id="L286"><span class="lineNum">     286</span>              : {</span>
+<span id="L287"><span class="lineNum">     287</span> <span class="tlaGNC">         313 :   BlockTimer bt(Timer::KSP_SETUP, use_timer);</span></span>
+<span id="L288"><span class="lineNum">     288</span> <span class="tlaGNC">         313 :   ksp-&gt;SetOperator(op);</span></span>
+<span id="L289"><span class="lineNum">     289</span> <span class="tlaGNC">         313 :   if (pc)</span></span>
+<span id="L290"><span class="lineNum">     290</span>              :   {</span>
+<span id="L291"><span class="lineNum">     291</span> <span class="tlaGNC">         313 :     const auto *mg_op = dynamic_cast&lt;const BaseMultigridOperator&lt;OperType&gt; *&gt;(&amp;pc_op);</span></span>
+<span id="L292"><span class="lineNum">     292</span> <span class="tlaGNC">         313 :     const auto *mg_pc = dynamic_cast&lt;const GeometricMultigridSolver&lt;OperType&gt; *&gt;(pc.get());</span></span>
+<span id="L293"><span class="lineNum">     293</span> <span class="tlaGNC">         313 :     if (mg_op &amp;&amp; !mg_pc)</span></span>
+<span id="L294"><span class="lineNum">     294</span>              :     {</span>
+<span id="L295"><span class="lineNum">     295</span> <span class="tlaUNC tlaBgUNC">           0 :       pc-&gt;SetOperator(mg_op-&gt;GetFinestOperator());</span></span>
+<span id="L296"><span class="lineNum">     296</span>              :     }</span>
+<span id="L297"><span class="lineNum">     297</span>              :     else</span>
+<span id="L298"><span class="lineNum">     298</span>              :     {</span>
+<span id="L299"><span class="lineNum">     299</span> <span class="tlaGNC tlaBgGNC">         313 :       pc-&gt;SetOperator(pc_op);</span></span>
+<span id="L300"><span class="lineNum">     300</span>              :     }</span>
+<span id="L301"><span class="lineNum">     301</span>              :   }</span>
+<span id="L302"><span class="lineNum">     302</span> <span class="tlaGNC">         313 : }</span></span>
+<span id="L303"><span class="lineNum">     303</span>              : </span>
+<span id="L304"><span class="lineNum">     304</span>              : template &lt;typename OperType&gt;</span>
+<span id="L305"><span class="lineNum">     305</span> <span class="tlaGNC">         469 : void BaseKspSolver&lt;OperType&gt;::Mult(const VecType &amp;x, VecType &amp;y) const</span></span>
+<span id="L306"><span class="lineNum">     306</span>              : {</span>
+<span id="L307"><span class="lineNum">     307</span> <span class="tlaGNC">         469 :   BlockTimer bt(Timer::KSP, use_timer);</span></span>
+<span id="L308"><span class="lineNum">     308</span> <span class="tlaGNC">         469 :   ksp-&gt;Mult(x, y);</span></span>
+<span id="L309"><span class="lineNum">     309</span>              :   if (!ksp-&gt;GetConverged())</span>
+<span id="L310"><span class="lineNum">     310</span>              :   {</span>
+<span id="L311"><span class="lineNum">     311</span> <span class="tlaUNC tlaBgUNC">           0 :     Mpi::Warning(</span></span>
+<span id="L312"><span class="lineNum">     312</span>              :         ksp-&gt;GetComm(),</span>
+<span id="L313"><span class="lineNum">     313</span>              :         &quot;Linear solver did not converge, norm(Ax-b)/norm(b) = {:.3e} (norm(b) = {:.3e})!\n&quot;,</span>
+<span id="L314"><span class="lineNum">     314</span> <span class="tlaUNC">           0 :         ksp-&gt;GetFinalRes() / ksp-&gt;GetInitialRes(), ksp-&gt;GetInitialRes());</span></span>
+<span id="L315"><span class="lineNum">     315</span>              :   }</span>
+<span id="L316"><span class="lineNum">     316</span> <span class="tlaGNC tlaBgGNC">         469 :   ksp_mult++;</span></span>
+<span id="L317"><span class="lineNum">     317</span> <span class="tlaGNC">         469 :   ksp_mult_it += ksp-&gt;GetNumIterations();</span></span>
+<span id="L318"><span class="lineNum">     318</span> <span class="tlaGNC">         469 : }</span></span>
+<span id="L319"><span class="lineNum">     319</span>              : </span>
+<span id="L320"><span class="lineNum">     320</span>              : template class BaseKspSolver&lt;Operator&gt;;</span>
+<span id="L321"><span class="lineNum">     321</span>              : template class BaseKspSolver&lt;ComplexOperator&gt;;</span>
+<span id="L322"><span class="lineNum">     322</span>              : </span>
+<span id="L323"><span class="lineNum">     323</span>              : }  // namespace palace</span>
         </pre>
               </td>
             </tr>
