@@ -325,7 +325,18 @@
               "Type": { "type": "string", "enum": ["Default", "MA", "MS", "SA"] },
               "Thickness": { "type": "number" },
               "Permittivity": { "type": "number" },
-              "LossTan": { "type": "number" }
+              "LossTan": { "type": "number" },
+              "Mask":
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["Type", "Margin"],
+                "properties":
+                {
+                  "Type": { "type": "string", "enum": ["Inset"] },
+                  "Margin": { "type": "number", "minimum": 0.0 }
+                }
+              }
             }
           }
         },

@@ -137,6 +137,8 @@ auto RandomMeasurement(int ndomain = 5)
     cache.interface_eps_i.emplace_back(
         Measurement::InterfaceData{i, 1 + randd(100), (1 + randd(9999)) / 10000,
                                    (1 + randd(9999) / 10000), 1e9 / (1 + randd(9999))});
+    cache.interface_eps_mask_i.emplace_back(cache.interface_eps_i.back());
+    cache.interface_eps_mask_i.back().energy *= 0.5;
   }
 
   return cache;
@@ -335,6 +337,25 @@ TEST_CASE("PostOperator", "[idempotent][Serial]")
     CHECK_THAT(c.quality_factor, Catch::Matchers::WithinRel(ndc.quality_factor));
 
     auto &dc = dim_cache.interface_eps_i[i];
+    CHECK(c.idx == dc.idx);
+    CHECK_THAT(c.energy, !Catch::Matchers::WithinRel(dc.energy));
+    CHECK_THAT(c.tandelta, Catch::Matchers::WithinRel(dc.tandelta));
+    CHECK_THAT(c.energy_participation, Catch::Matchers::WithinRel(dc.energy_participation));
+    CHECK_THAT(c.quality_factor, Catch::Matchers::WithinRel(dc.quality_factor));
+  }
+
+  for (std::size_t i = 0; i < cache.interface_eps_mask_i.size(); i++)
+  {
+    auto &c = cache.interface_eps_mask_i[i];
+    auto &ndc = non_dim_cache.interface_eps_mask_i[i];
+    CHECK(c.idx == ndc.idx);
+    CHECK_THAT(c.energy, Catch::Matchers::WithinRel(ndc.energy));
+    CHECK_THAT(c.tandelta, Catch::Matchers::WithinRel(ndc.tandelta));
+    CHECK_THAT(c.energy_participation,
+               Catch::Matchers::WithinRel(ndc.energy_participation));
+    CHECK_THAT(c.quality_factor, Catch::Matchers::WithinRel(ndc.quality_factor));
+
+    auto &dc = dim_cache.interface_eps_mask_i[i];
     CHECK(c.idx == dc.idx);
     CHECK_THAT(c.energy, !Catch::Matchers::WithinRel(dc.energy));
     CHECK_THAT(c.tandelta, Catch::Matchers::WithinRel(dc.tandelta));

@@ -197,6 +197,7 @@ struct Measurement
 
   std::vector<FluxData> surface_flux_i;
   std::vector<InterfaceData> interface_eps_i;
+  std::vector<InterfaceData> interface_eps_mask_i;
   FarFieldData farfield;
 
   // Dimensionalize and nondimensionalize a set of measurements
@@ -274,6 +275,18 @@ protected:
   std::optional<TableWithCSVFile> surface_Q;
   void InitializeSurfaceQ(const SurfacePostOperator &surf_post_op);
   void PrintSurfaceQ();
+
+  std::optional<TableWithCSVFile> surface_energy;
+  void InitializeSurfaceEnergy(const SurfacePostOperator &surf_post_op);
+  void PrintSurfaceEnergy();
+
+  std::optional<TableWithCSVFile> surface_mask_Q;
+  void InitializeSurfaceMaskQ(const SurfacePostOperator &surf_post_op);
+  void PrintSurfaceMaskQ();
+
+  std::optional<TableWithCSVFile> surface_mask_energy;
+  void InitializeSurfaceMaskEnergy(const SurfacePostOperator &surf_post_op);
+  void PrintSurfaceMaskEnergy();
 
   std::optional<TableWithCSVFile> probe_E;
   std::optional<TableWithCSVFile> probe_En;

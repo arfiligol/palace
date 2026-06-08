@@ -1349,6 +1349,7 @@ void PostOperator<solver_t>::MeasureInterfaceEFieldEnergy() const
   // with:
   //          p_mj = 1/2 t_j Re{∫_{Γ_j} (ε_j E_m)ᴴ E_m dS} / (E_elec + E_cap).
   measurement_cache.interface_eps_i.clear();
+  measurement_cache.interface_eps_mask_i.clear();
   if constexpr (HasEGridFunction<solver_t>())
   {
     // Domain and port energies must have been measured first. E_cap returns zero if the
@@ -1359,6 +1360,8 @@ void PostOperator<solver_t>::MeasureInterfaceEFieldEnergy() const
                                measurement_cache.lumped_port_capacitor_energy;
 
     measurement_cache.interface_eps_i.reserve(surf_post_op.eps_surfs.size());
+    measurement_cache.interface_eps_mask_i.reserve(
+        surf_post_op.GetMaskedInterfaceIndices().size());
     for (const auto &[idx, data] : surf_post_op.eps_surfs)
     {
       auto energy = surf_post_op.GetInterfaceElectricFieldEnergy(idx, *E);
@@ -1371,6 +1374,20 @@ void PostOperator<solver_t>::MeasureInterfaceEFieldEnergy() const
 
       measurement_cache.interface_eps_i.emplace_back(Measurement::InterfaceData{
           idx, energy, loss_tangent_delta, energy_participation_p, quality_factor_Q});
+
+      if (surf_post_op.HasInterfaceMask(idx))
+      {
+        auto masked_energy = surf_post_op.GetMaskedInterfaceElectricFieldEnergy(idx, *E);
+        auto masked_energy_participation_p = masked_energy / energy_electric_all;
+        auto masked_quality_factor_Q =
+            (masked_energy_participation_p == 0.0 || loss_tangent_delta == 0.0)
+                ? mfem::infinity()
+                : 1.0 / (loss_tangent_delta * masked_energy_participation_p);
+
+        measurement_cache.interface_eps_mask_i.emplace_back(Measurement::InterfaceData{
+            idx, masked_energy, loss_tangent_delta, masked_energy_participation_p,
+            masked_quality_factor_Q});
+      }
     }
   }
 }

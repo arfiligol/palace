@@ -122,6 +122,11 @@ Measurement Measurement::Dimensionalize(const Units &units,
     auto &eps = measurement_cache.interface_eps_i.emplace_back(data);
     eps.energy = units.Dimensionalize<Units::ValueType::ENERGY>(data.energy);
   }
+  for (const auto &data : nondim_measurement_cache.interface_eps_mask_i)
+  {
+    auto &eps = measurement_cache.interface_eps_mask_i.emplace_back(data);
+    eps.energy = units.Dimensionalize<Units::ValueType::ENERGY>(data.energy);
+  }
 
   measurement_cache.farfield.thetaphis =
       nondim_measurement_cache.farfield.thetaphis;  // NONE
@@ -261,6 +266,11 @@ Measurement Measurement::Nondimensionalize(const Units &units,
   for (const auto &data : dim_measurement_cache.interface_eps_i)
   {
     auto &eps = measurement_cache.interface_eps_i.emplace_back(data);
+    eps.energy = units.Nondimensionalize<Units::ValueType::ENERGY>(data.energy);
+  }
+  for (const auto &data : dim_measurement_cache.interface_eps_mask_i)
+  {
+    auto &eps = measurement_cache.interface_eps_mask_i.emplace_back(data);
     eps.energy = units.Nondimensionalize<Units::ValueType::ENERGY>(data.energy);
   }
 
@@ -644,6 +654,143 @@ void PostOperatorCSV<solver_t>::PrintSurfaceQ()
     surface_Q->table[fmt::format("Q_{}_{}", data.idx, m_ex_idx)] << data.quality_factor;
   }
   surface_Q->WriteFullTableTrunc();
+}
+
+template <ProblemType solver_t>
+void PostOperatorCSV<solver_t>::InitializeSurfaceEnergy(
+    const SurfacePostOperator &surf_post_op)
+{
+  if (!(surf_post_op.eps_surfs.size() > 0))
+  {
+    return;
+  }
+  surface_energy = TableWithCSVFile(post_dir / "surface-energy.csv", reload_table);
+
+  Table t;  // Define table locally first due to potential reload.
+  auto nr_expected_measurement_cols =
+      1 + ex_idx_v_all.size() * surf_post_op.eps_surfs.size();
+  t.reserve(nr_expected_measurement_rows, nr_expected_measurement_cols);
+  t.insert("idx", LabelIndexCol(solver_t), -1, 0, PrecIndexCol(solver_t), "");
+  for (const auto ex_idx : ex_idx_v_all)
+  {
+    std::string ex_label = HasSingleExIdx() ? "" : fmt::format("[{}]", ex_idx);
+    for (const auto &surf : surf_post_op.eps_surfs)
+    {
+      auto idx = surf.first;
+      t.insert(fmt::format("E_{}_{}", idx, ex_idx),
+               fmt::format("E_surf[{}]{} (J)", idx, ex_label), ex_idx);
+    }
+  }
+  MoveTableValidateReload(*surface_energy, std::move(t));
+}
+
+template <ProblemType solver_t>
+void PostOperatorCSV<solver_t>::PrintSurfaceEnergy()
+{
+  if (!surface_energy)
+  {
+    return;
+  }
+  CheckAppendIndex(surface_energy->table["idx"], row_idx_v, row_i);
+
+  for (const auto &data : measurement_cache.interface_eps_i)
+  {
+    surface_energy->table[fmt::format("E_{}_{}", data.idx, m_ex_idx)] << data.energy;
+  }
+  surface_energy->WriteFullTableTrunc();
+}
+
+template <ProblemType solver_t>
+void PostOperatorCSV<solver_t>::InitializeSurfaceMaskQ(
+    const SurfacePostOperator &surf_post_op)
+{
+  if (!surf_post_op.HasMaskedInterfaceDielectrics())
+  {
+    return;
+  }
+  surface_mask_Q = TableWithCSVFile(post_dir / "surface-mask-Q.csv", reload_table);
+
+  const auto masked_indices = surf_post_op.GetMaskedInterfaceIndices();
+  Table t;  // Define table locally first due to potential reload.
+  auto nr_expected_measurement_cols = 1 + ex_idx_v_all.size() * (2 * masked_indices.size());
+  t.reserve(nr_expected_measurement_rows, nr_expected_measurement_cols);
+  t.insert("idx", LabelIndexCol(solver_t), -1, 0, PrecIndexCol(solver_t), "");
+  for (const auto ex_idx : ex_idx_v_all)
+  {
+    std::string ex_label = HasSingleExIdx() ? "" : fmt::format("[{}]", ex_idx);
+    for (const auto idx : masked_indices)
+    {
+      t.insert(fmt::format("p_mask_{}_{}", idx, ex_idx),
+               fmt::format("p_surf_mask[{}]{}", idx, ex_label), ex_idx);
+      t.insert(fmt::format("Q_mask_{}_{}", idx, ex_idx),
+               fmt::format("Q_surf_mask[{}]{}", idx, ex_label), ex_idx);
+    }
+  }
+  MoveTableValidateReload(*surface_mask_Q, std::move(t));
+}
+
+template <ProblemType solver_t>
+void PostOperatorCSV<solver_t>::PrintSurfaceMaskQ()
+{
+  if (!surface_mask_Q)
+  {
+    return;
+  }
+  CheckAppendIndex(surface_mask_Q->table["idx"], row_idx_v, row_i);
+
+  for (const auto &data : measurement_cache.interface_eps_mask_i)
+  {
+    surface_mask_Q->table[fmt::format("p_mask_{}_{}", data.idx, m_ex_idx)]
+        << data.energy_participation;
+    surface_mask_Q->table[fmt::format("Q_mask_{}_{}", data.idx, m_ex_idx)]
+        << data.quality_factor;
+  }
+  surface_mask_Q->WriteFullTableTrunc();
+}
+
+template <ProblemType solver_t>
+void PostOperatorCSV<solver_t>::InitializeSurfaceMaskEnergy(
+    const SurfacePostOperator &surf_post_op)
+{
+  if (!surf_post_op.HasMaskedInterfaceDielectrics())
+  {
+    return;
+  }
+  surface_mask_energy =
+      TableWithCSVFile(post_dir / "surface-mask-energy.csv", reload_table);
+
+  const auto masked_indices = surf_post_op.GetMaskedInterfaceIndices();
+  Table t;  // Define table locally first due to potential reload.
+  auto nr_expected_measurement_cols = 1 + ex_idx_v_all.size() * masked_indices.size();
+  t.reserve(nr_expected_measurement_rows, nr_expected_measurement_cols);
+  t.insert("idx", LabelIndexCol(solver_t), -1, 0, PrecIndexCol(solver_t), "");
+  for (const auto ex_idx : ex_idx_v_all)
+  {
+    std::string ex_label = HasSingleExIdx() ? "" : fmt::format("[{}]", ex_idx);
+    for (const auto idx : masked_indices)
+    {
+      t.insert(fmt::format("E_mask_{}_{}", idx, ex_idx),
+               fmt::format("E_surf_mask[{}]{} (J)", idx, ex_label), ex_idx);
+    }
+  }
+  MoveTableValidateReload(*surface_mask_energy, std::move(t));
+}
+
+template <ProblemType solver_t>
+void PostOperatorCSV<solver_t>::PrintSurfaceMaskEnergy()
+{
+  if (!surface_mask_energy)
+  {
+    return;
+  }
+  CheckAppendIndex(surface_mask_energy->table["idx"], row_idx_v, row_i);
+
+  for (const auto &data : measurement_cache.interface_eps_mask_i)
+  {
+    surface_mask_energy->table[fmt::format("E_mask_{}_{}", data.idx, m_ex_idx)]
+        << data.energy;
+  }
+  surface_mask_energy->WriteFullTableTrunc();
 }
 
 template <ProblemType solver_t>
@@ -1519,6 +1666,9 @@ void PostOperatorCSV<solver_t>::InitializeCSVDataCollection(
   InitializeDomainE(post_op.dom_post_op);
   InitializeSurfaceF(post_op.surf_post_op);
   InitializeSurfaceQ(post_op.surf_post_op);
+  InitializeSurfaceEnergy(post_op.surf_post_op);
+  InitializeSurfaceMaskQ(post_op.surf_post_op);
+  InitializeSurfaceMaskEnergy(post_op.surf_post_op);
 
 #if defined(MFEM_USE_GSLIB)
   {
@@ -1597,6 +1747,9 @@ void PostOperatorCSV<solver_t>::PrintAllCSVData(
   PrintDomainE();
   PrintSurfaceF();
   PrintSurfaceQ();
+  PrintSurfaceEnergy();
+  PrintSurfaceMaskQ();
+  PrintSurfaceMaskEnergy();
 
 #if defined(MFEM_USE_GSLIB)
   {

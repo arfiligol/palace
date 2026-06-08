@@ -566,6 +566,15 @@ public:
 struct InterfaceDielectricData
 {
 public:
+  struct MaskData
+  {
+    // Type of interface dielectric mask.
+    std::string type = "Inset";
+
+    // Inset distance from the selected interface patch boundary [m].
+    double margin = 0.0;
+  };
+
   // Type of interface dielectric for computing electric field energy participation ratios.
   InterfaceDielectric type = InterfaceDielectric::DEFAULT;
 
@@ -580,6 +589,9 @@ public:
 
   // List of boundary attributes for this interface dielectric postprocessing index.
   std::vector<int> attributes = {};
+
+  // Optional mask for computing a second, masked interface participation.
+  std::optional<MaskData> mask = {};
 
   InterfaceDielectricData() = default;
   InterfaceDielectricData(const json &dielectric);
