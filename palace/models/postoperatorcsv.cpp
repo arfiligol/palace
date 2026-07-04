@@ -3,7 +3,9 @@
 
 #include "postoperatorcsv.hpp"
 
+#include <fmt/ranges.h>
 #include <mfem.hpp>
+#include <fstream>
 
 #include "models/curlcurloperator.hpp"
 #include "models/laplaceoperator.hpp"
@@ -11,11 +13,37 @@
 #include "models/postoperator.hpp"
 #include "models/spaceoperator.hpp"
 #include "models/waveportoperator.hpp"
+#include "utils/communication.hpp"
 #include "utils/constants.hpp"
 #include "utils/iodata.hpp"
+#include "utils/geodata.hpp"
 
 namespace palace
 {
+
+namespace
+{
+
+// Convert interface dielectric enum to output string.
+std::string interface_dielectric_to_string(InterfaceDielectric type)
+{
+  switch (type)
+  {
+    case InterfaceDielectric::MA:
+      return "MA";
+    case InterfaceDielectric::MS:
+      return "MS";
+    case InterfaceDielectric::SA:
+      return "SA";
+    case InterfaceDielectric::DEFAULT:
+      return "Default";
+  }
+  MFEM_VERIFY(false,
+              "Cannot convert unknown interface dielectric enum when printing interface-DoF.csv!");
+  return "";
+}
+
+}  // namespace
 
 // static
 Measurement Measurement::Dimensionalize(const Units &units,
@@ -791,6 +819,72 @@ void PostOperatorCSV<solver_t>::PrintSurfaceMaskEnergy()
         << data.energy;
   }
   surface_mask_energy->WriteFullTableTrunc();
+}
+
+template <ProblemType solver_t>
+void PostOperatorCSV<solver_t>::PrintInterfaceDoF(
+    const PostOperator<solver_t> &post_op, const SurfacePostOperator &surf_post_op)
+{
+  if (surf_post_op.eps_surfs.empty())
+  {
+    return;
+  }
+
+  const auto comm = post_op.fem_op->GetComm();
+  const bool root = Mpi::Root(comm);
+
+  // Mesh/FESpace diagnostic output for interface DoFs (boundary element/trace DOF counts).
+  // This is not a mask-specific energy-support report.
+  const auto &mesh = post_op.fem_op->GetMesh().Get();
+  std::ofstream fo;
+  if (root)
+  {
+    auto path = post_dir / "interface-DoF.csv";
+    if (fs::is_symlink(path))
+    {
+      fs::remove(path);
+    }
+    fo.open(path);
+    MFEM_VERIFY(fo, "Cannot open interface-DoF.csv for writing!");
+    fo << "idx,type,attributes,boundary_elements,h1_boundary_tdofs,nd_boundary_tdofs\n";
+  }
+
+  for (const auto &[idx, data] : surf_post_op.eps_surfs)
+  {
+    const auto &attrs = data.attr_list;
+
+    int bdr_attr_max = mesh.bdr_attributes.Size() ? mesh.bdr_attributes.Max() : 0;
+    auto attr_marker = mesh::AttrToMarker(bdr_attr_max, attrs, false);
+
+    long long int boundary_elements = 0;
+    for (int i = 0; i < mesh.GetNBE(); i++)
+    {
+      auto attr = mesh.GetBdrAttribute(i);
+      if (attr > 0 && attr <= attr_marker.Size() && attr_marker[attr - 1])
+      {
+        boundary_elements++;
+      }
+    }
+
+    mfem::Array<int> h1_bdr_tdof_list;
+    post_op.fem_op->GetH1Space().Get().GetEssentialTrueDofs(attr_marker, h1_bdr_tdof_list);
+    long long int h1_tdofs = h1_bdr_tdof_list.Size();
+
+    mfem::Array<int> nd_bdr_tdof_list;
+    post_op.fem_op->GetNDSpace().Get().GetEssentialTrueDofs(attr_marker, nd_bdr_tdof_list);
+    long long int nd_tdofs = nd_bdr_tdof_list.Size();
+
+    Mpi::GlobalSum(1, &boundary_elements, comm);
+    Mpi::GlobalSum(1, &h1_tdofs, comm);
+    Mpi::GlobalSum(1, &nd_tdofs, comm);
+
+    if (root)
+    {
+      fo << idx << "," << interface_dielectric_to_string(data.type) << ","
+         << fmt::format("{}", fmt::join(attrs, ";")) << "," << boundary_elements << ","
+         << h1_tdofs << "," << nd_tdofs << "\n";
+    }
+  }
 }
 
 template <ProblemType solver_t>
@@ -1659,6 +1753,8 @@ template <ProblemType solver_t>
 void PostOperatorCSV<solver_t>::InitializeCSVDataCollection(
     const PostOperator<solver_t> &post_op)
 {
+  PrintInterfaceDoF(post_op, post_op.surf_post_op);
+
   if (!Mpi::Root(post_op.fem_op->GetComm()))
   {
     return;

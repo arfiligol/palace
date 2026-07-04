@@ -410,6 +410,10 @@ protected:
   template <ProblemType U = solver_t>
   auto PrintEigPortQ() -> std::enable_if_t<U == ProblemType::EIGENMODE, void>;
 
+  // Diagnostics for mesh/FESpace boundary-dof counts.
+  void PrintInterfaceDoF(const PostOperator<solver_t> &post_op,
+                         const SurfacePostOperator &surf_post_op);
+
 public:
   // Print all data from nondim_measurement_cache.
   void PrintAllCSVData(const PostOperator<solver_t> &post_op,

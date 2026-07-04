@@ -1942,6 +1942,11 @@ double RebalanceMesh(const IoData &iodata, std::unique_ptr<mfem::ParMesh> &mesh)
     auto sfile = fs::path(iodata.problem.output) / fs::path(iodata.model.mesh).stem();
     sfile += ".mesh";
 
+    if (Mpi::Root(comm) && fs::is_symlink(sfile))
+    {
+      fs::remove(sfile);
+    }
+
     auto PrintSerial = [&](mfem::Mesh &smesh)
     {
       BlockTimer bt1(Timer::IO);
