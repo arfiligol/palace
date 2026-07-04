@@ -1932,51 +1932,58 @@ std::unique_ptr<mfem::ParMesh> DistributeSerialMesh(MPI_Comm comm,
   return DistributeMesh(comm, smesh, partitioning.get());
 }
 
+void SaveAdaptMesh(const IoData &iodata, mfem::ParMesh &mesh)
+{
+  if (!iodata.model.refinement.save_adapt_mesh)
+  {
+    return;
+  }
+
+  MPI_Comm comm = mesh.GetComm();
+  auto sfile = fs::path(iodata.problem.output) / fs::path(iodata.model.mesh).stem();
+  sfile += ".mesh";
+
+  if (Mpi::Root(comm) && fs::is_symlink(sfile))
+  {
+    fs::remove(sfile);
+  }
+
+  auto PrintSerial = [&](mfem::Mesh &smesh)
+  {
+    BlockTimer bt1(Timer::IO);
+    if (Mpi::Root(comm))
+    {
+      std::ofstream fo(sfile);
+      // mfem::ofgzstream fo(sfile, true);  // Use zlib compression if available
+      // fo << std::fixed;
+      fo << std::scientific;
+      fo.precision(MSH_FLT_PRECISION);
+      mesh::DimensionalizeMesh(smesh, iodata.units.GetMeshLengthRelativeScale());
+      smesh.Mesh::Print(fo);  // Do not need to nondimensionalize the temporary mesh
+    }
+    Mpi::Barrier(comm);
+  };
+
+  if (mesh.Nonconforming())
+  {
+    mfem::ParMesh smesh(mesh);
+    mfem::Array<int> serial_partition(mesh.GetNE());
+    serial_partition = 0;
+    smesh.Rebalance(serial_partition);
+    PrintSerial(smesh);
+  }
+  else
+  {
+    mfem::Mesh smesh = mesh.GetSerialMesh(0);
+    PrintSerial(smesh);
+  }
+}
+
 double RebalanceMesh(const IoData &iodata, std::unique_ptr<mfem::ParMesh> &mesh)
 {
   BlockTimer bt0(Timer::REBALANCE);
   MPI_Comm comm = mesh->GetComm();
-  if (iodata.model.refinement.save_adapt_mesh)
-  {
-    // Create a separate serial mesh to write to disk.
-    auto sfile = fs::path(iodata.problem.output) / fs::path(iodata.model.mesh).stem();
-    sfile += ".mesh";
-
-    if (Mpi::Root(comm) && fs::is_symlink(sfile))
-    {
-      fs::remove(sfile);
-    }
-
-    auto PrintSerial = [&](mfem::Mesh &smesh)
-    {
-      BlockTimer bt1(Timer::IO);
-      if (Mpi::Root(comm))
-      {
-        std::ofstream fo(sfile);
-        // mfem::ofgzstream fo(sfile, true);  // Use zlib compression if available
-        // fo << std::fixed;
-        fo << std::scientific;
-        fo.precision(MSH_FLT_PRECISION);
-        mesh::DimensionalizeMesh(smesh, iodata.units.GetMeshLengthRelativeScale());
-        smesh.Mesh::Print(fo);  // Do not need to nondimensionalize the temporary mesh
-      }
-      Mpi::Barrier(comm);
-    };
-
-    if (mesh->Nonconforming())
-    {
-      mfem::ParMesh smesh(*mesh);
-      mfem::Array<int> serial_partition(mesh->GetNE());
-      serial_partition = 0;
-      smesh.Rebalance(serial_partition);
-      PrintSerial(smesh);
-    }
-    else
-    {
-      mfem::Mesh smesh = mesh->GetSerialMesh(0);
-      PrintSerial(smesh);
-    }
-  }
+  SaveAdaptMesh(iodata, *mesh);
 
   // If there is more than one processor, may perform rebalancing.
   if (Mpi::Size(comm) == 1)
