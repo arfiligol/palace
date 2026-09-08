@@ -60,152 +60,6 @@ mfem::Array<int> SetUpBoundaryProperties(const T &data,
   return attr_list;
 }
 
-void GetGlobalVertexIndices(const mfem::ParMesh &mesh, mfem::Array<HYPRE_BigInt> &gi)
-{
-  gi.SetSize(mesh.GetNV());
-  if (mesh.Nonconforming())
-  {
-    gi = -1;
-    const auto &ncmesh = *mesh.ncmesh;
-    for (int n = 0; n < ncmesh.GetNumNodes(); n++)
-    {
-      const auto &node = ncmesh.GetNode(n);
-      if (node.HasVertex())
-      {
-        const int v = node.vert_index;
-        if (v >= 0 && v < mesh.GetNV())
-        {
-          gi[v] = n;
-        }
-      }
-    }
-    return;
-  }
-  mesh.GetGlobalVertexIndices(gi);
-}
-
-std::vector<SurfaceMaskEdge> GetInsetMaskEdges(const mfem::ParMesh &mesh,
-                                               const mfem::Array<int> &attr_list,
-                                               double margin)
-{
-  if (margin <= 0.0)
-  {
-    return {};
-  }
-
-  MFEM_VERIFY(mesh.Dimension() == 3 && mesh.SpaceDimension() == 3,
-              "Inset interface dielectric masks are supported only for 3D "
-              "boundary-surface postprocessing. 2D boundary-curve masks are not "
-              "supported!");
-
-  const int bdr_attr_max = mesh.bdr_attributes.Size() ? mesh.bdr_attributes.Max() : 0;
-  const auto attr_marker = mesh::AttrToMarker(bdr_attr_max, attr_list);
-
-  mfem::Array<HYPRE_BigInt> vertex_gi;
-  GetGlobalVertexIndices(mesh, vertex_gi);
-
-  std::vector<HYPRE_BigInt> local_keys;
-  std::vector<double> local_coords;
-  mfem::Array<int> edges, orientations, edge_vertices;
-  for (int i = 0; i < mesh.GetNBE(); i++)
-  {
-    if (!attr_marker[mesh.GetBdrAttribute(i) - 1])
-    {
-      continue;
-    }
-    mesh.GetBdrElementEdges(i, edges, orientations);
-    for (const auto edge : edges)
-    {
-      mesh.GetEdgeVertices(edge, edge_vertices);
-      MFEM_VERIFY(edge_vertices.Size() == 2,
-                  "Inset interface dielectric masks require boundary edges with two "
-                  "vertices!");
-      const HYPRE_BigInt gv0 = vertex_gi[edge_vertices[0]];
-      const HYPRE_BigInt gv1 = vertex_gi[edge_vertices[1]];
-      MFEM_VERIFY(gv0 >= 0 && gv1 >= 0,
-                  "Failed to determine global vertex identifiers for inset interface "
-                  "dielectric mask perimeter extraction!");
-      const auto key0 = std::min(gv0, gv1);
-      const auto key1 = std::max(gv0, gv1);
-      local_keys.insert(local_keys.end(), {key0, key1});
-
-      const auto *x0 = mesh.GetVertex(edge_vertices[0]);
-      const auto *x1 = mesh.GetVertex(edge_vertices[1]);
-      local_coords.insert(local_coords.end(), {x0[0], x0[1], x0[2], x1[0], x1[1], x1[2]});
-    }
-  }
-
-  const auto comm = mesh.GetComm();
-  const int comm_size = Mpi::Size(comm);
-  const int local_key_count = static_cast<int>(local_keys.size());
-  std::vector<int> key_recv_counts(comm_size);
-  Mpi::Allgather(1, &local_key_count, key_recv_counts.data(), comm);
-  std::vector<int> key_displs(comm_size);
-  int global_key_count = 0;
-  for (int i = 0; i < comm_size; i++)
-  {
-    key_displs[i] = global_key_count;
-    global_key_count += key_recv_counts[i];
-  }
-  std::vector<HYPRE_BigInt> global_keys(global_key_count);
-  Mpi::Allgatherv(local_key_count, local_keys.data(), global_keys.data(),
-                  key_recv_counts.data(), key_displs.data(), comm);
-
-  const int local_coord_count = static_cast<int>(local_coords.size());
-  std::vector<int> coord_recv_counts(comm_size);
-  Mpi::Allgather(1, &local_coord_count, coord_recv_counts.data(), comm);
-  std::vector<int> coord_displs(comm_size);
-  int global_coord_count = 0;
-  for (int i = 0; i < comm_size; i++)
-  {
-    coord_displs[i] = global_coord_count;
-    global_coord_count += coord_recv_counts[i];
-  }
-  std::vector<double> global_coords(global_coord_count);
-  Mpi::Allgatherv(local_coord_count, local_coords.data(), global_coords.data(),
-                  coord_recv_counts.data(), coord_displs.data(), comm);
-
-  MFEM_VERIFY(global_keys.size() % 2 == 0 && global_coords.size() % 6 == 0 &&
-                  global_keys.size() / 2 == global_coords.size() / 6,
-              "Inconsistent inset interface dielectric mask perimeter data gathered "
-              "across MPI ranks!");
-
-  struct EdgeData
-  {
-    int count = 0;
-    SurfaceMaskEdge edge;
-  };
-
-  std::map<std::pair<HYPRE_BigInt, HYPRE_BigInt>, EdgeData> edge_data;
-  for (std::size_t i = 0; i < global_keys.size() / 2; i++)
-  {
-    const auto key = std::make_pair(global_keys[2 * i], global_keys[2 * i + 1]);
-    auto &data = edge_data[key];
-    data.count++;
-    if (data.count == 1)
-    {
-      const auto j = 6 * i;
-      data.edge = SurfaceMaskEdge{
-          {global_coords[j], global_coords[j + 1], global_coords[j + 2]},
-          {global_coords[j + 3], global_coords[j + 4], global_coords[j + 5]}};
-    }
-  }
-
-  std::vector<SurfaceMaskEdge> mask_edges;
-  for (const auto &[key, data] : edge_data)
-  {
-    if (data.count == 1)
-    {
-      mask_edges.push_back(data.edge);
-    }
-  }
-  MFEM_VERIFY(!mask_edges.empty(),
-              "Inset interface dielectric mask found no perimeter edges for the "
-              "selected boundary attributes. Select an open 3D boundary-surface patch or "
-              "set Margin to zero.");
-  return mask_edges;
-}
-
 class InsetMaskCoefficient : public mfem::Coefficient
 {
 private:
@@ -366,7 +220,22 @@ SurfacePostOperator::InterfaceDielectricData::InterfaceDielectricData(
                 "Inset interface dielectric masks are supported only for 3D "
                 "boundary-surface postprocessing. 2D boundary-curve masks are not "
                 "supported!");
-    mask_edges = GetInsetMaskEdges(mesh, attr_list, mask_margin);
+    if (mask_margin > 0.0)
+    {
+      MFEM_VERIFY(data.mask->perimeter,
+                  "Inset interface dielectric mask is missing original pre-crack "
+                  "perimeter data. Load an original mesh through native preprocessing; "
+                  "reloading an already nonconforming/cracked mesh is not supported.");
+      const auto &perimeter = *data.mask->perimeter;
+      MFEM_VERIFY(perimeter.has_selected_faces,
+                  "Inset interface dielectric mask selected no original surface faces "
+                  "for the requested boundary attributes.");
+      MFEM_VERIFY(!perimeter.edges.empty(),
+                  "Inset interface dielectric mask selected an original surface "
+                  "with no perimeter edges (including closed support). A positive "
+                  "Margin requires an open patch.");
+      mask_edges = perimeter.edges;
+    }
   }
 }
 

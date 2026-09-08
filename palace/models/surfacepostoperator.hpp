@@ -10,15 +10,10 @@
 #include <vector>
 #include <mfem.hpp>
 #include "fem/coefficient.hpp"
+#include "utils/surfacemask.hpp"
 
 namespace palace
 {
-
-struct SurfaceMaskEdge
-{
-  std::array<double, 3> a;
-  std::array<double, 3> b;
-};
 
 class GridFunction;
 class IoData;

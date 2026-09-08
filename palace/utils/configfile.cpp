@@ -1631,6 +1631,17 @@ void Nondimensionalize(const Units &units, InterfaceDielectricData &data)
   if (data.mask)
   {
     data.mask->margin /= units.GetMeshLengthRelativeScale();
+    if (data.mask->perimeter)
+    {
+      for (auto &edge : data.mask->perimeter->edges)
+      {
+        for (int d = 0; d < 3; d++)
+        {
+          edge.a[d] /= units.GetMeshLengthRelativeScale();
+          edge.b[d] /= units.GetMeshLengthRelativeScale();
+        }
+      }
+    }
   }
 }
 

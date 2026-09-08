@@ -12,6 +12,7 @@
 #include <vector>
 #include <nlohmann/json_fwd.hpp>
 #include "labels.hpp"
+#include "surfacemask.hpp"
 
 namespace palace::config
 {
@@ -568,11 +569,22 @@ struct InterfaceDielectricData
 public:
   struct MaskData
   {
+    struct PerimeterData
+    {
+      bool has_selected_faces = false;
+      std::vector<SurfaceMaskEdge> edges;
+    };
+
     // Type of interface dielectric mask.
     std::string type = "Inset";
 
     // Inset distance from the selected interface patch boundary [m].
     double margin = 0.0;
+
+    // Runtime-only source geometry. Disengaged means original lineage was not captured;
+    // captured empty selection and captured closed support are distinct valid states.
+    // Coordinates share the mesh/Margin length scale and survive partitioning and AMR.
+    std::optional<PerimeterData> perimeter;
   };
 
   // Type of interface dielectric for computing electric field energy participation ratios.
