@@ -667,6 +667,16 @@ InterfaceDielectricData::InterfaceDielectricData(const json &dielectric)
   t = dielectric.at("Thickness");             // Required
   epsilon_r = dielectric.at("Permittivity");  // Required
   tandelta = dielectric.value("LossTan", tandelta);
+  if (auto mask_it = dielectric.find("Mask"); mask_it != dielectric.end())
+  {
+    mask = MaskData{};
+    mask->type = mask_it->value("Type", mask->type);
+    MFEM_VERIFY(mask->type == "Inset",
+                "Only \"Inset\" interface dielectric masks are supported!");
+    mask->margin = mask_it->at("Margin");
+    MFEM_VERIFY(mask->margin >= 0.0,
+                "Interface dielectric inset mask margin must be non-negative!");
+  }
 }
 
 ModeImpedanceData::ModeImpedanceData(const json &imp)
@@ -1618,6 +1628,21 @@ void Nondimensionalize(const Units &units, SurfaceFluxData &data)
 void Nondimensionalize(const Units &units, InterfaceDielectricData &data)
 {
   data.t /= units.GetMeshLengthRelativeScale();
+  if (data.mask)
+  {
+    data.mask->margin /= units.GetMeshLengthRelativeScale();
+    if (data.mask->perimeter)
+    {
+      for (auto &edge : data.mask->perimeter->edges)
+      {
+        for (int d = 0; d < 3; d++)
+        {
+          edge.a[d] /= units.GetMeshLengthRelativeScale();
+          edge.b[d] /= units.GetMeshLengthRelativeScale();
+        }
+      }
+    }
+  }
 }
 
 void Nondimensionalize(const Units &units, EigenSolverData &data)

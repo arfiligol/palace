@@ -1,6 +1,7 @@
 // Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 // SPDX-License-Identifier: Apache-2.0
 
+#include <fstream>
 #include <vector>
 #include <catch2/catch_test_macros.hpp>
 #include <nlohmann/json.hpp>
@@ -9,6 +10,7 @@
 
 #include "test-helpers.hpp"
 
+#include "fixtures.hpp"
 #include "utils/geodata.hpp"
 #include "utils/geodata_impl.hpp"
 
@@ -17,12 +19,30 @@
 #include "utils/communication.hpp"
 #include "utils/configfile.hpp"
 #include "utils/filesystem.hpp"
+#include "utils/iodata.hpp"
 
 namespace palace
 {
 using json = nlohmann::json;
 namespace fs = std::filesystem;
 using namespace Catch::Matchers;
+
+namespace
+{
+
+void CreateFile(const palace::fs::path &path, const std::string &content = "test")
+{
+  std::ofstream f(path);
+  f << content;
+}
+
+std::string ReadFile(const palace::fs::path &path)
+{
+  std::ifstream f(path);
+  return {std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>()};
+}
+
+}  // namespace
 
 // TODO: Add this test when we can access MFEM_DATA_PATH from Spack
 // This requires MFEM to move to a CMake-based build system for spack.
@@ -181,6 +201,54 @@ TEST_CASE("TwoDimensionalDiagonalSquarePort", "[geodata][Serial]")
   CHECK_THAT(normals(1, 1), WithinAbs(ax1[1], 1e-4));
   CHECK_THAT(normals(2, 1), WithinAbs(ax1[2], 1e-4));
   CHECK(box.planar);
+}
+
+TEST_CASE_METHOD(test::SharedTempDir, "RebalanceMesh removes mesh symlink only if symlink",
+                 "[geodata][Serial]")
+{
+  MPI_Comm comm = MPI_COMM_WORLD;
+
+  auto serial_mesh = std::make_unique<mfem::Mesh>(
+      mfem::Mesh::MakeCartesian3D(1, 1, 1, mfem::Element::TETRAHEDRON));
+  auto mesh = std::make_unique<mfem::ParMesh>(comm, *serial_mesh);
+
+  auto make_mesh_name = temp_dir / "model";
+
+  Units units(1.0, 1.0);
+  IoData iodata(units);
+  iodata.problem.output = temp_dir;
+  iodata.model.mesh = make_mesh_name;
+  iodata.model.refinement.save_adapt_mesh = true;
+
+  SECTION("Regular mesh file is overwritten, not unlinked")
+  {
+    auto sfile = temp_dir / fs::path(iodata.model.mesh).stem();
+    sfile += ".mesh";
+    CreateFile(sfile, "old_regular");
+
+    mesh::RebalanceMesh(iodata, mesh);
+
+    CHECK(fs::is_regular_file(sfile));
+    CHECK(!fs::is_symlink(sfile));
+    CHECK(ReadFile(sfile) != "old_regular");
+  }
+
+  SECTION("Symlink mesh file is removed before overwrite")
+  {
+    auto sfile = temp_dir / fs::path(iodata.model.mesh).stem();
+    sfile += ".mesh";
+    auto symlink_target = temp_dir / "linked_target.mesh";
+    CreateFile(symlink_target, "adapted_target");
+    fs::create_symlink(symlink_target, sfile);
+    CHECK(fs::is_symlink(sfile));
+
+    mesh::RebalanceMesh(iodata, mesh);
+
+    CHECK(fs::is_regular_file(sfile));
+    CHECK(!fs::is_symlink(sfile));
+    CHECK(fs::is_regular_file(symlink_target));
+    CHECK(ReadFile(symlink_target) == "adapted_target");
+  }
 }
 
 TEST_CASE("TetToHex", "[geodata][Serial]")

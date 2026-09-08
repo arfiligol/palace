@@ -3,7 +3,9 @@
 
 #include "postoperatorcsv.hpp"
 
+#include <fmt/ranges.h>
 #include <mfem.hpp>
+#include <fstream>
 
 #include "models/curlcurloperator.hpp"
 #include "models/laplaceoperator.hpp"
@@ -11,11 +13,37 @@
 #include "models/postoperator.hpp"
 #include "models/spaceoperator.hpp"
 #include "models/waveportoperator.hpp"
+#include "utils/communication.hpp"
 #include "utils/constants.hpp"
 #include "utils/iodata.hpp"
+#include "utils/geodata.hpp"
 
 namespace palace
 {
+
+namespace
+{
+
+// Convert interface dielectric enum to output string.
+std::string interface_dielectric_to_string(InterfaceDielectric type)
+{
+  switch (type)
+  {
+    case InterfaceDielectric::MA:
+      return "MA";
+    case InterfaceDielectric::MS:
+      return "MS";
+    case InterfaceDielectric::SA:
+      return "SA";
+    case InterfaceDielectric::DEFAULT:
+      return "Default";
+  }
+  MFEM_VERIFY(false,
+              "Cannot convert unknown interface dielectric enum when printing interface-DoF.csv!");
+  return "";
+}
+
+}  // namespace
 
 // static
 Measurement Measurement::Dimensionalize(const Units &units,
@@ -120,6 +148,11 @@ Measurement Measurement::Dimensionalize(const Units &units,
   for (const auto &data : nondim_measurement_cache.interface_eps_i)
   {
     auto &eps = measurement_cache.interface_eps_i.emplace_back(data);
+    eps.energy = units.Dimensionalize<Units::ValueType::ENERGY>(data.energy);
+  }
+  for (const auto &data : nondim_measurement_cache.interface_eps_mask_i)
+  {
+    auto &eps = measurement_cache.interface_eps_mask_i.emplace_back(data);
     eps.energy = units.Dimensionalize<Units::ValueType::ENERGY>(data.energy);
   }
 
@@ -261,6 +294,11 @@ Measurement Measurement::Nondimensionalize(const Units &units,
   for (const auto &data : dim_measurement_cache.interface_eps_i)
   {
     auto &eps = measurement_cache.interface_eps_i.emplace_back(data);
+    eps.energy = units.Nondimensionalize<Units::ValueType::ENERGY>(data.energy);
+  }
+  for (const auto &data : dim_measurement_cache.interface_eps_mask_i)
+  {
+    auto &eps = measurement_cache.interface_eps_mask_i.emplace_back(data);
     eps.energy = units.Nondimensionalize<Units::ValueType::ENERGY>(data.energy);
   }
 
@@ -644,6 +682,209 @@ void PostOperatorCSV<solver_t>::PrintSurfaceQ()
     surface_Q->table[fmt::format("Q_{}_{}", data.idx, m_ex_idx)] << data.quality_factor;
   }
   surface_Q->WriteFullTableTrunc();
+}
+
+template <ProblemType solver_t>
+void PostOperatorCSV<solver_t>::InitializeSurfaceEnergy(
+    const SurfacePostOperator &surf_post_op)
+{
+  if (!(surf_post_op.eps_surfs.size() > 0))
+  {
+    return;
+  }
+  surface_energy = TableWithCSVFile(post_dir / "surface-energy.csv", reload_table);
+
+  Table t;  // Define table locally first due to potential reload.
+  auto nr_expected_measurement_cols =
+      1 + ex_idx_v_all.size() * surf_post_op.eps_surfs.size();
+  t.reserve(nr_expected_measurement_rows, nr_expected_measurement_cols);
+  t.insert("idx", LabelIndexCol(solver_t), -1, 0, PrecIndexCol(solver_t), "");
+  for (const auto ex_idx : ex_idx_v_all)
+  {
+    std::string ex_label = HasSingleExIdx() ? "" : fmt::format("[{}]", ex_idx);
+    for (const auto &surf : surf_post_op.eps_surfs)
+    {
+      auto idx = surf.first;
+      t.insert(fmt::format("E_{}_{}", idx, ex_idx),
+               fmt::format("E_surf[{}]{} (J)", idx, ex_label), ex_idx);
+    }
+  }
+  MoveTableValidateReload(*surface_energy, std::move(t));
+}
+
+template <ProblemType solver_t>
+void PostOperatorCSV<solver_t>::PrintSurfaceEnergy()
+{
+  if (!surface_energy)
+  {
+    return;
+  }
+  CheckAppendIndex(surface_energy->table["idx"], row_idx_v, row_i);
+
+  for (const auto &data : measurement_cache.interface_eps_i)
+  {
+    surface_energy->table[fmt::format("E_{}_{}", data.idx, m_ex_idx)] << data.energy;
+  }
+  surface_energy->WriteFullTableTrunc();
+}
+
+template <ProblemType solver_t>
+void PostOperatorCSV<solver_t>::InitializeSurfaceMaskQ(
+    const SurfacePostOperator &surf_post_op)
+{
+  if (!surf_post_op.HasMaskedInterfaceDielectrics())
+  {
+    return;
+  }
+  surface_mask_Q = TableWithCSVFile(post_dir / "surface-mask-Q.csv", reload_table);
+
+  const auto masked_indices = surf_post_op.GetMaskedInterfaceIndices();
+  Table t;  // Define table locally first due to potential reload.
+  auto nr_expected_measurement_cols = 1 + ex_idx_v_all.size() * (2 * masked_indices.size());
+  t.reserve(nr_expected_measurement_rows, nr_expected_measurement_cols);
+  t.insert("idx", LabelIndexCol(solver_t), -1, 0, PrecIndexCol(solver_t), "");
+  for (const auto ex_idx : ex_idx_v_all)
+  {
+    std::string ex_label = HasSingleExIdx() ? "" : fmt::format("[{}]", ex_idx);
+    for (const auto idx : masked_indices)
+    {
+      t.insert(fmt::format("p_mask_{}_{}", idx, ex_idx),
+               fmt::format("p_surf_mask[{}]{}", idx, ex_label), ex_idx);
+      t.insert(fmt::format("Q_mask_{}_{}", idx, ex_idx),
+               fmt::format("Q_surf_mask[{}]{}", idx, ex_label), ex_idx);
+    }
+  }
+  MoveTableValidateReload(*surface_mask_Q, std::move(t));
+}
+
+template <ProblemType solver_t>
+void PostOperatorCSV<solver_t>::PrintSurfaceMaskQ()
+{
+  if (!surface_mask_Q)
+  {
+    return;
+  }
+  CheckAppendIndex(surface_mask_Q->table["idx"], row_idx_v, row_i);
+
+  for (const auto &data : measurement_cache.interface_eps_mask_i)
+  {
+    surface_mask_Q->table[fmt::format("p_mask_{}_{}", data.idx, m_ex_idx)]
+        << data.energy_participation;
+    surface_mask_Q->table[fmt::format("Q_mask_{}_{}", data.idx, m_ex_idx)]
+        << data.quality_factor;
+  }
+  surface_mask_Q->WriteFullTableTrunc();
+}
+
+template <ProblemType solver_t>
+void PostOperatorCSV<solver_t>::InitializeSurfaceMaskEnergy(
+    const SurfacePostOperator &surf_post_op)
+{
+  if (!surf_post_op.HasMaskedInterfaceDielectrics())
+  {
+    return;
+  }
+  surface_mask_energy =
+      TableWithCSVFile(post_dir / "surface-mask-energy.csv", reload_table);
+
+  const auto masked_indices = surf_post_op.GetMaskedInterfaceIndices();
+  Table t;  // Define table locally first due to potential reload.
+  auto nr_expected_measurement_cols = 1 + ex_idx_v_all.size() * masked_indices.size();
+  t.reserve(nr_expected_measurement_rows, nr_expected_measurement_cols);
+  t.insert("idx", LabelIndexCol(solver_t), -1, 0, PrecIndexCol(solver_t), "");
+  for (const auto ex_idx : ex_idx_v_all)
+  {
+    std::string ex_label = HasSingleExIdx() ? "" : fmt::format("[{}]", ex_idx);
+    for (const auto idx : masked_indices)
+    {
+      t.insert(fmt::format("E_mask_{}_{}", idx, ex_idx),
+               fmt::format("E_surf_mask[{}]{} (J)", idx, ex_label), ex_idx);
+    }
+  }
+  MoveTableValidateReload(*surface_mask_energy, std::move(t));
+}
+
+template <ProblemType solver_t>
+void PostOperatorCSV<solver_t>::PrintSurfaceMaskEnergy()
+{
+  if (!surface_mask_energy)
+  {
+    return;
+  }
+  CheckAppendIndex(surface_mask_energy->table["idx"], row_idx_v, row_i);
+
+  for (const auto &data : measurement_cache.interface_eps_mask_i)
+  {
+    surface_mask_energy->table[fmt::format("E_mask_{}_{}", data.idx, m_ex_idx)]
+        << data.energy;
+  }
+  surface_mask_energy->WriteFullTableTrunc();
+}
+
+template <ProblemType solver_t>
+void PostOperatorCSV<solver_t>::PrintInterfaceDoF(
+    const PostOperator<solver_t> &post_op, const SurfacePostOperator &surf_post_op)
+{
+  if (surf_post_op.eps_surfs.empty())
+  {
+    return;
+  }
+
+  const auto comm = post_op.fem_op->GetComm();
+  const bool root = Mpi::Root(comm);
+
+  // Mesh/FESpace diagnostic output for interface DoFs (boundary element/trace DOF counts).
+  // This is not a mask-specific energy-support report.
+  const auto &mesh = post_op.fem_op->GetMesh().Get();
+  std::ofstream fo;
+  if (root)
+  {
+    auto path = post_dir / "interface-DoF.csv";
+    if (fs::is_symlink(path))
+    {
+      fs::remove(path);
+    }
+    fo.open(path);
+    MFEM_VERIFY(fo, "Cannot open interface-DoF.csv for writing!");
+    fo << "idx,type,attributes,boundary_elements,h1_boundary_tdofs,nd_boundary_tdofs\n";
+  }
+
+  for (const auto &[idx, data] : surf_post_op.eps_surfs)
+  {
+    const auto &attrs = data.attr_list;
+
+    int bdr_attr_max = mesh.bdr_attributes.Size() ? mesh.bdr_attributes.Max() : 0;
+    auto attr_marker = mesh::AttrToMarker(bdr_attr_max, attrs, false);
+
+    long long int boundary_elements = 0;
+    for (int i = 0; i < mesh.GetNBE(); i++)
+    {
+      auto attr = mesh.GetBdrAttribute(i);
+      if (attr > 0 && attr <= attr_marker.Size() && attr_marker[attr - 1])
+      {
+        boundary_elements++;
+      }
+    }
+
+    mfem::Array<int> h1_bdr_tdof_list;
+    post_op.fem_op->GetH1Space().Get().GetEssentialTrueDofs(attr_marker, h1_bdr_tdof_list);
+    long long int h1_tdofs = h1_bdr_tdof_list.Size();
+
+    mfem::Array<int> nd_bdr_tdof_list;
+    post_op.fem_op->GetNDSpace().Get().GetEssentialTrueDofs(attr_marker, nd_bdr_tdof_list);
+    long long int nd_tdofs = nd_bdr_tdof_list.Size();
+
+    Mpi::GlobalSum(1, &boundary_elements, comm);
+    Mpi::GlobalSum(1, &h1_tdofs, comm);
+    Mpi::GlobalSum(1, &nd_tdofs, comm);
+
+    if (root)
+    {
+      fo << idx << "," << interface_dielectric_to_string(data.type) << ","
+         << fmt::format("{}", fmt::join(attrs, ";")) << "," << boundary_elements << ","
+         << h1_tdofs << "," << nd_tdofs << "\n";
+    }
+  }
 }
 
 template <ProblemType solver_t>
@@ -1512,6 +1753,8 @@ template <ProblemType solver_t>
 void PostOperatorCSV<solver_t>::InitializeCSVDataCollection(
     const PostOperator<solver_t> &post_op)
 {
+  PrintInterfaceDoF(post_op, post_op.surf_post_op);
+
   if (!Mpi::Root(post_op.fem_op->GetComm()))
   {
     return;
@@ -1519,6 +1762,9 @@ void PostOperatorCSV<solver_t>::InitializeCSVDataCollection(
   InitializeDomainE(post_op.dom_post_op);
   InitializeSurfaceF(post_op.surf_post_op);
   InitializeSurfaceQ(post_op.surf_post_op);
+  InitializeSurfaceEnergy(post_op.surf_post_op);
+  InitializeSurfaceMaskQ(post_op.surf_post_op);
+  InitializeSurfaceMaskEnergy(post_op.surf_post_op);
 
 #if defined(MFEM_USE_GSLIB)
   {
@@ -1597,6 +1843,9 @@ void PostOperatorCSV<solver_t>::PrintAllCSVData(
   PrintDomainE();
   PrintSurfaceF();
   PrintSurfaceQ();
+  PrintSurfaceEnergy();
+  PrintSurfaceMaskQ();
+  PrintSurfaceMaskEnergy();
 
 #if defined(MFEM_USE_GSLIB)
   {

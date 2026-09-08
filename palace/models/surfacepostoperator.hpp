@@ -4,11 +4,13 @@
 #ifndef PALACE_MODELS_SURFACE_POST_OPERATOR_HPP
 #define PALACE_MODELS_SURFACE_POST_OPERATOR_HPP
 
+#include <array>
 #include <map>
 #include <memory>
 #include <vector>
 #include <mfem.hpp>
 #include "fem/coefficient.hpp"
+#include "utils/surfacemask.hpp"
 
 namespace palace
 {
@@ -60,13 +62,19 @@ private:
   {
     InterfaceDielectric type;
     double t, epsilon, tandelta;
+    bool has_mask = false;
+    double mask_margin = 0.0;
+    std::vector<SurfaceMaskEdge> mask_edges;
 
     InterfaceDielectricData(const config::InterfaceDielectricData &data,
                             const mfem::ParMesh &mesh,
                             const mfem::Array<int> &bdr_attr_marker);
 
+    bool HasMask() const { return has_mask; }
     std::unique_ptr<mfem::Coefficient> GetCoefficient(const GridFunction &E,
                                                       const MaterialOperator &mat_op) const;
+    std::unique_ptr<mfem::Coefficient>
+    GetMaskedCoefficient(const GridFunction &E, const MaterialOperator &mat_op) const;
   };
   struct FarFieldData : public SurfaceData
   {
@@ -118,8 +126,12 @@ public:
                 double omega_im) const;
 
   // Get surface integrals computing interface dielectric energy.
+  bool HasMaskedInterfaceDielectrics() const;
+  std::vector<int> GetMaskedInterfaceIndices() const;
+  bool HasInterfaceMask(int idx) const;
   double GetInterfaceLossTangent(int idx) const;
   double GetInterfaceElectricFieldEnergy(int idx, const GridFunction &E) const;
+  double GetMaskedInterfaceElectricFieldEnergy(int idx, const GridFunction &E) const;
 
   int GetVDim() const { return mat_op.SpaceDimension(); };
 };

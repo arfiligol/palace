@@ -692,6 +692,33 @@ be the interface layer permittivity for the specific `"Type"` of interface speci
 
 `"LossTan" [0.0]` :  Loss tangent for this lossy dielectric interface.
 
+`"Mask" [None]` :  Optional `{"Type": "Inset", "Margin": <float>}` object for an
+additional masked integral of the same interface and field solution. `"Margin"` is finite
+and nonnegative, in mesh length units. Zero gives the full integral. For a positive margin,
+quadrature contributions are excluded when their Euclidean distance to the selected
+patch's perimeter segments is strictly less than the margin; equality is included.
+
+The perimeter belongs to the union of this index's `"Attributes"` on the original 3D
+surface, including outer boundaries, holes, and disconnected components. Shared edges
+between selected faces are not perimeter. Native preprocessing retains its segments before
+crack duplication or displacement, including selected automatically generated boundary
+faces. Coordinates and margin use the same nondimensionalization. Partitioning, subsequent
+AMR, and rebalancing retain this geometry; both physical crack sides continue to contribute.
+
+Use an original mesh input. A positive margin reports distinct errors for unavailable
+original perimeter data, an empty selected surface, and a selected surface without perimeter.
+Reloading an already nonconforming or cracked mesh is not supported for positive masks;
+arbitrary externally cracked conforming files cannot be reliably recognized. No perimeter
+metadata is serialized. Zero margin does not require perimeter data. A valid mask that
+excludes all quadrature contributions produces zero energy, without changing the margin.
+
+Perimeter edges are straight endpoint segments, not geodesic curves. Conformal preprocessing
+captures them after serial refinement and any crack-refinement retries. When region
+refinement converts a conformal tensor mesh to nonconforming form, they are retained before
+that conversion, and the existing path continues to skip crack/boundary insertion. Curved
+edges are represented by their captured chords; equivalence to a later refined curved-edge
+polyline is not implied.
+
 ## `boundaries["Postprocessing"]["Impedance"]`
 
 ```json

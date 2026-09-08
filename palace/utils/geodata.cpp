@@ -64,7 +64,8 @@ std::unordered_map<int, int> CheckMesh(const mfem::Mesh &, const config::Boundar
 // Adding boundary elements for material interfaces and exterior boundaries, and "crack"
 // desired internal boundary elements to disconnect the elements on either side.
 int AddInterfaceBdrElements(IoData &, std::unique_ptr<mfem::Mesh> &,
-                            std::unordered_map<int, int> &, MPI_Comm comm);
+                            std::unordered_map<int, int> &, MPI_Comm comm,
+                            bool capture_perimeters);
 
 // Generate element-based mesh partitioning, using either a provided file or METIS.
 std::unique_ptr<int[]> GetMeshPartitioning(const mfem::Mesh &, int,
@@ -80,10 +81,14 @@ std::unique_ptr<mfem::ParMesh> DistributeMesh(MPI_Comm, std::unique_ptr<mfem::Me
 void RebalanceConformalMesh(std::unique_ptr<mfem::ParMesh> &);
 
 // Apply box/sphere region-based refinement to a serial mesh in-place. For tensor-element
-// meshes the refinement is non-conforming and the mesh must already be nonconforming.
+// meshes the refinement is non-conforming and converts the mesh before refinement.
 // Refinement levels are applied one at a time; at each level every element whose geometry
 // intersects at least one active (level-appropriate) refinement region is refined.
-void RegionRefine(const config::RefinementData &refinement, mfem::Mesh &mesh);
+void RegionRefine(IoData &, mfem::Mesh &, bool capture_perimeters);
+
+// Retain the selected source-face perimeter while original edge identity is available.
+void CaptureSurfaceMaskPerimeters(IoData &, const mfem::Mesh &,
+                                  const std::unordered_map<int, int> * = nullptr);
 
 }  // namespace
 
@@ -122,6 +127,15 @@ bool UseAmr(const config::RefinementData &refinement)
 std::unique_ptr<mfem::Mesh> Load(IoData &iodata, MPI_Comm comm)
 {
   BlockTimer bt0(Timer::MESH_PREPROCESS);
+
+  // Runtime lineage belongs to this load, including ranks without a serial mesh.
+  for (auto &[idx, data] : iodata.boundaries.postpro.dielectric)
+  {
+    if (data.mask)
+    {
+      data.mask->perimeter.reset();
+    }
+  }
 
   const auto &refinement = iodata.model.refinement;
   const bool use_amr = UseAmr(refinement);
@@ -168,6 +182,10 @@ std::unique_ptr<mfem::Mesh> Load(IoData &iodata, MPI_Comm comm)
   {
     return smesh;
   }
+
+  // An initially NC/restart input cannot recover original face lineage, even if
+  // subsequent preprocessing changes its representation.
+  const bool capture_perimeters = smesh->Conforming();
 
   // AMR / element compatibility.
   const auto element_types = CheckElements(*smesh);
@@ -234,7 +252,7 @@ std::unique_ptr<mfem::Mesh> Load(IoData &iodata, MPI_Comm comm)
   // (rather than in parallel RefineMesh) so the user-facing 3D box / sphere geometry
   // stays in sync with the mesh the problem actually solves on — BoundaryMode's
   // Preprocess may extract a 2D submesh from this refined 3D mesh.
-  RegionRefine(refinement, *smesh);
+  RegionRefine(iodata, *smesh, capture_perimeters);
 
   // Exterior-boundary check and optional material-interface / crack boundary element
   // insertion. Only meaningful on an initial conformal mesh.
@@ -243,10 +261,15 @@ std::unique_ptr<mfem::Mesh> Load(IoData &iodata, MPI_Comm comm)
     auto face_to_be = CheckMesh(*smesh, iodata.boundaries);
     if (iodata.model.crack_bdr_elements || iodata.model.add_bdr_elements)
     {
-      while (AddInterfaceBdrElements(iodata, smesh, face_to_be, comm) != 1)
+      while (AddInterfaceBdrElements(iodata, smesh, face_to_be, comm,
+                                     capture_perimeters) != 1)
       {
         // May require multiple calls due to early exit/retry approach.
       }
+    }
+    else if (capture_perimeters)
+    {
+      CaptureSurfaceMaskPerimeters(iodata, *smesh);
     }
   }
   else
@@ -303,6 +326,63 @@ std::unique_ptr<mfem::ParMesh> Partition(IoData &iodata, std::unique_ptr<mfem::M
     {
       iodata.boundaries.cracked_attributes.clear();
       iodata.boundaries.cracked_attributes.insert(data.begin(), data.end());
+    }
+  }
+
+  // Preprocess has already scaled this runtime geometry with the mesh and Margin.
+  // Every rank receives root's state in the deterministic dielectric Index map order;
+  // later refinement and rebalancing continue to use this retained source geometry.
+  for (auto &[idx, data] : iodata.boundaries.postpro.dielectric)
+  {
+    if (!data.mask || data.mask->margin <= 0.0)
+    {
+      continue;
+    }
+    auto &perimeter = data.mask->perimeter;
+    bool available = perimeter.has_value();
+    Mpi::Broadcast(1, &available, 0, comm);
+    if (!available)
+    {
+      perimeter.reset();
+      continue;
+    }
+    if (!Mpi::Root(comm))
+    {
+      perimeter.emplace();
+    }
+    Mpi::Broadcast(1, &perimeter->has_selected_faces, 0, comm);
+    int coordinate_count = 0;
+    std::vector<double> coordinates;
+    if (Mpi::Root(comm))
+    {
+      MFEM_VERIFY(perimeter->edges.size() <=
+                      static_cast<std::size_t>(std::numeric_limits<int>::max()) / 6,
+                  "Surface mask perimeter exceeds MPI coordinate count capacity!");
+      coordinate_count = static_cast<int>(6 * perimeter->edges.size());
+      coordinates.reserve(coordinate_count);
+      for (const auto &edge : perimeter->edges)
+      {
+        coordinates.insert(coordinates.end(), edge.a.begin(), edge.a.end());
+        coordinates.insert(coordinates.end(), edge.b.begin(), edge.b.end());
+      }
+    }
+    Mpi::Broadcast(1, &coordinate_count, 0, comm);
+    if (!Mpi::Root(comm))
+    {
+      coordinates.resize(coordinate_count);
+    }
+    if (coordinate_count > 0)
+    {
+      Mpi::Broadcast(coordinate_count, coordinates.data(), 0, comm);
+    }
+    if (!Mpi::Root(comm))
+    {
+      perimeter->edges.resize(coordinate_count / 6);
+      for (std::size_t i = 0; i < perimeter->edges.size(); i++)
+      {
+        std::copy_n(coordinates.data() + 6 * i, 3, perimeter->edges[i].a.begin());
+        std::copy_n(coordinates.data() + 6 * i + 3, 3, perimeter->edges[i].b.begin());
+      }
     }
   }
 
@@ -1932,46 +2012,58 @@ std::unique_ptr<mfem::ParMesh> DistributeSerialMesh(MPI_Comm comm,
   return DistributeMesh(comm, smesh, partitioning.get());
 }
 
+void SaveAdaptMesh(const IoData &iodata, mfem::ParMesh &mesh)
+{
+  if (!iodata.model.refinement.save_adapt_mesh)
+  {
+    return;
+  }
+
+  MPI_Comm comm = mesh.GetComm();
+  auto sfile = fs::path(iodata.problem.output) / fs::path(iodata.model.mesh).stem();
+  sfile += ".mesh";
+
+  if (Mpi::Root(comm) && fs::is_symlink(sfile))
+  {
+    fs::remove(sfile);
+  }
+
+  auto PrintSerial = [&](mfem::Mesh &smesh)
+  {
+    BlockTimer bt1(Timer::IO);
+    if (Mpi::Root(comm))
+    {
+      std::ofstream fo(sfile);
+      // mfem::ofgzstream fo(sfile, true);  // Use zlib compression if available
+      // fo << std::fixed;
+      fo << std::scientific;
+      fo.precision(MSH_FLT_PRECISION);
+      mesh::DimensionalizeMesh(smesh, iodata.units.GetMeshLengthRelativeScale());
+      smesh.Mesh::Print(fo);  // Do not need to nondimensionalize the temporary mesh
+    }
+    Mpi::Barrier(comm);
+  };
+
+  if (mesh.Nonconforming())
+  {
+    mfem::ParMesh smesh(mesh);
+    mfem::Array<int> serial_partition(mesh.GetNE());
+    serial_partition = 0;
+    smesh.Rebalance(serial_partition);
+    PrintSerial(smesh);
+  }
+  else
+  {
+    mfem::Mesh smesh = mesh.GetSerialMesh(0);
+    PrintSerial(smesh);
+  }
+}
+
 double RebalanceMesh(const IoData &iodata, std::unique_ptr<mfem::ParMesh> &mesh)
 {
   BlockTimer bt0(Timer::REBALANCE);
   MPI_Comm comm = mesh->GetComm();
-  if (iodata.model.refinement.save_adapt_mesh)
-  {
-    // Create a separate serial mesh to write to disk.
-    auto sfile = fs::path(iodata.problem.output) / fs::path(iodata.model.mesh).stem();
-    sfile += ".mesh";
-
-    auto PrintSerial = [&](mfem::Mesh &smesh)
-    {
-      BlockTimer bt1(Timer::IO);
-      if (Mpi::Root(comm))
-      {
-        std::ofstream fo(sfile);
-        // mfem::ofgzstream fo(sfile, true);  // Use zlib compression if available
-        // fo << std::fixed;
-        fo << std::scientific;
-        fo.precision(MSH_FLT_PRECISION);
-        mesh::DimensionalizeMesh(smesh, iodata.units.GetMeshLengthRelativeScale());
-        smesh.Mesh::Print(fo);  // Do not need to nondimensionalize the temporary mesh
-      }
-      Mpi::Barrier(comm);
-    };
-
-    if (mesh->Nonconforming())
-    {
-      mfem::ParMesh smesh(*mesh);
-      mfem::Array<int> serial_partition(mesh->GetNE());
-      serial_partition = 0;
-      smesh.Rebalance(serial_partition);
-      PrintSerial(smesh);
-    }
-    else
-    {
-      mfem::Mesh smesh = mesh->GetSerialMesh(0);
-      PrintSerial(smesh);
-    }
-  }
+  SaveAdaptMesh(iodata, *mesh);
 
   // If there is more than one processor, may perform rebalancing.
   if (Mpi::Size(comm) == 1)
@@ -2476,8 +2568,96 @@ struct UnorderedPairHasher
   }
 };
 
+// Preserve the existing generated-attribute pairing for both source selection and
+// actual insertion. Attributes remain relative to the original boundary maximum.
+int GetInterfaceBdrAttribute(const mfem::Mesh &mesh, int face)
+{
+  int e1, e2, a = 0, b = 0;
+  mesh.GetFaceElements(face, &e1, &e2);
+  if (e1 >= 0 && e2 >= 0)
+  {
+    a = std::max(mesh.GetAttribute(e1), mesh.GetAttribute(e2));
+    b = (a == mesh.GetAttribute(e1)) ? mesh.GetAttribute(e2) : mesh.GetAttribute(e1);
+  }
+  else  // e1 >= 0
+  {
+    a = mesh.GetAttribute(e1);
+  }
+  MFEM_VERIFY(a + b > 0, "Invalid new boundary element attribute!");
+  const int bdr_attr_max = mesh.bdr_attributes.Size() ? mesh.bdr_attributes.Max() : 0;
+  const long long int new_attr =
+      bdr_attr_max + (((a + b) * (long long int)(a + b + 1)) / 2) + a;
+  return mfem::internal::to_int(new_attr);
+}
+
+void CaptureSurfaceMaskPerimeters(
+    IoData &iodata, const mfem::Mesh &mesh,
+    const std::unordered_map<int, int> *generated_faces)
+{
+  if (mesh.Dimension() != 3 || mesh.SpaceDimension() != 3 || !mesh.Conforming())
+  {
+    return;
+  }
+  for (auto &[idx, data] : iodata.boundaries.postpro.dielectric)
+  {
+    if (!data.mask || data.mask->margin <= 0.0)
+    {
+      continue;
+    }
+    auto &perimeter = data.mask->perimeter.emplace();
+    const std::unordered_set<int> attributes(data.attributes.begin(), data.attributes.end());
+    std::set<int> selected_faces;
+    for (int be = 0; be < mesh.GetNBE(); be++)
+    {
+      if (attributes.count(mesh.GetBdrAttribute(be)))
+      {
+        int face, orientation;
+        mesh.GetBdrElementFace(be, &face, &orientation);
+        selected_faces.insert(face);
+      }
+    }
+    if (generated_faces)
+    {
+      for (const auto &[face, count] : *generated_faces)
+      {
+        if (count > 0 && attributes.count(GetInterfaceBdrAttribute(mesh, face)))
+        {
+          selected_faces.insert(face);
+        }
+      }
+    }
+    perimeter.has_selected_faces = !selected_faces.empty();
+
+    // Count each logical selected face once, using original topological edge IDs.
+    // Shared triangulation edges disappear; holes and disconnected rims remain.
+    // Coordinates are retained only after classification, never used to weld topology.
+    std::map<int, int> edge_incidence;
+    mfem::Array<int> edges, orientations, vertices;
+    for (int face : selected_faces)
+    {
+      mesh.GetFaceEdges(face, edges, orientations);
+      for (int edge : edges)
+      {
+        edge_incidence[edge]++;
+      }
+    }
+    for (const auto &[edge, count] : edge_incidence)
+    {
+      if (count == 1)
+      {
+        mesh.GetEdgeVertices(edge, vertices);
+        SurfaceMaskEdge segment;
+        std::copy_n(mesh.GetVertex(vertices[0]), 3, segment.a.begin());
+        std::copy_n(mesh.GetVertex(vertices[1]), 3, segment.b.begin());
+        perimeter.edges.push_back(segment);
+      }
+    }
+  }
+}
+
 int AddInterfaceBdrElements(IoData &iodata, std::unique_ptr<mfem::Mesh> &orig_mesh,
-                            std::unordered_map<int, int> &face_to_be, MPI_Comm comm)
+                            std::unordered_map<int, int> &face_to_be, MPI_Comm comm,
+                            bool capture_perimeters)
 {
   // Exclude some internal boundary conditions for which cracking would give invalid
   // results: lumpedports in particular.
@@ -2503,6 +2683,10 @@ int AddInterfaceBdrElements(IoData &iodata, std::unique_ptr<mfem::Mesh> &orig_me
   // Return if nothing to do. Otherwise, count vertices and boundary elements to add.
   if (crack_boundary_attributes.empty() && !iodata.model.add_bdr_elements)
   {
+    if (capture_perimeters)
+    {
+      CaptureSurfaceMaskPerimeters(iodata, *orig_mesh);
+    }
     return 1;  // Success
   }
 
@@ -2845,6 +3029,13 @@ int AddInterfaceBdrElements(IoData &iodata, std::unique_ptr<mfem::Mesh> &orig_me
     }
   }
 
+  // All crack-refinement retries are complete, but source topology and coordinates
+  // still precede duplication and displacement. Include faces about to be generated.
+  if (capture_perimeters)
+  {
+    CaptureSurfaceMaskPerimeters(iodata, *orig_mesh, &new_face_bdr_elem);
+  }
+
   // Export mesh after pre-processing, before cracking boundary elements.
   if (iodata.model.export_prerefined_mesh && Mpi::Root(comm))
   {
@@ -3008,33 +3199,13 @@ int AddInterfaceBdrElements(IoData &iodata, std::unique_ptr<mfem::Mesh> &orig_me
     const mfem::Table &elem_to_face =
         (orig_mesh->Dimension() == 2 ? orig_mesh->ElementToEdgeTable()
                                      : orig_mesh->ElementToFaceTable());
-    int bdr_attr_max =
-        orig_mesh->bdr_attributes.Size() ? orig_mesh->bdr_attributes.Max() : 0;
     for (int f = 0; f < orig_mesh->GetNumFaces(); f++)
     {
       if (new_face_bdr_elem[f] > 0)
       {
-        // Assign new unique attribute based on attached elements. Save so that the
-        // attributes of e1 and e2 can be easily referenced using the new attribute. Since
-        // attributes are in 1-based indexing, a, b > 0. See also
-        // https://en.wikipedia.org/wiki/Pairing_function.
-        int e1, e2, a = 0, b = 0;
+        const int new_attr = GetInterfaceBdrAttribute(*orig_mesh, f);
+        int e1, e2;
         orig_mesh->GetFaceElements(f, &e1, &e2);
-        if (e1 >= 0 && e2 >= 0)
-        {
-          a = std::max(orig_mesh->GetAttribute(e1), orig_mesh->GetAttribute(e2));
-          b = (a == orig_mesh->GetAttribute(e1)) ? orig_mesh->GetAttribute(e2)
-                                                 : orig_mesh->GetAttribute(e1);
-        }
-        else  // e1 >= 0
-        {
-          a = orig_mesh->GetAttribute(e1);
-          b = 0;
-        }
-        MFEM_VERIFY(a + b > 0, "Invalid new boundary element attribute!");
-        long long int l_new_attr =
-            bdr_attr_max + (((a + b) * (long long int)(a + b + 1)) / 2) + a;
-        int new_attr = mfem::internal::to_int(l_new_attr);  // At least bdr_attr_max + 1
 
         // Add the boundary elements with the new boundary attribute. The element vertices
         // may have been renumbered in the new mesh, so the new face is not necessarily
@@ -3066,7 +3237,7 @@ int AddInterfaceBdrElements(IoData &iodata, std::unique_ptr<mfem::Mesh> &orig_me
         {
           Mpi::Print(
               "Adding boundary element with attribute {:d} from elements {:d} and {:d}\n",
-              new_attr, a, b);
+              new_attr, e1, e2);
         }
         if (new_face_bdr_elem[f] > 1)
         {
@@ -3079,7 +3250,7 @@ int AddInterfaceBdrElements(IoData &iodata, std::unique_ptr<mfem::Mesh> &orig_me
           {
             Mpi::Print("Adding second boundary element with attribute {:d} from elements "
                        "{:d} and {:d}\n",
-                       new_attr, a, b);
+                       new_attr, e1, e2);
           }
         }
       }
@@ -3388,8 +3559,9 @@ void RebalanceConformalMesh(std::unique_ptr<mfem::ParMesh> &pmesh)
   pmesh = DistributeMesh(comm, smesh, partitioning.get());
 }
 
-void RegionRefine(const config::RefinementData &refinement, mfem::Mesh &mesh)
+void RegionRefine(IoData &iodata, mfem::Mesh &mesh, bool capture_perimeters)
 {
+  const auto &refinement = iodata.model.refinement;
   int max_region_ref_levels = 0;
   for (const auto &box : refinement.GetBoxes())
   {
@@ -3409,7 +3581,14 @@ void RegionRefine(const config::RefinementData &refinement, mfem::Mesh &mesh)
        element_types.has_pyramids) &&
       !mesh.Nonconforming())
   {
-    // Region refinement of tensor meshes hangs hanging nodes; convert to NC. Simplex
+    // This conversion makes Load skip interface insertion and cracking. Retain the
+    // existing source-face perimeter before NC refinement loses conformal incidence;
+    // straight source segments persist through subsequent refinement (including AMR).
+    if (capture_perimeters)
+    {
+      CaptureSurfaceMaskPerimeters(iodata, mesh);
+    }
+    // Region refinement of tensor meshes creates hanging nodes; convert to NC. Simplex
     // meshes don't need NC for GeneralRefinement and stay conforming.
     mesh.EnsureNCMesh(true);
   }

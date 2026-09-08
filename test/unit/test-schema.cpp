@@ -292,6 +292,29 @@ TEST_CASE("Schema Validation - Sub-schema by Key", "[schema][Serial]")
     CHECK(!err.empty());
   }
 
+  SECTION("Valid InterfaceDielectric inset mask")
+  {
+    json dielectric = {{"Index", 1},
+                       {"Attributes", {1}},
+                       {"Thickness", 0.002},
+                       {"Permittivity", 10.0},
+                       {"Mask", {{"Type", "Inset"}, {"Margin", 0.5}}}};
+    std::string err = ValidateConfig(dielectric, "Dielectric");
+    INFO("Error: " << err);
+    CHECK(err.empty());
+  }
+
+  SECTION("Invalid InterfaceDielectric mask type")
+  {
+    json dielectric = {{"Index", 1},
+                       {"Attributes", {1}},
+                       {"Thickness", 0.002},
+                       {"Permittivity", 10.0},
+                       {"Mask", {{"Type", "Box"}, {"Margin", 0.5}}}};
+    std::string err = ValidateConfig(dielectric, "Dielectric");
+    CHECK(!err.empty());
+  }
+
   SECTION("Valid WavePort")
   {
     json port = {{"Index", 1}, {"Attributes", {1}}, {"Mode", 2}};

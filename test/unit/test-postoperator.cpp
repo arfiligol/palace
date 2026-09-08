@@ -9,10 +9,15 @@
 #include <catch2/generators/catch_generators_all.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <catch2/matchers/catch_matchers_vector.hpp>
+#include <fstream>
+#include <sstream>
 #include "fem/integrator.hpp"
 #include "models/postoperator.hpp"
+#include "utils/communication.hpp"
+#include "utils/filesystem.hpp"
 #include "utils/iodata.hpp"
 #include "utils/units.hpp"
+#include "fixtures.hpp"
 
 using namespace palace;
 using namespace Catch::Matchers;
@@ -137,6 +142,8 @@ auto RandomMeasurement(int ndomain = 5)
     cache.interface_eps_i.emplace_back(
         Measurement::InterfaceData{i, 1 + randd(100), (1 + randd(9999)) / 10000,
                                    (1 + randd(9999) / 10000), 1e9 / (1 + randd(9999))});
+    cache.interface_eps_mask_i.emplace_back(cache.interface_eps_i.back());
+    cache.interface_eps_mask_i.back().energy *= 0.5;
   }
 
   return cache;
@@ -335,6 +342,25 @@ TEST_CASE("PostOperator", "[idempotent][Serial]")
     CHECK_THAT(c.quality_factor, Catch::Matchers::WithinRel(ndc.quality_factor));
 
     auto &dc = dim_cache.interface_eps_i[i];
+    CHECK(c.idx == dc.idx);
+    CHECK_THAT(c.energy, !Catch::Matchers::WithinRel(dc.energy));
+    CHECK_THAT(c.tandelta, Catch::Matchers::WithinRel(dc.tandelta));
+    CHECK_THAT(c.energy_participation, Catch::Matchers::WithinRel(dc.energy_participation));
+    CHECK_THAT(c.quality_factor, Catch::Matchers::WithinRel(dc.quality_factor));
+  }
+
+  for (std::size_t i = 0; i < cache.interface_eps_mask_i.size(); i++)
+  {
+    auto &c = cache.interface_eps_mask_i[i];
+    auto &ndc = non_dim_cache.interface_eps_mask_i[i];
+    CHECK(c.idx == ndc.idx);
+    CHECK_THAT(c.energy, Catch::Matchers::WithinRel(ndc.energy));
+    CHECK_THAT(c.tandelta, Catch::Matchers::WithinRel(ndc.tandelta));
+    CHECK_THAT(c.energy_participation,
+               Catch::Matchers::WithinRel(ndc.energy_participation));
+    CHECK_THAT(c.quality_factor, Catch::Matchers::WithinRel(ndc.quality_factor));
+
+    auto &dc = dim_cache.interface_eps_mask_i[i];
     CHECK(c.idx == dc.idx);
     CHECK_THAT(c.energy, !Catch::Matchers::WithinRel(dc.energy));
     CHECK_THAT(c.tandelta, Catch::Matchers::WithinRel(dc.tandelta));
@@ -669,4 +695,119 @@ TEST_CASE("Dimensional field output", "[postoperator][Serial][Parallel]")
   std::vector<mfem::ParGridFunction> gf_after = copy_gridfunctions();
   CompareGridFunctions(gf_before, gf_after, std::vector<double>(gf_after.size(), 1.0),
                        rtol);
+}
+
+TEST_CASE_METHOD(palace::test::SharedTempDir, "Interface-DoF CSV",
+                 "[postoperator][Serial][Parallel]")
+{
+  auto read_csv_rows = [](const fs::path &path)
+  {
+    std::vector<std::vector<std::string>> rows;
+    std::ifstream file(path);
+    std::string line;
+    while (std::getline(file, line))
+    {
+      std::vector<std::string> row;
+      std::stringstream ss(line);
+      std::string cell;
+      while (std::getline(ss, cell, ','))
+      {
+        row.push_back(cell);
+      }
+      if (!row.empty())
+      {
+        rows.push_back(std::move(row));
+      }
+    }
+    return rows;
+  };
+
+  // Create iodata.
+  Units units(0.496, 1.453);
+  IoData iodata(units);
+  iodata.problem.output = temp_dir;
+  iodata.problem.type = ProblemType::ELECTROSTATIC;
+  iodata.solver.electrostatic.n_post = 1;
+  iodata.domains.materials.emplace_back().attributes = {1};
+  iodata.boundaries.pec.attributes = {1};
+
+  // Interface dielectric on outer boundary. Include an inactive raw attribute to verify
+  // interface-DoF.csv reports resolved active attributes.
+  iodata.boundaries.postpro.dielectric.emplace(1, config::InterfaceDielectricData());
+  iodata.boundaries.postpro.dielectric[1].attributes = {1, 99};
+  iodata.boundaries.postpro.dielectric[1].t = 1.0;
+  iodata.boundaries.postpro.dielectric[1].epsilon_r = 1.0;
+  iodata.CheckConfiguration();
+
+  // Create serial/parallel mesh.
+  int resolution = 3;
+  auto serial_mesh = std::make_unique<mfem::Mesh>(mfem::Mesh::MakeCartesian3D(
+      resolution, resolution, resolution, mfem::Element::TETRAHEDRON));
+  auto comm = Mpi::World();
+  iodata.model.Lc = mesh::ComputeReferenceLength(serial_mesh, comm);
+  iodata.NondimensionalizeInputs(serial_mesh);
+  auto par_mesh = std::make_unique<mfem::ParMesh>(comm, *serial_mesh);
+  std::vector<std::unique_ptr<Mesh>> mesh;
+  mesh.push_back(std::make_unique<Mesh>(std::move(par_mesh)));
+  auto &pm = mesh.front()->Get();
+
+  // Build operator and measure once.
+  LaplaceOperator laplace_op(iodata, mesh);
+  PostOperator<ProblemType::ELECTROSTATIC> post_op(iodata, laplace_op);
+  const auto &Grad = laplace_op.GetGradMatrix();
+  Vector V(Grad.Width()), E(Grad.Height());
+  V = 0.0;
+  E = 0.0;
+  post_op.MeasureAndPrintAll(0, V, E, 0);
+
+  int bdr_attr_max = pm.bdr_attributes.Size() ? pm.bdr_attributes.Max() : 0;
+  mfem::Array<int> marker(bdr_attr_max);
+  marker = 0;
+  mfem::Array<int> resolved_attrs(1);
+  resolved_attrs[0] = 1;
+  for (auto attr : resolved_attrs)
+  {
+    if (attr > 0 && attr <= bdr_attr_max)
+    {
+      marker[attr - 1] = 1;
+    }
+  }
+
+  int expected_boundary_elements = 0;
+  for (int i = 0; i < pm.GetNBE(); i++)
+  {
+    auto attr = pm.GetBdrAttribute(i);
+    if (attr > 0 && attr <= marker.Size() && marker[attr - 1])
+    {
+      expected_boundary_elements++;
+    }
+  }
+
+  mfem::Array<int> h1_tdofs;
+  laplace_op.GetH1Space().Get().GetEssentialTrueDofs(marker, h1_tdofs);
+  long long int expected_h1_tdofs = h1_tdofs.Size();
+
+  mfem::Array<int> nd_tdofs;
+  laplace_op.GetNDSpace().Get().GetEssentialTrueDofs(marker, nd_tdofs);
+  long long int expected_nd_tdofs = nd_tdofs.Size();
+
+  auto comm2 = laplace_op.GetComm();
+  Mpi::GlobalSum(1, &expected_boundary_elements, comm2);
+  Mpi::GlobalSum(1, &expected_h1_tdofs, comm2);
+  Mpi::GlobalSum(1, &expected_nd_tdofs, comm2);
+
+  if (Mpi::Root(comm2))
+  {
+    auto rows = read_csv_rows(temp_dir / "interface-DoF.csv");
+    REQUIRE(rows.size() == 2);
+    CHECK(rows[0] ==
+          std::vector<std::string>{"idx", "type", "attributes", "boundary_elements",
+                                  "h1_boundary_tdofs", "nd_boundary_tdofs"});
+    CHECK(rows[1][0] == "1");
+    CHECK(rows[1][1] == "Default");
+    CHECK(rows[1][2] == "1");
+    CHECK(std::stoi(rows[1][3]) == expected_boundary_elements);
+    CHECK(std::stoi(rows[1][4]) == expected_h1_tdofs);
+    CHECK(std::stoi(rows[1][5]) == expected_nd_tdofs);
+  }
 }

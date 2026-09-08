@@ -92,6 +92,15 @@ file. These include:
     for more information. The participation ratios and associated quality factors are
     written to the file `surface-Q.csv` in the specified output directory.
 
+    An optional [`Mask`](../config/boundaries.md#boundaries%5B%22Postprocessing%22%5D%5B%22Dielectric%22%5D)
+    adds an inset integral using the original selected-patch perimeter retained before
+    cracking. Masked quality-factor and energy measurements retain the same interface
+    index and field solution as their unmasked measurements. Separate indices can compare
+    several margins, including repeated values; these are alternative integrals, not
+    additional loss channels to sum together. Keep the logical unmasked baseline once.
+    Configuration dry-run checks parsing and mesh-path existence; it does not construct
+    the mesh or validate a positive inset perimeter.
+
 ## Visualization
 
 When specified in the configuration file, the electric field and magnetic flux density

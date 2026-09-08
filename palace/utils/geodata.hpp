@@ -322,6 +322,9 @@ inline double GetVolume(const mfem::ParMesh &mesh, int attr)
 std::unique_ptr<mfem::ParMesh> DistributeSerialMesh(MPI_Comm comm,
                                                     std::unique_ptr<mfem::Mesh> &smesh);
 
+// Write the current adaptive mesh to the postprocessing directory when SaveAdaptMesh is enabled.
+void SaveAdaptMesh(const IoData &iodata, mfem::ParMesh &mesh);
+
 // Helper function responsible for rebalancing the mesh, and optionally writing meshes from
 // the intermediate stages to disk. Returns the imbalance ratio before rebalancing.
 double RebalanceMesh(const IoData &iodata, std::unique_ptr<mfem::ParMesh> &mesh);

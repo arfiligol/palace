@@ -213,6 +213,7 @@ void BaseSolver::SolveEstimateMarkRefine(std::vector<std::unique_ptr<Mesh>> &mes
     // Optionally save off the previous solution.
     if (refinement.save_adapt_iterations)
     {
+      mesh::SaveAdaptMesh(iodata, *mesh.back());
       SaveIteration(comm, post_dir, it,
                     1 + static_cast<int>(std::log10(refinement.max_it)));
     }

@@ -3,7 +3,11 @@
 
 #include "surfacepostoperator.hpp"
 
+#include <algorithm>
+#include <array>
+#include <cmath>
 #include <complex>
+#include <map>
 #include <set>
 #include "fem/gridfunction.hpp"
 #include "fem/integrator.hpp"
@@ -55,6 +59,56 @@ mfem::Array<int> SetUpBoundaryProperties(const T &data,
   }
   return attr_list;
 }
+
+class InsetMaskCoefficient : public mfem::Coefficient
+{
+private:
+  std::unique_ptr<mfem::Coefficient> coeff;
+  std::vector<SurfaceMaskEdge> edges;
+  double margin2;
+
+public:
+  InsetMaskCoefficient(std::unique_ptr<mfem::Coefficient> &&coeff,
+                       std::vector<SurfaceMaskEdge> edges, double margin)
+    : coeff(std::move(coeff)), edges(std::move(edges)), margin2(margin * margin)
+  {
+  }
+
+  double Eval(mfem::ElementTransformation &T, const mfem::IntegrationPoint &ip) override
+  {
+    MFEM_VERIFY(T.GetSpaceDim() == 3,
+                "Inset interface dielectric masks are supported only for 3D "
+                "boundary-surface postprocessing!");
+
+    mfem::Vector x(T.GetSpaceDim());
+    T.Transform(ip, x);
+    double d2_min = mfem::infinity();
+    for (const auto &edge : edges)
+    {
+      const double ab0 = edge.b[0] - edge.a[0];
+      const double ab1 = edge.b[1] - edge.a[1];
+      const double ab2 = edge.b[2] - edge.a[2];
+      const double ax0 = x[0] - edge.a[0];
+      const double ax1 = x[1] - edge.a[1];
+      const double ax2 = x[2] - edge.a[2];
+      const double ab2_norm = ab0 * ab0 + ab1 * ab1 + ab2 * ab2;
+      if (ab2_norm == 0.0)
+      {
+        continue;
+      }
+      const double t = std::clamp((ax0 * ab0 + ax1 * ab1 + ax2 * ab2) / ab2_norm, 0.0, 1.0);
+      const double dx = ax0 - t * ab0;
+      const double dy = ax1 - t * ab1;
+      const double dz = ax2 - t * ab2;
+      d2_min = std::min(d2_min, dx * dx + dy * dy + dz * dz);
+    }
+    if (d2_min < margin2)
+    {
+      return 0.0;
+    }
+    return coeff->Eval(T, ip);
+  }
+};
 
 }  // namespace
 
@@ -158,6 +212,31 @@ SurfacePostOperator::InterfaceDielectricData::InterfaceDielectricData(
   t = data.t;
   epsilon = data.epsilon_r;
   tandelta = data.tandelta;
+  if (data.mask)
+  {
+    has_mask = true;
+    mask_margin = data.mask->margin;
+    MFEM_VERIFY(mesh.Dimension() == 3 && mesh.SpaceDimension() == 3,
+                "Inset interface dielectric masks are supported only for 3D "
+                "boundary-surface postprocessing. 2D boundary-curve masks are not "
+                "supported!");
+    if (mask_margin > 0.0)
+    {
+      MFEM_VERIFY(data.mask->perimeter,
+                  "Inset interface dielectric mask is missing original pre-crack "
+                  "perimeter data. Load an original mesh through native preprocessing; "
+                  "reloading an already nonconforming/cracked mesh is not supported.");
+      const auto &perimeter = *data.mask->perimeter;
+      MFEM_VERIFY(perimeter.has_selected_faces,
+                  "Inset interface dielectric mask selected no original surface faces "
+                  "for the requested boundary attributes.");
+      MFEM_VERIFY(!perimeter.edges.empty(),
+                  "Inset interface dielectric mask selected an original surface "
+                  "with no perimeter edges (including closed support). A positive "
+                  "Margin requires an open patch.");
+      mask_edges = perimeter.edges;
+    }
+  }
 }
 
 std::unique_ptr<mfem::Coefficient>
@@ -184,6 +263,20 @@ SurfacePostOperator::InterfaceDielectricData::GetCoefficient(
           attr_list, E, mat_op, t, epsilon);
   }
   return {};  // For compiler warning
+}
+
+std::unique_ptr<mfem::Coefficient>
+SurfacePostOperator::InterfaceDielectricData::GetMaskedCoefficient(
+    const GridFunction &E, const MaterialOperator &mat_op) const
+{
+  MFEM_VERIFY(has_mask,
+              "Masked interface dielectric coefficient requested without mask data!");
+  auto coeff = GetCoefficient(E, mat_op);
+  if (mask_margin <= 0.0)
+  {
+    return coeff;
+  }
+  return std::make_unique<InsetMaskCoefficient>(std::move(coeff), mask_edges, mask_margin);
 }
 
 SurfacePostOperator::FarFieldData::FarFieldData(const config::FarFieldPostData &data,
@@ -321,6 +414,33 @@ std::complex<double> SurfacePostOperator::GetSurfaceFlux(int idx, const GridFunc
   return dot;
 }
 
+bool SurfacePostOperator::HasMaskedInterfaceDielectrics() const
+{
+  return std::any_of(eps_surfs.begin(), eps_surfs.end(),
+                     [](const auto &surf) { return surf.second.HasMask(); });
+}
+
+std::vector<int> SurfacePostOperator::GetMaskedInterfaceIndices() const
+{
+  std::vector<int> indices;
+  for (const auto &[idx, data] : eps_surfs)
+  {
+    if (data.HasMask())
+    {
+      indices.push_back(idx);
+    }
+  }
+  return indices;
+}
+
+bool SurfacePostOperator::HasInterfaceMask(int idx) const
+{
+  auto it = eps_surfs.find(idx);
+  MFEM_VERIFY(it != eps_surfs.end(),
+              "Unknown interface dielectric postprocessing index requested!");
+  return it->second.HasMask();
+}
+
 double SurfacePostOperator::GetInterfaceLossTangent(int idx) const
 {
   auto it = eps_surfs.find(idx);
@@ -339,6 +459,24 @@ double SurfacePostOperator::GetInterfaceElectricFieldEnergy(int idx,
   int bdr_attr_max = mesh.bdr_attributes.Size() ? mesh.bdr_attributes.Max() : 0;
   mfem::Array<int> attr_marker = mesh::AttrToMarker(bdr_attr_max, it->second.attr_list);
   auto f = it->second.GetCoefficient(E, mat_op);
+  double dot = GetLocalSurfaceIntegral(*f, attr_marker);
+  Mpi::GlobalSum(1, &dot, E.GetComm());
+  return dot;
+}
+
+double
+SurfacePostOperator::GetMaskedInterfaceElectricFieldEnergy(int idx,
+                                                           const GridFunction &E) const
+{
+  auto it = eps_surfs.find(idx);
+  MFEM_VERIFY(it != eps_surfs.end(),
+              "Unknown interface dielectric postprocessing index requested!");
+  MFEM_VERIFY(it->second.HasMask(),
+              "Masked interface dielectric energy requested without mask data!");
+  const auto &mesh = *h1_fespace.GetParMesh();
+  int bdr_attr_max = mesh.bdr_attributes.Size() ? mesh.bdr_attributes.Max() : 0;
+  mfem::Array<int> attr_marker = mesh::AttrToMarker(bdr_attr_max, it->second.attr_list);
+  auto f = it->second.GetMaskedCoefficient(E, mat_op);
   double dot = GetLocalSurfaceIntegral(*f, attr_marker);
   Mpi::GlobalSum(1, &dot, E.GetComm());
   return dot;
