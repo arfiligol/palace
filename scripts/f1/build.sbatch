@@ -259,6 +259,7 @@ if ! stage_is_complete fast_float; then
   complete_stage fast_float
 fi
 
+scn_new_install=0
 if ! stage_is_complete scn; then
   "$cmake_bin" --fresh \
     -S "$bootstrap_source/scn-4.0.1/scnlib-4.0.1" \
@@ -275,9 +276,15 @@ if ! stage_is_complete scn; then
     -DFETCHCONTENT_FULLY_DISCONNECTED=ON
   "$cmake_bin" --build "$build_dir/scn" --parallel "$jobs"
   "$cmake_bin" --install "$build_dir/scn"
-  [[ -f $prefix/lib/cmake/scn/scn-config.cmake ]] || f1_die "scn package config was not installed"
-  complete_stage scn
+  scn_new_install=1
 fi
+scn_config=$(f1_find_one "$prefix" 'scn-config.cmake')
+case "$scn_config" in
+  "$prefix"/lib/cmake/scn/scn-config.cmake|"$prefix"/lib64/cmake/scn/scn-config.cmake) ;;
+  *) f1_die "scn package config was installed in an unsupported location: $scn_config" ;;
+esac
+scn_dir=$(dirname -- "$scn_config")
+((scn_new_install == 0)) || complete_stage scn
 
 openblas_library=$(f1_find_one "$prefix" 'libopenblas.so')
 zlib_library=$(f1_find_one "$prefix" 'libz.so')
@@ -398,6 +405,7 @@ native=$build_dir/native
   -DSUNDIALS_DIR="$prefix" \
   -DGSLIB_DIR="$prefix" \
   -DARPACK_DIR="$prefix" \
+  -Dscn_DIR="$scn_dir" \
   -DBLAS_LIBRARIES="$blas_lapack" \
   -DLAPACK_LIBRARIES="$blas_lapack" \
   -DZLIB_INCLUDE_DIR="$prefix/include" \
