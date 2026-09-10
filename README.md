@@ -60,6 +60,10 @@ Finally, instructions for obtaining *Palace* and building from source can be fou
 process, most dependencies are downloaded and installed automatically and thus an internet
 connection is required.
 
+For the NCHC Forerunner 1 CPU environment, the repository also provides a locked
+[login preparation, offline compute build, and Slurm run guide](scripts/f1/README.md). This path
+stages every dependency before entering F1's network-isolated compute nodes.
+
 System requirements:
 
   - CMake version 3.24 or later

@@ -1,0 +1,177 @@
+{
+  "schema_version": 1,
+  "palace_source": {
+    "commit": "1ea14a84f60f672ffe4ce12dad404bc82896ef11",
+    "tree": "246e6de4418c00488da225b99c3e9c3461e63beb",
+    "archive": "palace-1ea14a84.tar",
+    "archive_prefix": "palace-1ea14a84",
+    "sha256": "d14c624ff1f1034b7b8b21098fb679346f4469109e92267e956322f76f669200"
+  },
+  "archives": [
+    {
+      "name": "cmake",
+      "version": "3.31.8",
+      "filename": "cmake-3.31.8-linux-x86_64.tar.gz",
+      "url": "https://github.com/Kitware/CMake/releases/download/v3.31.8/cmake-3.31.8-linux-x86_64.tar.gz",
+      "sha256": "630615d8e98ac33eba7fbe472626dff5c899c85af3c024585ae109166a6909d0",
+      "archive_prefix": "cmake-3.31.8-linux-x86_64",
+      "purpose": "bootstrap"
+    },
+    {
+      "name": "openblas",
+      "version": "0.3.20",
+      "filename": "OpenBLAS-0.3.20.tar.gz",
+      "url": "https://github.com/OpenMathLib/OpenBLAS/releases/download/v0.3.20/OpenBLAS-0.3.20.tar.gz",
+      "sha256": "8495c9affc536253648e942908e88e097f2ec7753ede55aca52e5dead3029e3c",
+      "archive_prefix": "OpenBLAS-0.3.20",
+      "purpose": "bootstrap"
+    },
+    {
+      "name": "zlib",
+      "version": "1.3.2",
+      "filename": "zlib-1.3.2.tar.gz",
+      "url": "https://zlib.net/zlib-1.3.2.tar.gz",
+      "sha256": "bb329a0a2cd0274d05519d61c667c062e06990d72e125ee2dfa8de64f0119d16",
+      "archive_prefix": "zlib-1.3.2",
+      "purpose": "bootstrap"
+    },
+    {
+      "name": "json",
+      "version": "3.12.0",
+      "filename": "json-3.12.0.tar.xz",
+      "url": "https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz",
+      "sha256": "42f6e95cad6ec532fd372391373363b62a14af6d771056dbfc86160e6dfff7aa",
+      "archive_prefix": "json",
+      "cmake_variable": "EXTERN_JSON_URL",
+      "purpose": "external"
+    },
+    {
+      "name": "json_schema_validator",
+      "version": "2.4.0",
+      "filename": "json-schema-validator-2.4.0.tar.gz",
+      "url": "https://github.com/pboettch/json-schema-validator/archive/refs/tags/2.4.0.tar.gz",
+      "sha256": "24cbb114609cc9b43d4018b8d03e082ff5d2f26f5dce8bd36538097267b63af9",
+      "archive_prefix": "json-schema-validator-2.4.0",
+      "cmake_variable": "EXTERN_JSON_SCHEMA_VALIDATOR_URL",
+      "purpose": "external"
+    },
+    {
+      "name": "fmt",
+      "version": "12.1.0",
+      "filename": "fmt-12.1.0.zip",
+      "url": "https://github.com/fmtlib/fmt/releases/download/12.1.0/fmt-12.1.0.zip",
+      "sha256": "695fd197fa5aff8fc67b5f2bbc110490a875cdf7a41686ac8512fb480fa8ada7",
+      "archive_prefix": "fmt-12.1.0",
+      "cmake_variable": "EXTERN_FMT_URL",
+      "purpose": "external"
+    },
+    {
+      "name": "scn",
+      "version": "4.0.1",
+      "filename": "scn-4.0.1.zip",
+      "url": "https://github.com/eliaskosunen/scnlib/archive/refs/tags/v4.0.1.zip",
+      "sha256": "4e2540e947338ec5f51e89e3b61dc9a7cd0022cece80c15a192253b5ebc573b8",
+      "archive_prefix": "scnlib-4.0.1",
+      "cmake_variable": "EXTERN_SCN_URL",
+      "purpose": "external"
+    },
+    {
+      "name": "eigen",
+      "version": "5.0.0",
+      "filename": "eigen-5.0.0.tar.gz",
+      "url": "https://gitlab.com/libeigen/eigen/-/archive/5.0.0/eigen-5.0.0.tar.gz",
+      "sha256": "315c881e19e17542a7d428c5aa37d113c89b9500d350c433797b730cd449c056",
+      "archive_prefix": "eigen-5.0.0",
+      "cmake_variable": "EXTERN_EIGEN_URL",
+      "purpose": "external"
+    }
+  ],
+  "git_mirrors": [
+    {
+      "name": "arpack-ng",
+      "url": "https://github.com/opencollab/arpack-ng.git",
+      "ref": "804fa3149a0f773064198a8e883bd021832157ca",
+      "commit": "804fa3149a0f773064198a8e883bd021832157ca",
+      "cmake_variable": "EXTERN_ARPACK_URL"
+    },
+    {
+      "name": "fast_float",
+      "url": "https://github.com/fastfloat/fast_float.git",
+      "ref": "v6.1.6",
+      "commit": "00c8c7b0d5c722d2212568d915a39ea73b08b973",
+      "cmake_variable": null
+    },
+    {
+      "name": "gslib",
+      "url": "https://github.com/Nek5000/gslib.git",
+      "ref": "v1.0.9",
+      "commit": "95acf5b42301d6cb48fda88d662f1d784b863089",
+      "cmake_variable": "EXTERN_GSLIB_URL"
+    },
+    {
+      "name": "hypre",
+      "url": "https://github.com/hypre-space/hypre.git",
+      "ref": "fca98afcd78a26b784dc24b0c3edb0e6140598af",
+      "commit": "fca98afcd78a26b784dc24b0c3edb0e6140598af",
+      "cmake_variable": "EXTERN_HYPRE_URL"
+    },
+    {
+      "name": "libCEED",
+      "url": "https://github.com/CEED/libCEED.git",
+      "ref": "95bd1e908b16e04a70015e3a9a7fddec5e9c3fc8",
+      "commit": "95bd1e908b16e04a70015e3a9a7fddec5e9c3fc8",
+      "cmake_variable": "EXTERN_LIBCEED_URL"
+    },
+    {
+      "name": "libxsmm",
+      "url": "https://github.com/libxsmm/libxsmm.git",
+      "ref": "ea0b20499a41377bab148257240adbbfe1b4a333",
+      "commit": "ea0b20499a41377bab148257240adbbfe1b4a333",
+      "cmake_variable": "EXTERN_LIBXSMM_URL"
+    },
+    {
+      "name": "metis",
+      "url": "https://bitbucket.org/petsc/pkg-metis.git",
+      "ref": "v5.1.0-p13",
+      "commit": "08c3082720ff9114b8e3cbaa4484a26739cd7d2d",
+      "cmake_variable": "EXTERN_METIS_URL"
+    },
+    {
+      "name": "mfem",
+      "url": "https://github.com/mfem/mfem.git",
+      "ref": "d9d6526cc1749980a2ba1da16e2c1ca1e07d82ec",
+      "commit": "d9d6526cc1749980a2ba1da16e2c1ca1e07d82ec",
+      "cmake_variable": "EXTERN_MFEM_URL"
+    },
+    {
+      "name": "parmetis",
+      "url": "https://bitbucket.org/petsc/pkg-parmetis.git",
+      "ref": "v4.0.3-p10",
+      "commit": "53c9341b6c1ba876c97567cb52ddfc87c159dc36",
+      "cmake_variable": "EXTERN_PARMETIS_URL"
+    },
+    {
+      "name": "sundials",
+      "url": "https://github.com/LLNL/sundials.git",
+      "ref": "v7.5.0",
+      "commit": "c8dabcea90ca8bf195474da120e4f3dd39aa711f",
+      "cmake_variable": "EXTERN_SUNDIALS_URL"
+    },
+    {
+      "name": "superlu_dist",
+      "url": "https://github.com/xiaoyeli/superlu_dist.git",
+      "ref": "v9.2.1",
+      "commit": "39236c165c6887da09b05c0f540478378ad34d38",
+      "cmake_variable": "EXTERN_SUPERLU_URL"
+    }
+  ],
+  "public_case": {
+    "name": "xmon-fixed",
+    "archive_sha256": "c73772d1e8f739c3f174eecffb4a2b8bc5df7b2c622aa7302d4ea3adc09cdff6",
+    "archive_size": 3889187,
+    "config_name": "config.json",
+    "config_sha256": "7bd0e7dc97854c8bac7829dd71e16f2c8c91cfe3caec456d24455f8d68caeed2",
+    "mesh_name": "palace.msh",
+    "mesh_sha256": "942365447b123cebe2f1f3f70c7284b5bc284602d8ed137f968637a703177cf5"
+  }
+}
